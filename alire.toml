@@ -1,0 +1,15 @@
+name = "topoproof"
+description = "Provable geometry command-line application"
+version = "0.1.0-dev"
+authors = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi"]
+licenses = "Apache-2.0"
+website = "https://github.com/LionelDraghi/topoproof"
+tags = ["spark", "formal-methods", "geometry", "cad", "proof"]
+project-files = ["topoproof.gpr"]
+
+[build-switches]
+"*".ada_version = "Ada2022"
+Development.compile_checks = "errors"
+Development.contracts = "yes"
+Release.optimization = "performance"

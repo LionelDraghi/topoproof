@@ -1,0 +1,15 @@
+.alire/
+alire/
+alire.lock
+obj/
+bin/
+**/obj/
+**/bin/
+gnatprove/
+*.ali
+*.o
+*.in
+*.out
+.DS_Store
+Thumbs.db
+desktop.ini

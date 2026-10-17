@@ -1,0 +1,13 @@
+name = "topoproof_tests"
+description = "Executable documentation and proof tools for TopoProof"
+version = "0.1.0-dev"
+authors = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi"]
+licenses = "Apache-2.0"
+[[depends-on]]
+bbt = "*"
+gnatprove = "*"
+gnatformat = "*"
+topoproof = "*"
+[pins]
+topoproof = { path = ".." }
