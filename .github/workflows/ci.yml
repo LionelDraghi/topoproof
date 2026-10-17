@@ -8,11 +8,8 @@ permissions:
   contents: read
 jobs:
   build-and-bbt:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    # TopoProof targets Linux only for now
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: alire-project/setup-alire@latest

@@ -1,12 +1,46 @@
 name = "topoproof"
 description = "Provable geometry command-line application"
-version = "0.1.0-dev"
+version = "0.1.0"
+
 authors = ["Lionel Draghi"]
-maintainers = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]
+maintainers-logins = ["LionelDraghi"]
 licenses = "Apache-2.0"
 website = "https://github.com/LionelDraghi/topoproof"
 tags = ["spark", "formal-methods", "geometry", "cad", "proof"]
+
+executables = ["topoproof"]
 project-files = ["topoproof.gpr"]
+
+[configuration]
+output_dir = "src/Alire_config"
+generate_C = false
+
+[[depends-on]]
+# SPARK 16.x pairs with the GNAT 16 toolchain
+gnat = ">=16"
+
+[[depends-on]]
+# executable documentation: make test runs the Markdown pages through bbt
+bbt = ">=0.5.0"
+
+[[depends-on]]
+# formal verification: make prove runs GNATprove
+gnatprove = "^16.1.0"
+
+[[depends-on]]
+# source formatting: make format runs GNATformat
+# The source crate gnatformat is not installable yet: its stack needs the
+# libgmp system crate, marked available = false in the community index, and
+# libgpr2 26, incompatible with GNAT 16. The binary release is used instead.
+# TopoProof targets Linux only for now.
+gnatformat_bin = "^26.0.0"
+
+[[actions]]
+# alr test builds the application and runs the Markdown documentation
+# through bbt
+type = "test"
+command = ["make", "test"]
 
 [build-switches]
 "*".ada_version = "Ada2022"

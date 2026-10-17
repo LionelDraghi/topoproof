@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+<rect width="640" height="400" fill="#ffffff"/>
+<circle cx="320.0" cy="200.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="330.0" y="190.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (1, 2, 3)</text>
+<circle cx="320.0" cy="200.0" r="9.0" fill="none" stroke="#1f6feb" stroke-width="1.5" stroke-dasharray="3 2"/>
+<text x="330.0" y="220.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (1, 2, 3)</text>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
+</svg>

@@ -29,7 +29,8 @@ make prove
 make check
 ```
 
-They will be enabled with the initial Alire/SPARK project skeleton.
+They are operational and require [Alire](https://alire.ada.dev/), which provides
+the GNAT toolchain, GNATprove, GNATformat, and bbt.
 
 ## Documentation
 
@@ -38,11 +39,12 @@ They will be enabled with the initial Alire/SPARK project skeleton.
 - [Numeric model](docs/numeric-model.md): units, numeric domains, representability, and overflow policy.
 - [Development plan](docs/development-plan.md): milestones and completion criteria.
 - [Development guide](docs/development.md): repository workflow and verification commands.
+- [Release procedure](docs/dev/release_procedure.md): versioning, tagging, GitHub and Alire publication.
 - [Perspectives](docs/perspectives.md): non-normative research directions.
 
 ## Licence
 
-To be defined.
+Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## Command-line application and executable documentation
 
@@ -52,10 +54,12 @@ alr run -- displacement -1 2 -3 4 -5 6
 alr run -- --input request.txt --output result.txt
 ```
 
-Each mathematical operation is documented in Markdown with executable bbt scenarios:
+Each user-visible operation has one page under `docs/features/`, with its
+contract and executable bbt scenarios:
 
-- [Command-line interface](docs/command-line.md)
-- [Translation](docs/translation.md)
-- [Displacement](docs/displacement.md)
+- [Command-line interface](docs/features/command-line.md)
+- [Translation](docs/features/translation.md)
+- [Displacement](docs/features/displacement.md)
+- [Point equality](docs/features/equality.md)
 
 `make test` executes the documentation against the compiled application; `make prove` runs SPARK; `make check` runs both.
