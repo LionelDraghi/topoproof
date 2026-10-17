@@ -1,8 +1,8 @@
 -- -----------------------------------------------------------------------------
--- TopoProof, provable geometry application
--- (https://github.com/LionelDraghi/topoproof)
--- SPDX-License-Identifier: Apache-2.0
--- SPDX-FileCopyrightText: 2026, Lionel Draghi
+--  TopoProof, provable geometry application
+--  (https://github.com/LionelDraghi/topoproof)
+--  SPDX-License-Identifier: Apache-2.0
+--  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
 with Ada.Command_Line;                use Ada.Command_Line;
@@ -19,6 +19,8 @@ procedure TopoProof_CLI is
    Usage_Error             : exception;
    Input_Path, Output_Path : Unbounded_String;
 
+   procedure Emit (S : String);
+
    procedure Emit (S : String) is
       F : File_Type;
 
@@ -33,6 +35,8 @@ procedure TopoProof_CLI is
 
       end if;
    end Emit;
+
+   function Token (S : in out Unbounded_String) return String;
 
    function Token (S : in out Unbounded_String) return String is
       T : constant String := Trim (To_String (S), Both);
@@ -64,6 +68,8 @@ procedure TopoProof_CLI is
 
    function Img (N : Vector_Component) return String
    is (Trim (Vector_Component'Image (N), Both));
+
+   procedure Execute (Line : String);
 
    procedure Execute (Line : String) is
       R  : Unbounded_String := To_Unbounded_String (Line);

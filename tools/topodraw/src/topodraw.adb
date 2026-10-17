@@ -1,8 +1,8 @@
 -- -----------------------------------------------------------------------------
--- TopoProof, provable geometry application
--- (https://github.com/LionelDraghi/topoproof)
--- SPDX-License-Identifier: Apache-2.0
--- SPDX-FileCopyrightText: 2026, Lionel Draghi
+--  TopoProof, provable geometry application
+--  (https://github.com/LionelDraghi/topoproof)
+--  SPDX-License-Identifier: Apache-2.0
+--  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
 with Ada.Directories;
@@ -67,6 +67,10 @@ package body Topodraw is
    end record;
 
    procedure Head
+     (S : String; Word : out Unbounded_String;
+      Rest : out Unbounded_String);
+
+   procedure Head
      (S : String; Word : out Unbounded_String; Rest : out Unbounded_String)
    is
       Sp : constant Natural := Index (S, " ");
@@ -86,6 +90,8 @@ package body Topodraw is
 
    function Same_Position (A, B : Point_Rec) return Boolean is
      (A.X = B.X and then A.Y = B.Y and then A.Z = B.Z);
+
+   function Find_Point (S : Scene; Name : String) return Point_Rec;
 
    function Find_Point (S : Scene; Name : String) return Point_Rec is
    begin
@@ -249,8 +255,12 @@ package body Topodraw is
          Min_Y : Long_Float := Long_Float'Last;
          Max_Y : Long_Float := Long_Float'First;
 
+         function Raw_X (C : Coord3) return Long_Float;
+
          function Raw_X (C : Coord3) return Long_Float is
            ((Long_Float (C.X) - Long_Float (C.Y)) * Cos30);
+
+         function Raw_Y (C : Coord3) return Long_Float;
 
          function Raw_Y (C : Coord3) return Long_Float is
            ((Long_Float (C.X) + Long_Float (C.Y)) * Sin30
@@ -281,8 +291,12 @@ package body Topodraw is
               (Long_Float (H) - (Max_Y - Min_Y) * Scale) / 2.0
               - Min_Y * Scale;
 
+            function To_Screen (C : Coord3) return Screen2;
+
             function To_Screen (C : Coord3) return Screen2 is
               (Raw_X (C) * Scale + Ox, Raw_Y (C) * Scale + Oy);
+
+            procedure Append_F (V : Long_Float);
 
             procedure Append_F (V : Long_Float) is
                Tmp : String (1 .. 24);
@@ -291,6 +305,11 @@ package body Topodraw is
                LF_IO.Put (Tmp, V, Aft => 1, Exp => 0);
                Append (Buffer, Trim (Tmp, Both));
             end Append_F;
+
+            procedure Line
+              (A, B : Screen2; Color : String;
+               Width : Long_Float; Dash : String := "";
+               Marker : String := "");
 
             procedure Line
               (A, B : Screen2; Color : String; Width : Long_Float;
@@ -321,6 +340,11 @@ package body Topodraw is
             procedure Circle
               (C : Screen2; R : Long_Float; Fill : String;
                Stroke : String := ""; Stroke_Width : Long_Float := 1.0;
+               Dash : String := "");
+
+            procedure Circle
+              (C : Screen2; R : Long_Float; Fill : String;
+               Stroke : String := ""; Stroke_Width : Long_Float := 1.0;
                Dash : String := "")
             is
             begin
@@ -342,6 +366,10 @@ package body Topodraw is
                end if;
                Append (Buffer, """/>" & ASCII.LF);
             end Circle;
+
+            procedure Text_At
+              (X, Y : Long_Float; Content : String;
+               Color : String);
 
             procedure Text_At
               (X, Y : Long_Float; Content : String; Color : String)
@@ -525,6 +553,8 @@ package body Topodraw is
       end;
       return To_String (Buffer);
    end Render;
+
+   function Directory_Of (Path : String) return String;
 
    function Directory_Of (Path : String) return String is
    begin

@@ -9,7 +9,7 @@ project Topodraw is
    end Builder;
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat2022", "-gnatwa", "-gnatVa", "-gnatf", "-gnaty3abcefhiklmnprst");
+        ("-gnat2022", "-gnatwa", "-gnatVa", "-gnatf", "-gnaty3abcefhiklmnprstM100");
    end Compiler;
    package Format is
       for Indentation ("Ada") use "3";

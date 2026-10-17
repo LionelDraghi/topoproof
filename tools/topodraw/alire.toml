@@ -13,6 +13,7 @@ executables = ["topodraw"]
 project-files = ["topodraw.gpr"]
 
 [build-switches]
+"*".style_checks = "No"
 "*".ada_version = "Ada2022"
 Development.compile_checks = "errors"
 Development.contracts = "yes"

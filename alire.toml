@@ -43,6 +43,7 @@ type = "test"
 command = ["make", "test"]
 
 [build-switches]
+"*".style_checks = "No"
 "*".ada_version = "Ada2022"
 Development.compile_checks = "errors"
 Development.contracts = "yes"
