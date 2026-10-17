@@ -12,7 +12,22 @@ project TopoProof is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat2022", "-gnatwa", "-gnatVa", "-gnatf", "-gnaty3abcefhiklmnprstM100");
+        ("-gnat2022", "-gnatwa", "-gnatVa", "-gnatf", "-gnatyabefhiklnprtx");
+      --  Style checking :
+      --  a : Check attribute casing
+      --  b : Blanks not allowed at statement end
+      --  e : Check end/exit labels
+      --  f : No form feeds or vertical tabs
+      --  h : No horizontal tabs
+      --  i : Check if-then layout
+      --  k : Check keyword casing
+      --  l : Check layout
+      --  n : Check casing of entities in Standard
+      --  p : Check pragma casing
+      --  r : Check references
+      --  t : Check token spacing
+      --  x : Check extra parentheses
+      --  No maximum line length: GNATformat (width 100) owns the layout.
    end Compiler;
 
    package Format is
