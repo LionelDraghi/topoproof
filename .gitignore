@@ -13,3 +13,4 @@ gnatprove/
 .DS_Store
 Thumbs.db
 desktop.ini
+.vscode/settings.json

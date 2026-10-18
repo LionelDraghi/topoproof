@@ -10,9 +10,13 @@ TopoProof replaces the historical model of continuous geometry, approximate comp
 - Ada/SPARK contracts and proofs;
 - topological invariants preserved by construction.
 
+Why? Because of one too many of these:
+> Job 1, 'freecad&' terminated by signal SIGSEGV
+
 ## Status
 
 TopoProof is in its initial development phase. The first deliverable is a complete verified vertical slice covering numeric types, points, vectors, translation, displacement, SPARK contracts, proofs, executable tests, and documentation.
+
 
 ## Development cycle
 
