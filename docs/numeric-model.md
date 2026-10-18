@@ -36,12 +36,17 @@ With a 10 nm quantum, this represents positions from -10 m to +10 m on each axis
 
 ## Vector components
 
-A difference between two valid coordinates can have twice the coordinate amplitude:
+A difference between two valid coordinates spans the full grid amplitude, so
+the domain is derived from the coordinate domain instead of restating
+numbers:
 
 ```ada
+Grid_Amplitude : constant :=
+  Grid_Coordinate'Last - Grid_Coordinate'First;
+
 type Vector_Component is range
-  -2_000_000_000 ..
-   2_000_000_000;
+  -Grid_Amplitude ..
+   Grid_Amplitude;
 ```
 
 `Grid_Coordinate` and `Vector_Component` have different meanings and domains even if an implementation uses related machine representations.
@@ -55,22 +60,27 @@ coordinate -> difference -> product -> determinant
 ```
 
 The orientation determinant is the first application of the full chain. Each
-difference of coordinates is bounded by 2E9, each product of differences by
-2E9 * 2E9 = 4E18, and the difference of two products by 8E18:
+domain is derived from the previous one: the amplitude of a product of two
+component differences is the square of the difference amplitude, and the
+determinant is the difference of two such products:
 
 ```ada
+Product_Amplitude : constant :=
+  Vector_Component'Last * Vector_Component'Last;
+
 type Product_Component is range
-  -4_000_000_000_000_000_000 ..
-   4_000_000_000_000_000_000;
+  -Product_Amplitude ..
+   Product_Amplitude;
 
 type Determinant is range
-  -8_000_000_000_000_000_000 ..
-   8_000_000_000_000_000_000;
+  -(2 * Product_Component'Last) ..
+   2 * Product_Component'Last;
 ```
 
-Both domains are representable on 64 bits, since 8E18 < 2**63, and GNATprove
-proves that no operation of the orientation predicate can overflow them for
-any grid input. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
+With the initial grid, this gives products bounded by 4E18 and determinants
+bounded by 8E18 < 2**63, hence representable on 64 bits. GNATprove proves
+that no operation of the orientation predicate can overflow these domains
+for any grid input. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
 
 ## Representability
 

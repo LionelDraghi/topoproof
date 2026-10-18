@@ -29,6 +29,16 @@ A possible long-term strategy is:
 
 This is not part of the initial core unless introduced explicitly by a future development milestone.
 
+## Convex hulls
+
+The exact orientation predicate is the comparison primitive of all classical
+hull algorithms (Graham scan, gift wrapping, monotone chain). An exact 2D hull
+over the grid could be the first bulk operation on a point cloud, and its 3D
+counterpart would rely on the plane-side classification of a later milestone.
+Degenerate cases (coincident points, collinear edges on the hull) are decided
+exactly by the determinant sign, with no tolerance. This is not part of the
+development plan until a milestone introduces it.
+
 ## Long-term vision
 
 Certified enclosures could form a bridge between mathematical constructions defined in continuous geometry, TopoProof's discrete model, and formal proof of the produced result. Their purpose would be to state exactly what the kernel knows, never to hide uncertainty.
