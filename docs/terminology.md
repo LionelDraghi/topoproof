@@ -51,6 +51,29 @@ States whether all exact component additions performed by `Translate` belong to 
 
 Represented points are equal by component-wise integer equality. `Almost_Equal` is not used for points already placed on the grid.
 
+## Normative for milestone 2
+
+### `Point_2D`
+
+An absolute position with two `Grid_Coordinate` components, in the same grid as `Point_3D`. Two points are equal exactly when both components are equal. A point is not a vector and is not a topological vertex.
+
+### `Orientation`
+
+Classification of the path `A -> B -> C` as counter-clockwise, clockwise or collinear, decided exactly by the sign of the determinant
+`(B.X - A.X) * (C.Y - A.Y) - (B.Y - A.Y) * (C.X - A.X)`. There is no tolerance and no angle computation.
+
+### `Orientation_Kind`
+
+The result type of `Orientation`: `Counter_Clockwise`, `Clockwise`, or `Collinear`.
+
+### Exact collinearity
+
+Three points are collinear exactly when the orientation determinant is zero. Two coincident points among the three make the path degenerate, hence collinear.
+
+### 2D translation
+
+`Translate_2D` applies two vector components to a `Point_2D` when the results are representable, exactly as `Translate` does for `Point_3D`. It is used to state and prove the invariance of `Orientation` under translation.
+
 ## Provisional geometric terms
 
 ### `Grid_Quantum`
@@ -64,14 +87,6 @@ One integer displacement step on the grid.
 ### `Length`
 
 A non-negative physical magnitude. It is distinct from a coordinate and from an oriented displacement even if representations are related.
-
-### `Point_2D`
-
-An exact position with two grid-coordinate components.
-
-### `Orientation`
-
-Classification of three 2D points as clockwise, counterclockwise, or collinear according to the exact determinant sign.
 
 ### Geometric predicate
 

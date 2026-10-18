@@ -22,7 +22,7 @@ Tests cover the null vector, interior and boundary translations, negative coordi
 
 ## Milestone 2: first geometric predicate
 
-Introduce `Point_2D`, `Orientation_Kind`, and exact orientation based on the determinant sign. Prove absence of overflow, exhaustive classification, permutation behaviour, collinearity, and translation invariance within the valid domain.
+Introduce `Point_2D`, `Orientation_Kind`, and exact orientation based on the determinant sign, with the 2D translation surface needed to state invariance. Prove absence of overflow, exhaustive classification, permutation behaviour, collinearity (including degenerate paths with coincident points), and translation invariance within the valid domain.
 
 ## Milestone 3: segment intersection in 2D
 

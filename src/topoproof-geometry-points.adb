@@ -12,4 +12,7 @@ is
    function "=" (Left, Right : Point_3D) return Boolean
    is (Left.X = Right.X and then Left.Y = Right.Y and then Left.Z = Right.Z);
 
+   function "=" (Left, Right : Point_2D) return Boolean
+   is (Left.X = Right.X and then Left.Y = Right.Y);
+
 end TopoProof.Geometry.Points;

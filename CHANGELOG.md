@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.1-dev] - 2026-??-??**
+  - [Added]   the `orientation` operation: exact classification of three 2D points
+              as counter-clockwise, clockwise or collinear from the determinant
+              sign, documented with executable scenarios under `docs/features/`
+  - [Added]   the orientation properties proved by SPARK over the whole grid
+              domain: invariance under cyclic permutation, mirroring under
+              exchange of two points, degenerate collinearity of paths with
+              coincident points, and invariance under representable translation
 
 - **[0.1.0] - 2026-10-17**
   - [Added]   the TopoProof application and its first three operations: `translate`,

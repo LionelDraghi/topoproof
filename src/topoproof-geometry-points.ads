@@ -21,4 +21,13 @@ is
    function "=" (Left, Right : Point_3D) return Boolean
    with Post => "="'Result = (Left.X = Right.X and then Left.Y = Right.Y and then Left.Z = Right.Z);
 
+   type Point_2D is record
+      X : Numerics.Grid_Coordinate;
+      Y : Numerics.Grid_Coordinate;
+   end record;
+
+   --  Two points are equal exactly when both coordinates are equal.
+   function "=" (Left, Right : Point_2D) return Boolean
+   with Post => "="'Result = (Left.X = Right.X and then Left.Y = Right.Y);
+
 end TopoProof.Geometry.Points;

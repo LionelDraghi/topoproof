@@ -10,6 +10,7 @@ with Ada.Strings;                     use Ada.Strings;
 with Ada.Strings.Fixed;               use Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
+with TopoProof.Geometry.Orientations; use TopoProof.Geometry.Orientations;
 with TopoProof.Geometry.Points;       use TopoProof.Geometry.Points;
 with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
@@ -133,6 +134,30 @@ procedure TopoProof_CLI is
             end if;
          end;
 
+      elsif Op = "orientation" then
+         declare
+            A : constant Point_2D := (C (Token (R)), C (Token (R)));
+            B : constant Point_2D := (C (Token (R)), C (Token (R)));
+            P : constant Point_2D := (C (Token (R)), C (Token (R)));
+
+         begin
+            if Token (R) /= "" then
+               raise Usage_Error;
+
+            end if;
+            case Orientation (A, B, P) is
+               when Counter_Clockwise =>
+                  Emit ("orientation counter_clockwise");
+
+               when Clockwise         =>
+                  Emit ("orientation clockwise");
+
+               when Collinear         =>
+                  Emit ("orientation collinear");
+
+            end case;
+         end;
+
       else
          raise Usage_Error;
 
@@ -171,7 +196,7 @@ begin
       elsif Argument (I) = "--help" or else Argument (I) = "-h" then
          Emit ("usage: topoproof OPERATION PARAMETERS [--output FILE]");
          Emit ("       topoproof --input FILE [--output FILE]");
-         Emit ("operations: translate, displacement, equal");
+         Emit ("operations: translate, displacement, equal, orientation");
          return;
 
       else

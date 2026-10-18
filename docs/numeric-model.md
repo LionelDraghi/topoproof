@@ -46,6 +46,32 @@ type Vector_Component is range
 
 `Grid_Coordinate` and `Vector_Component` have different meanings and domains even if an implementation uses related machine representations.
 
+## Intermediate arithmetic
+
+Predicates must use intermediate types sized for the degree of their expressions:
+
+```text
+coordinate -> difference -> product -> determinant
+```
+
+The orientation determinant is the first application of the full chain. Each
+difference of coordinates is bounded by 2E9, each product of differences by
+2E9 * 2E9 = 4E18, and the difference of two products by 8E18:
+
+```ada
+type Product_Component is range
+  -4_000_000_000_000_000_000 ..
+   4_000_000_000_000_000_000;
+
+type Determinant is range
+  -8_000_000_000_000_000_000 ..
+   8_000_000_000_000_000_000;
+```
+
+Both domains are representable on 64 bits, since 8E18 < 2**63, and GNATprove
+proves that no operation of the orientation predicate can overflow them for
+any grid input. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
+
 ## Representability
 
 An operation is representable when its exact result belongs to the destination type's domain. Representability checks must themselves be free from overflow.
@@ -57,16 +83,6 @@ P.X + V.DX
 P.Y + V.DY
 P.Z + V.DZ
 ```
-
-## Intermediate arithmetic
-
-Predicates must use intermediate types sized for the degree of their expressions:
-
-```text
-coordinate -> difference -> product -> determinant
-```
-
-The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
 
 ## External conversion
 

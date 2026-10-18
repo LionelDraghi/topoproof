@@ -8,7 +8,8 @@ ALR ?= alr
 SCENARII := ../docs/features/command-line.md \
             ../docs/features/translation.md \
             ../docs/features/displacement.md \
-            ../docs/features/equality.md
+            ../docs/features/equality.md \
+            ../docs/features/orientation.md
 
 .SILENT:
 
