@@ -5,6 +5,8 @@ All notable changes **from a user perspective** to this project will be document
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), (guidelines at the bottom of the page).  
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+- **[0.1.2-dev] - 2026-??-??**
+
 - **[0.1.1] - 2026-10-19**
   - [Changed] the grid domain is now derived from the machine, not the other
               way around: coordinates run to 2**30 - 1, the largest domain
