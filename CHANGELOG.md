@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.1-dev] - 2026-??-??**
+  - [Changed] the grid domain is now derived from the machine, not the other
+              way around: coordinates run to 2**30 - 1, the largest domain
+              for which the whole arithmetic chain stays on native widths,
+              with differences saturating 32 bits and determinants exactly
+              saturating 64 bits
+  - [Added]   the `intersect` operation: exact classification of the intersection
+              of two 2D segments as no intersection, single grid position,
+              crossing at a non-grid position, or collinear overlap, with the
+              shared point or sub-segment returned
+  - [Added]   the intersection properties proved by SPARK over the whole grid
+              domain: invariance under exchange of the two segments, and
+              membership of every reported point and overlap boundary in both
+              segments
   - [Added]   the `orientation` operation: exact classification of three 2D points
               as counter-clockwise, clockwise or collinear from the determinant
               sign, documented with executable scenarios under `docs/features/`

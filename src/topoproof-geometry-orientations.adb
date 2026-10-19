@@ -48,6 +48,12 @@ is
    function Are_Collinear (A, B, C : Points.Point_2D) return Boolean
    is (Determinant (A, B, C) = 0);
 
+   --  Antisymmetry follows from the commutativity of each exact product.
+   procedure Lemma_Cross_Antisymmetry (U1X, U1Y, U2X, U2Y : Numerics.Vector_Component) is
+   begin
+      null;
+   end Lemma_Cross_Antisymmetry;
+
    --  The postconditions of the four lemmas below are proved by GNATprove
    --  over the whole grid domain, from the exact determinant expression.
    procedure Lemma_Cyclic_Permutation (P, Q, R : Points.Point_2D) is

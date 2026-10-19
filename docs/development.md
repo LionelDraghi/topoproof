@@ -28,11 +28,49 @@ The project skeleton should expose these stable entry points:
 ```sh
 make build   # compile the project
 make test    # run executable tests
-make prove   # run GNATprove
+make prove   # run GNATprove (level 2: the daily, fast policy)
+make prove+  # escalate unproved checks (level 4: larger solver budgets
+             # and counterexamples; proved checks come from the cache)
 make check   # run the complete verification chain
 make doc     # regenerate the feature diagrams from their topodraw sources
 alr test     # build, then run the executable documentation through bbt
 ```
+
+Proof policy: `make prove` uses level 2 (three provers, short budgets), which
+is the policy for day-to-day development. If checks remain unproved, run
+`make prove+`: level 4 gives each remaining check a much larger budget and
+generates counterexamples, which often suggest the missing intermediate
+assertion or a test scenario. GNATprove caches proved checks, so escalation
+only re-attempts the failures. Before declaring a milestone complete, the
+escalation must leave no unproved check.
+
+## Build profiles
+
+The profiles are selected in `topoproof.gpr` by the `Topoproof_Build_Profile`
+external, owned by the project itself (the Alire profile remains unused):
+
+- **development** (default, `make build`): all run-time checks and all
+  contracts are verified at execution (`-gnatVa -gnata`). In particular,
+  `make test` runs the bbt scenarios against a build where every kernel
+  precondition and postcondition is checked dynamically: the executable
+  documentation also exercises the contracts.
+- **release** (`make release`): the proved kernel units are compiled with
+  `-O2 -gnatp`, suppressing the run-time checks whose absence is proved
+  (the silver payoff). The command-line interface keeps `-gnatVa`: its
+  input validation relies on `Constraint_Error` to reject out-of-domain
+  parameters, so its checks are never suppressed.
+
+Three rules keep this sound:
+
+- Run-time check suppression lives in the build configuration only,
+  never in the sources: GNATprove honours `pragma Suppress`, so a source
+  suppression would stop checking the very property it is meant to
+  guarantee.
+- The interface validates external input before it enters the kernel,
+  so the kernel never receives arguments outside its proved domain.
+- The project does not import the Alire-generated configuration:
+  pulling it would drag the whole dependency tree (including bbt) into
+  the project graph, which confuses GNATprove's binding step.
 
 Each feature page may embed one or more `topodraw` scene sources: statements
 in an X, Y, Z frame (`point`, `vector`, `axes`, `ticks`, `anchors`), whose

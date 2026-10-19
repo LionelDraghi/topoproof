@@ -10,7 +10,9 @@ with Ada.Strings;                     use Ada.Strings;
 with Ada.Strings.Fixed;               use Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
-with TopoProof.Geometry.Orientations; use TopoProof.Geometry.Orientations;
+with TopoProof.Geometry.Intersections; use TopoProof.Geometry.Intersections;
+with TopoProof.Geometry.Orientations;  use TopoProof.Geometry.Orientations;
+with TopoProof.Geometry.Segments;      use TopoProof.Geometry.Segments;
 with TopoProof.Geometry.Points;       use TopoProof.Geometry.Points;
 with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
@@ -158,6 +160,43 @@ procedure TopoProof_CLI is
             end case;
          end;
 
+      elsif Op = "intersect" then
+         declare
+            S1 : constant Segment_2D :=
+              ((C (Token (R)), C (Token (R))), (C (Token (R)), C (Token (R))));
+            S2 : constant Segment_2D :=
+              ((C (Token (R)), C (Token (R))), (C (Token (R)), C (Token (R))));
+
+         begin
+            if Token (R) /= "" then
+               raise Usage_Error;
+
+            end if;
+            declare
+               Res : constant Intersection_Result := Intersection (S1, S2);
+
+            begin
+               case Res.Kind is
+                  when No_Intersection =>
+                     Emit ("intersection no_intersection");
+                  when Point_Intersection =>
+                     Emit
+                       ("intersection point_intersection "
+                        & Img (Res.Point.X) & " " & Img (Res.Point.Y));
+                  when Off_Grid_Crossing =>
+                     Emit ("intersection off_grid_crossing");
+                  when Overlap =>
+                     Emit
+                       ("intersection overlap "
+                        & Img (Res.Overlap.From_Point.X) & " "
+                        & Img (Res.Overlap.From_Point.Y) & " "
+                        & Img (Res.Overlap.To_Point.X) & " "
+                        & Img (Res.Overlap.To_Point.Y));
+
+               end case;
+            end;
+         end;
+
       else
          raise Usage_Error;
 
@@ -196,7 +235,7 @@ begin
       elsif Argument (I) = "--help" or else Argument (I) = "-h" then
          Emit ("usage: topoproof OPERATION PARAMETERS [--output FILE]");
          Emit ("       topoproof --input FILE [--output FILE]");
-         Emit ("operations: translate, displacement, equal, orientation");
+         Emit ("operations: translate, displacement, equal, orientation, intersect");
          return;
 
       else

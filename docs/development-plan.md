@@ -26,7 +26,7 @@ Introduce `Point_2D`, `Orientation_Kind`, and exact orientation based on the det
 
 ## Milestone 3: segment intersection in 2D
 
-Distinguish no intersection, point intersection, and overlapping segments. Prove symmetry, membership of intersection results, explicit treatment of collinear cases, and absence of tolerance-based decisions.
+Introduce `Segment_2D` and the exact on-segment predicate. Distinguish no intersection, point intersection, crossing at a non-grid position, and overlapping segments: the discrete model states off-grid crossings exactly instead of approximating them. Prove symmetry, membership of intersection results, explicit treatment of collinear cases, and absence of tolerance-based decisions.
 
 ## Milestone 4: contours and loops in 2D
 

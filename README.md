@@ -66,5 +66,6 @@ contract and executable bbt scenarios:
 - [Displacement](docs/features/displacement.md)
 - [Point equality](docs/features/equality.md)
 - [Orientation](docs/features/orientation.md)
+- [Intersection](docs/features/intersection.md)
 
 `make test` executes the documentation against the compiled application; `make prove` runs SPARK; `make check` runs both.

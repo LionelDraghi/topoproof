@@ -24,7 +24,7 @@ TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer 
 - Distinguish `Point` from `Vertex`.
 - Distinguish `Grid_Coordinate` from `Vector_Component`.
 - Do not implement research perspectives before they enter the development plan.
-- Never commit without the owner's review: stage the change, present it, and wait for explicit approval.
+- Never commit without the owner's review. The owner reviews files in the source control tool; a file validated there is approved. An explicit "go" for commit or push approves all remaining modified files as well.
 
 ## Development discipline
 

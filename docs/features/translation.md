@@ -24,7 +24,7 @@ vector P Q (5, 7, -9)
 - And there is no error
 
 ## Scenario: reject an unrepresentable result
-- When I run `../bin/topoproof translate 1_000_000_000 0 0 1 0 0`
+- When I run `../bin/topoproof translate 1073741823 0 0 1 0 0`
 - Then the output is `error: translation is not representable`
 - And there is an error
 

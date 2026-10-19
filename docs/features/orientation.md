@@ -67,7 +67,7 @@ vector B C (0, -1)
 - And there is no error
 
 ## Scenario: the extreme corners of the grid do not overflow
-- When I run `../bin/topoproof orientation 1000000000 0 0 1000000000 -1000000000 -1000000000`
+- When I run `../bin/topoproof orientation 1073741823 0 0 1073741823 -1073741823 -1073741823`
 - Then the output is `orientation counter_clockwise`
 - And there is no error
 

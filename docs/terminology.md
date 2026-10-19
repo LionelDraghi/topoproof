@@ -1,3 +1,37 @@
+- [TopoProof terminology](#topoproof-terminology)
+  - [Normative for milestone 1](#normative-for-milestone-1)
+    - [`Grid_Coordinate`](#grid_coordinate)
+    - [`Vector_Component`](#vector_component)
+    - [`Point_3D`](#point_3d)
+    - [`Vector_3D`](#vector_3d)
+    - [`Displacement`](#displacement)
+    - [`Translate`](#translate)
+    - [`Translation_Is_Representable`](#translation_is_representable)
+    - [Exact geometric equality](#exact-geometric-equality)
+  - [Normative for milestone 2](#normative-for-milestone-2)
+    - [`Point_2D`](#point_2d)
+    - [`Orientation`](#orientation)
+    - [`Orientation_Kind`](#orientation_kind)
+    - [Exact collinearity](#exact-collinearity)
+    - [2D translation](#2d-translation)
+  - [Normative for milestone 3](#normative-for-milestone-3)
+    - [`Segment_2D`](#segment_2d)
+    - [Exact point-on-segment](#exact-point-on-segment)
+    - [`Intersection`](#intersection)
+    - [`Off_Grid_Crossing`](#off_grid_crossing)
+  - [Provisional geometric terms](#provisional-geometric-terms)
+    - [`Grid_Quantum`](#grid_quantum)
+    - [`Grid_Unit`](#grid_unit)
+    - [`Length`](#length)
+    - [Geometric predicate](#geometric-predicate)
+  - [Provisional topological terms](#provisional-topological-terms)
+    - [`Vertex`](#vertex)
+    - [`Edge`](#edge)
+    - [`Loop`](#loop)
+    - [`Face`](#face)
+    - [B-Rep](#b-rep)
+  - [Open decisions](#open-decisions)
+
 # TopoProof terminology
 
 This document defines the project's vocabulary. Terms used by the public API are normative once marked as such; others remain provisional or research-oriented.
@@ -73,6 +107,24 @@ Three points are collinear exactly when the orientation determinant is zero. Two
 ### 2D translation
 
 `Translate_2D` applies two vector components to a `Point_2D` when the results are representable, exactly as `Translate` does for `Point_3D`. It is used to state and prove the invariance of `Orientation` under translation.
+
+## Normative for milestone 3
+
+### `Segment_2D`
+
+An oriented pair of 2D endpoints. A segment is a geometric value, not the topological `Edge`. A segment is degenerate when both endpoints coincide.
+
+### Exact point-on-segment
+
+A point is on a segment exactly when it is collinear with both endpoints and inside their bounding box on both axes. No tolerance and no neighbourhood are involved.
+
+### `Intersection`
+
+The exact classification of two segments as sharing no grid position, exactly one grid position, a crossing at a point that is not a grid position, or a collinear sub-segment. The result data, when present, belongs to both segments, and does not depend on the order of the arguments.
+
+### `Off_Grid_Crossing`
+
+A properly crossing pair of segments whose crossing point is not a grid position. The discrete model states this case exactly instead of snapping the crossing to a nearby grid position: on the grid, positions that do not exist are not fabricated.
 
 ## Provisional geometric terms
 

@@ -8,9 +8,20 @@
 package TopoProof.Numerics
    with Pure, SPARK_Mode
 is
-   --  One signed position on one grid axis. This is the only domain stated
-   --  as a literal: every domain below is derived from it.
-   type Grid_Coordinate is range -1_000_000_000 .. 1_000_000_000;
+   --  The grid is sized from the machine, not the other way around. The
+   --  expression chain (coordinate -> difference -> product -> determinant
+   --  -> cubic) must stay on native machine widths: 32-bit differences,
+   --  64-bit products and determinants, 128-bit cubic products. With
+   --  A the grid amplitude and L the largest coordinate (A = 2 * L), the
+   --  binding constraint is the 64-bit determinant domain: 2 * A**2 must
+   --  stay below 2**63, which gives L = 2**30 - 1. This is the largest
+   --  grid position for which the whole chain runs on native registers:
+   --  differences then exactly saturate 32 bits, and determinants exactly
+   --  saturate 64 bits. Every domain below is derived from this bound.
+   Grid_Last : constant := 2**30 - 1;
+
+   --  One signed position on one grid axis.
+   type Grid_Coordinate is range -Grid_Last .. Grid_Last;
 
    --  The grid amplitude: the largest possible difference between two
    --  coordinates.
@@ -33,9 +44,14 @@ is
    type Product_Component is range -Product_Amplitude .. Product_Amplitude;
 
    --  Exact difference of two products, so its amplitude is the sum of two
-   --  product amplitudes. The compiler rejects the declaration if the range
-   --  does not fit a supported machine type; here 8E18 < 2**63, so the
-   --  determinant is representable on 64 bits.
+   --  product amplitudes.
    type Determinant is range -(2 * Product_Component'Last) .. 2 * Product_Component'Last;
+
+   --  Product of a determinant and a component difference: the third degree
+   --  of the expression chain, needed to test whether a crossing of two
+   --  segments falls on a grid position.
+   Cubic_Amplitude : constant := Determinant'Last * Grid_Amplitude;
+
+   type Cubic_Product is range -Cubic_Amplitude .. Cubic_Amplitude;
 
 end TopoProof.Numerics;

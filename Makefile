@@ -9,22 +9,25 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/translation.md \
             ../docs/features/displacement.md \
             ../docs/features/equality.md \
-            ../docs/features/orientation.md
+            ../docs/features/orientation.md \
+            ../docs/features/intersection.md
 
 .SILENT:
 
 .DEFAULT_GOAL := all
-.PHONY: help all build test prove format doc check clean
+.PHONY: help all build release test prove prove+ format doc check clean
 
 help:
 	echo "Usage: make [target]"
 	echo ""
 	echo "Targets:"
 	echo "  all        : build, test and prove (default when no target given)"
-	echo "  build      : compile the application (alr build)"
+	echo "  build      : compile the application (alr build, dev profile)"
+	echo "  release    : build with the release profile (fast proved kernel)"
 	echo "  test       : build, then run the Markdown documentation in"
 	echo "               docs/features through bbt"
-	echo "  prove      : run GNATprove on the SPARK sources"
+	echo "  prove      : run GNATprove on the SPARK sources (level 2, fast)"
+	echo "  prove+     : escalate unproved checks (level 4, counterexamples)"
 	echo "  check      : test and prove: the complete verification chain"
 	echo "  format     : reformat the Ada sources with GNATformat"
 	echo "  doc        : regenerate the feature diagrams (SVG) from the"
@@ -41,6 +44,14 @@ build:
 
 	$(ALR) build
 
+# Release build: run-time checks suppressed on the proved kernel (the
+# silver payoff), kept on the command-line interface.
+release:
+	echo
+	echo === building topoproof, release profile
+
+	$(ALR) exec -- gprbuild -P topoproof.gpr -XTopoproof_Build_Profile=release
+
 # bbt runs from tests/, where the documentation scenarios create their
 # files; --cleanup removes the files created by Given steps, and the
 # files created by the application in When steps are removed before the
@@ -49,13 +60,22 @@ test: build
 	echo
 	echo === running the executable documentation
 
-	$(ALR) exec -- sh -c 'cd tests && rm -f *.out && bbt --cleanup $(SCENARII)'
+	$(ALR) exec -- sh -c 'cd tests && rm -f *.out && bbt --cleanup=full --yes $(SCENARII)'
 
 prove:
 	echo
 	echo === running GNATprove
 
-	$(ALR) exec -- gnatprove -P topoproof.gpr --mode=prove --level=2 --warnings=error --report=all
+	$(ALR) exec -- gnatprove -P topoproof.gpr --mode=all --level=2 --warnings=error --report=all 
+
+# Escalation for unproved checks: level 4 gives the provers a larger
+# budget and generates counterexamples; already-proved checks are taken
+# from the GNATprove cache and are not redone.
+prove+:
+	echo
+	echo === running GNATprove, escalation level
+
+	$(ALR) exec -- gnatprove -P topoproof.gpr --mode=all --level=4 --warnings=error --report=all
 
 format:
 	echo

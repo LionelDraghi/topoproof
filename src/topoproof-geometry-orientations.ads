@@ -24,6 +24,22 @@ is
    function Component_Product (U, V : Numerics.Vector_Component) return Numerics.Product_Component
    is (Numerics.Product_Component (U) * Numerics.Product_Component (V));
 
+   --  Exact determinant of two direction vectors U and V, that is
+   --  U.X * V.Y - U.Y * V.X: positive when V turns counter-clockwise
+   --  from U. Both operands are component differences, so the result is
+   --  bounded by the Determinant domain.
+   function Cross_Determinant (UX, UY, VX, VY : Numerics.Vector_Component)
+      return Numerics.Determinant
+   is
+     (Numerics.Determinant (Component_Product (UX, VY))
+      - Numerics.Determinant (Component_Product (UY, VX)));
+
+   --  Antisymmetry: exchanging the two directions negates the determinant.
+   procedure Lemma_Cross_Antisymmetry (U1X, U1Y, U2X, U2Y : Numerics.Vector_Component)
+   with
+      Ghost,
+      Post => Cross_Determinant (U2X, U2Y, U1X, U1Y) = -Cross_Determinant (U1X, U1Y, U2X, U2Y);
+
    --  Exact signed determinant of the orientation test on A, B, C:
    --  (B.X - A.X) * (C.Y - A.Y) - (B.Y - A.Y) * (C.X - A.X), computed as the
    --  difference of two exact products in the Determinant domain.

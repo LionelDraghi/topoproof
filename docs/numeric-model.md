@@ -24,15 +24,23 @@ Physical units and internal representation must remain distinct concepts.
 
 ## Coordinates
 
-The initial coordinate domain is:
+The grid is sized from the machine, not the other way around: the coordinate
+domain is the largest for which the whole expression chain
+(coordinate -> difference -> product -> determinant -> cubic) stays on
+native machine widths. The binding constraint is the 64-bit determinant
+domain, which gives:
 
 ```ada
+Grid_Last : constant := 2**30 - 1;
+
 type Grid_Coordinate is range
-  -1_000_000_000 ..
-   1_000_000_000;
+  -Grid_Last ..
+   Grid_Last;
 ```
 
-With a 10 nm quantum, this represents positions from -10 m to +10 m on each axis. The representation clause and machine type remain to be fixed explicitly.
+With a 10 nm quantum, this represents positions from -10.74 m to +10.74 m
+on each axis. The representation clause and machine type remain to be fixed
+explicitly.
 
 ## Vector components
 
@@ -77,10 +85,28 @@ type Determinant is range
    2 * Product_Component'Last;
 ```
 
-With the initial grid, this gives products bounded by 4E18 and determinants
-bounded by 8E18 < 2**63, hence representable on 64 bits. GNATprove proves
-that no operation of the orientation predicate can overflow these domains
-for any grid input. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
+With this grid, differences exactly saturate 32 bits, products are bounded
+by about 4.6E18, determinants exactly saturate 64 bits (about 9.2E18 <
+2**63), and cubic products are bounded by about 2**94 < 2**127. GNATprove
+proves that no operation of the orientation predicate can overflow these
+domains for any grid input.
+
+The segment crossing test adds the third degree of the chain: the exact
+coordinate quotients of the crossing multiply a determinant by a component
+difference, bounded by about 2**94 < 2**127, representable on 128 bits:
+
+```ada
+Cubic_Amplitude : constant :=
+  Determinant'Last * Grid_Amplitude;
+
+type Cubic_Product is range
+  -Cubic_Amplitude ..
+   Cubic_Amplitude;
+```
+
+The crossing point is accepted only when both exact quotients are integers
+whose coordinates stay in the grid domain; otherwise the crossing is
+reported as off-grid, never approximated. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
 
 ## Representability
 

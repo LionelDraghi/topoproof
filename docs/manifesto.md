@@ -28,6 +28,14 @@ Ada supports strongly typed numeric and topological abstractions. SPARK adds pre
 
 Proof is not added after design. It is an architectural constraint.
 
+## Proof obligations
+
+The founding motivation is reliability: no silent crash, no undefined result. The **silver** level of SPARK assurance — the proved absence of run-time errors over the whole input domain — is therefore the minimal baseline for every delivered change. A change that regresses below silver is not a candidate for integration, whatever its features.
+
+But the ambition does not stop at not crashing. The business logic — the geometric and topological properties that define the model, such as exact classification, symmetry, membership, and invariance — is stated in contracts and proved as far as practical. TopoProof aims at least at the **gold** level: the key integrity properties of every delivered operation are proved over the whole domain, not merely observed on tested inputs.
+
+Tests execute the documented behaviour; proofs establish it everywhere. Both are part of every change.
+
 ## Vision
 
 TopoProof is intended to be deterministic, explicit about discretisation, free from hidden tolerances, efficient in its advertised domain, and capable of producing precise failures instead of silently inconsistent geometry.
