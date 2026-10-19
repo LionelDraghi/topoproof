@@ -15,7 +15,6 @@ abstract project Topodraw_Config is
            ,"-gnatn" -- Enable inlining
            ,"-ffunction-sections" -- Separate ELF section for each function
            ,"-fdata-sections" -- Separate ELF section for each variable
-           ,"-gnat2022" -- Ada 2022 Mode
            ,"-gnatW8" -- UTF-8 encoding for wide characters
           );
 

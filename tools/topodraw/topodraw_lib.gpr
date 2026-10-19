@@ -8,7 +8,8 @@ project Topodraw_Lib is
    for Excluded_Source_Files use ("topodraw_main.adb");
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat2022", "-gnatwa", "-gnatVa", "-gnatf", "-gnatyabefhiklnprtx");
+        ("-gnat2022", "-gnatwa", "-gnatwe", "-gnatVa", "-gnatf",
+         "-gnatyabefhiklnprtx");
    end Compiler;
    package Format is
       for Indentation ("Ada") use "3";

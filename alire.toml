@@ -50,9 +50,8 @@ gnatformat_bin = "^26.0.0"
 type = "test"
 command = ["make", "test"]
 
-[build-switches]
-"*".style_checks = "No"
-"*".ada_version = "Ada2022"
-Development.compile_checks = "errors"
-Development.contracts = "yes"
-Release.optimization = "performance"
+# No [build-switches] here: the project files (topoproof.gpr,
+# tools/topodraw/*.gpr) own the switches, so the local builds and the CI
+# builds compile with one single profile. Alire build-switches are ignored
+# whenever the project defines its own Compiler.Default_Switches, which
+# made the profiles silently diverge.

@@ -13,6 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: alire-project/setup-alire@latest
+      # bbt is a binary-tool dependency: alr build builds it into the
+      # dependency cache, but does not put it on PATH; alr install does.
+      - name: Install bbt
+        run: alr install bbt
       - name: Build and execute Markdown specifications
         shell: bash
         run: make test

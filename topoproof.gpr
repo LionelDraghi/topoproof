@@ -28,7 +28,11 @@ project TopoProof is
    --  The command-line interface keeps its checks in every profile: its
    --  input validation relies on Constraint_Error for out-of-domain
    --  parameters.
-   Kernel_Switches := ("-gnat2022", "-gnatwa", "-gnatf",
+   --  Warnings are errors: a style violation (trailing blanks, layout,
+   --  casing) or any other warning fails every build, locally and in CI.
+   --  The GNATprove runs of make prove use their own flag
+   --  (--warnings=error), and the style switches apply there too.
+   Kernel_Switches := ("-gnat2022", "-gnatwa", "-gnatwe", "-gnatf",
                       "-gnatyabefhiklnprtx");
    --  Style checking :
    --  a : Check attribute casing
