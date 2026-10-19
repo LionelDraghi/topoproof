@@ -19,9 +19,18 @@
 <line x1="293.7" y1="230.4" x2="293.7" y2="210.1" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
 <text x="293.7" y="204.1" fill="#8b949e" font-family="sans-serif" font-size="13">Z</text>
 <circle cx="293.7" cy="230.4" r="2.5" fill="#8b949e"/>
-<line x1="385.8" y1="278.6" x2="377.1" y2="283.6" stroke="#8b949e" stroke-width="1.0"/>
-<line x1="205.9" y1="286.1" x2="205.9" y2="276.1" stroke="#8b949e" stroke-width="1.0"/>
-<line x1="289.3" y1="126.6" x2="298.0" y2="131.6" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="333.1" y1="248.2" x2="324.4" y2="253.2" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="368.2" y1="268.4" x2="359.5" y2="273.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="403.3" y1="288.7" x2="394.7" y2="293.7" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="438.4" y1="309.0" x2="429.8" y2="314.0" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="258.6" y1="255.7" x2="258.6" y2="245.7" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="223.5" y1="275.9" x2="223.5" y2="265.9" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="188.4" y1="296.2" x2="188.4" y2="286.2" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="153.3" y1="316.5" x2="153.3" y2="306.5" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="289.3" y1="187.4" x2="298.0" y2="192.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="289.3" y1="146.8" x2="298.0" y2="151.8" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="289.3" y1="106.3" x2="298.0" y2="111.3" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="289.3" y1="65.8" x2="298.0" y2="70.8" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="258.6" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
 <text x="268.6" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (5, 7, 0)</text>
 <circle cx="258.6" cy="352.0" r="9.0" fill="none" stroke="#1f6feb" stroke-width="1.5" stroke-dasharray="3 2"/>

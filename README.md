@@ -61,8 +61,8 @@ Apache License 2.0 — see [LICENSE](LICENSE).
 ## Command-line application and executable documentation
 
 ```sh
-alr run -- translate 10 -20 30 5 7 -9
-alr run -- displacement -1 2 -3 4 -5 6
+alr run -- translate P=(10, -20, 30) D=(5, 7, -9)
+alr run -- displacement A=(-1, 2, -3) B=(4, -5, 6)
 alr run -- --input request.txt --output result.txt
 ```
 

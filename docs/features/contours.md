@@ -117,35 +117,7 @@ simple. Note: the signed area is computed in a domain large enough to avoid
 overflow for the whole grid at the maximum sequence length (see Numeric
 Model).
 
-<!-- topodraw images/contour_1.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 2 0 0
-point C 2 2 0
-point D 0 2 0
-vector A B (2, 0)
-vector B C (0, 2)
-vector C D (-2, 0)
-vector D A (0, -2)
--->
-
 ![Counter-clockwise square loop](images/contour_1.svg)
-
-<!-- topodraw images/contour_2.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 0 2 0
-point C 2 2 0
-point D 2 0 0
-vector A B (0, 2)
-vector B C (2, 0)
-vector C D (0, -2)
-vector D A (-2, 0)
--->
 
 ![Clockwise square loop](images/contour_2.svg)
 
@@ -171,20 +143,6 @@ Consecutive segments are never compared: they share an endpoint by
 construction. This is checked using the exact `intersect` operation from
 milestone 3.
 
-<!-- topodraw images/contour_3.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 2 2 0
-point C 2 0 0
-point D 0 2 0
-vector A B (2, 2)
-vector B C (0, -2)
-vector C D (-2, 2)
-vector D A (0, -2)
--->
-
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
 ### Degenerate Segment Rejection
@@ -202,37 +160,42 @@ at every point. Sequences of less than two points are vacuously valid.
 The TopoProof application exposes the following operations for contour
 validation and classification:
 
+Points are named: `NAME=(X, Y)` defines and uses a point, and a bare
+`NAME` refers to a point defined earlier in the same command, which makes
+the closure of a chain visible. Each command below generates its own
+documentation diagram with `--draw`:
+
 ```sh
-topoproof contour_continuity <n> <X1 Y1 X2 Y2 ... >
+topoproof contour_continuity A=(0, 0) B=(1, 0) B C=(1, 1)
 ```
-Classifies whether `n` segments, each given by its two endpoints (four
-coordinates per segment), form a continuous sequence: the endpoint of each
+Classifies whether the segments, each given by its two endpoints (two point
+tokens per segment), form a continuous sequence: the endpoint of each
 segment must equal the start point of the next. Output is `continuity
 continuous` or `continuity discontinuous`.
 
 ```sh
-topoproof contour_closure <n> <X1 Y1 ... Xn Yn>
+topoproof contour_closure A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
 ```
-Classifies whether a sequence of `n` points forms a closed loop (i.e., the
-first and last points coincide). Output is `closure closed` or `closure
-open`.
+Classifies whether a sequence of points forms a closed loop (i.e., the
+first and last points coincide). Output is `closure closed` or `closure`
+`open`.
 
 ```sh
-topoproof contour_orientation <n> <X1 Y1 ... Xn Yn>
+topoproof contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
 ```
-Returns the orientation of a closed, valid sequence of `n` points:
-`orientation counter_clockwise`, `orientation clockwise`, or `orientation
-degenerate`. An error is reported when the sequence has less than three
+Returns the orientation of a closed, valid sequence of points:
+`orientation counter_clockwise`, `orientation clockwise`, or `orientation`
+`degenerate`. An error is reported when the sequence has less than three
 points, is not closed, or is not valid.
 
 ```sh
-topoproof contour_self_intersects <n> <X1 Y1 ... Xn Yn>
+topoproof contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A
 ```
-Returns `true` if the sequence of `n` points self-intersects, `false`
+Returns `true` if the sequence of points self-intersects, `false`
 otherwise.
 
 ```sh
-topoproof contour_valid <n> <X1 Y1 ... Xn Yn>
+topoproof contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
 ```
 Returns `true` if the sequence is valid (non-degenerate segments, no three
 consecutive collinear points), `false` otherwise.
@@ -247,20 +210,9 @@ points. Out-of-range values are rejected with an error.
 
 The endpoint of the first segment equals the start point of the second.
 
-<!-- topodraw images/contour_4.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-point C 1 1 0
-vector A B (1, 0)
-vector B C (0, 1)
--->
-
 ![Continuous sequence](images/contour_4.svg)
 
-- When I successfully run `../bin/topoproof contour_continuity 2 0 0 1 0 1 0 1 1`
+- When I successfully run `../bin/topoproof contour_continuity A=(0, 0) B=(1, 0) B C=(1, 1) --draw ../docs/features/images/contour_4.svg`
 - Then the output is `continuity continuous`
 
 ### Scenario: a discontinuous sequence
@@ -268,29 +220,17 @@ vector B C (0, 1)
 The endpoint `(1, 0)` of the first segment differs from the start point
 `(2, 1)` of the second: the chain has a gap.
 
-<!-- topodraw images/contour_5.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-point C 2 1 0
-point D 2 2 0
-vector A B (1, 0)
-vector C D (0, 1)
--->
-
 ![Discontinuous sequence](images/contour_5.svg)
 
-- When I successfully run `../bin/topoproof contour_continuity 2 0 0 1 0 2 1 2 2`
+- When I successfully run `../bin/topoproof contour_continuity A=(0, 0) B=(1, 0) C=(2, 1) D=(2, 2) --draw ../docs/features/images/contour_5.svg`
 - Then the output is `continuity discontinuous`
 
 ### Scenario: a single segment is trivially continuous
-- When I successfully run `../bin/topoproof contour_continuity 1 0 0 1 1`
+- When I successfully run `../bin/topoproof contour_continuity A=(0, 0) B=(1, 1)`
 - Then the output is `continuity continuous`
 
 ### Scenario: an empty sequence is continuous
-- When I successfully run `../bin/topoproof contour_continuity 0`
+- When I successfully run `../bin/topoproof contour_continuity`
 - Then the output is `continuity continuous`
 
 ## Scenarios: Closure
@@ -301,7 +241,7 @@ The last point equals the first: the square of the orientation definition.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topoproof contour_closure 5 0 0 2 0 2 2 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_closure A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
 - Then the output is `closure closed`
 
 ### Scenario: an open chain
@@ -309,24 +249,13 @@ The last point equals the first: the square of the orientation definition.
 The chain starts at `(0, 0)` and ends at `(1, 1)`: no segment returns to
 the start point.
 
-<!-- topodraw images/contour_6.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-point C 1 1 0
-vector A B (1, 0)
-vector B C (0, 1)
--->
-
 ![Open chain](images/contour_6.svg)
 
-- When I successfully run `../bin/topoproof contour_closure 3 0 0 1 0 1 1`
+- When I successfully run `../bin/topoproof contour_closure A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/contour_6.svg`
 - Then the output is `closure open`
 
 ### Scenario: closure with a repeated point
-- When I successfully run `../bin/topoproof contour_closure 2 5 5 5 5`
+- When I successfully run `../bin/topoproof contour_closure A=(5, 5) A`
 - Then the output is `closure closed`
 
 ## Scenarios: Contour Orientation
@@ -338,7 +267,7 @@ The square of the orientation definition, traversed from `(0, 0)` towards
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topoproof contour_orientation 5 0 0 2 0 2 2 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
 - Then the output is `orientation counter_clockwise`
 
 ### Scenario: clockwise square
@@ -348,7 +277,7 @@ on the right.
 
 ![Clockwise square loop](images/contour_2.svg)
 
-- When I successfully run `../bin/topoproof contour_orientation 5 0 0 0 2 2 2 2 0 0 0`
+- When I successfully run `../bin/topoproof contour_orientation A=(0, 0) B=(0, 2) C=(2, 2) D=(2, 0) A --draw ../docs/features/images/contour_2.svg`
 - Then the output is `orientation clockwise`
 
 ### Scenario: degenerate loop of zero area
@@ -358,26 +287,14 @@ same area and opposite orientations, so the shoelace sums to zero.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
-- When I successfully run `../bin/topoproof contour_orientation 5 0 0 2 2 2 0 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_orientation A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`
 - Then the output is `orientation degenerate`
 
 ### Scenario: counter-clockwise triangle
 
-<!-- topodraw images/contour_7.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 2 0 0
-point C 1 2 0
-vector A B (2, 0)
-vector B C (-1, 2)
-vector C A (-1, -2)
--->
-
 ![Counter-clockwise triangle loop](images/contour_7.svg)
 
-- When I successfully run `../bin/topoproof contour_orientation 4 0 0 2 0 1 2 0 0`
+- When I successfully run `../bin/topoproof contour_orientation A=(0, 0) B=(2, 0) C=(1, 2) A --draw ../docs/features/images/contour_7.svg`
 - Then the output is `orientation counter_clockwise`
 
 ## Scenarios: Self-Intersection
@@ -390,7 +307,7 @@ shared endpoint `(0, 0)`.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topoproof contour_self_intersects 5 0 0 2 0 2 2 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_self_intersects A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
 - Then the output is `false`
 
 ### Scenario: a bowtie self-intersects
@@ -400,7 +317,7 @@ segments cross at the grid position `(1, 1)`.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
-- When I successfully run `../bin/topoproof contour_self_intersects 5 0 0 2 2 2 0 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`
 - Then the output is `true`
 
 ### Scenario: three segments meeting at a point is not a self-intersection
@@ -409,25 +326,13 @@ The chain comes back to `(1, 0)`, where the first segment ends and the
 second and third segments meet: the common position is an endpoint of both
 non-consecutive segments, so it is a valid junction.
 
-<!-- topodraw images/contour_8.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-point C 1 1 0
-vector A B (1, 0)
-vector B C (0, 1)
-vector C B (0, -1)
--->
-
 ![Three segments meeting at a point](images/contour_8.svg)
 
-- When I successfully run `../bin/topoproof contour_self_intersects 4 0 0 1 0 1 1 1 0`
+- When I successfully run `../bin/topoproof contour_self_intersects A=(0, 0) B=(1, 0) C=(1, 1) B --draw ../docs/features/images/contour_8.svg`
 - Then the output is `false`
 
 ### Scenario: a single segment does not self-intersect
-- When I successfully run `../bin/topoproof contour_self_intersects 2 0 0 1 1`
+- When I successfully run `../bin/topoproof contour_self_intersects A=(0, 0) B=(1, 1)`
 - Then the output is `false`
 
 ## Scenarios: Validity
@@ -438,7 +343,7 @@ The square of the orientation definition.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topoproof contour_valid 5 0 0 2 0 2 2 0 2 0 0`
+- When I successfully run `../bin/topoproof contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
 - Then the output is `true`
 
 ### Scenario: invalid due to degenerate segment
@@ -446,19 +351,9 @@ The square of the orientation definition.
 The first two points coincide, so the first segment has the same start and
 end.
 
-<!-- topodraw images/contour_9.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-vector A B (1, 0)
-vector B A (-1, 0)
--->
-
 ![Degenerate segment: repeated point](images/contour_9.svg)
 
-- When I successfully run `../bin/topoproof contour_valid 4 0 0 0 0 1 0 0 0`
+- When I successfully run `../bin/topoproof contour_valid A=(0, 0) A B=(1, 0) A --draw ../docs/features/images/contour_9.svg`
 - Then the output is `false`
 
 ### Scenario: invalid due to three collinear consecutive points
@@ -466,21 +361,9 @@ vector B A (-1, 0)
 The points `(0, 0)`, `(1, 0)`, `(2, 0)` are all on the X axis: the chain
 has no turning direction at `(1, 0)`.
 
-<!-- topodraw images/contour_10.svg
-axes
-ticks 1
-anchors
-point A 0 0 0
-point B 1 0 0
-point C 2 0 0
-vector A B (1, 0)
-vector B C (1, 0)
-vector C A (-2, 0)
--->
-
 ![Three collinear consecutive points](images/contour_10.svg)
 
-- When I successfully run `../bin/topoproof contour_valid 4 0 0 1 0 2 0 0 0`
+- When I successfully run `../bin/topoproof contour_valid A=(0, 0) B=(1, 0) C=(2, 0) A --draw ../docs/features/images/contour_10.svg`
 - Then the output is `false`
 
 ## Scenarios: Grid Domain Limits
@@ -491,18 +374,9 @@ Two segments chaining at the two opposite corners of the grid, from
 `(1073741823, 1073741823)` to `(-1073741823, -1073741823)` and back: the
 extreme positions on both axes.
 
-<!-- topodraw images/contour_11.svg
-axes
-anchors
-point A 1073741823 1073741823 0
-point B -1073741823 -1073741823 0
-vector A B S1
-vector B A S2
--->
-
 ![Continuity at grid corners](images/contour_11.svg)
 
-- When I successfully run `../bin/topoproof contour_continuity 2 1073741823 1073741823 -1073741823 -1073741823 -1073741823 -1073741823 1073741823 1073741823`
+- When I successfully run `../bin/topoproof contour_continuity A=(1073741823, 1073741823) B=(-1073741823, -1073741823) B C=(1073741823, 1073741823) --draw ../docs/features/images/contour_11.svg --draw-short-labels`
 - Then the output is `continuity continuous`
 
 ### Scenario: orientation of extreme loop
@@ -512,22 +386,9 @@ top-right corner downwards: the interior is on the right, so the loop is
 clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
 `Area_Sum` domain.
 
-<!-- topodraw images/contour_12.svg
-axes
-anchors
-point A 1073741823 1073741823 0
-point B 1073741823 -1073741823 0
-point C -1073741823 -1073741823 0
-point D -1073741823 1073741823 0
-vector A B S1
-vector B C S2
-vector C D S3
-vector D A S4
--->
-
 ![Extreme loop on the grid corners](images/contour_12.svg)
 
-- When I successfully run `../bin/topoproof contour_orientation 5 1073741823 1073741823 1073741823 -1073741823 -1073741823 -1073741823 -1073741823 1073741823 1073741823 1073741823`
+- When I successfully run `../bin/topoproof contour_orientation A=(1073741823, 1073741823) B=(1073741823, -1073741823) C=(-1073741823, -1073741823) D=(-1073741823, 1073741823) A --draw ../docs/features/images/contour_12.svg --draw-short-labels`
 - Then the output is `orientation clockwise`
 
 ## Proved Properties

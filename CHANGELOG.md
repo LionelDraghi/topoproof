@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.2-dev] - 2026-??-??**
+  - [Changed] the command line now names its points: `NAME=(X, Y)` defines
+              and uses a point, a bare `NAME` refers to an earlier point of
+              the same command, and the point counts are gone; the closure
+              of a chain is visible as a repeated name
+  - [Added]   the `--draw` option: each command generates the SVG diagram
+              of its own data and results with the topodraw renderer, so
+              the tested command is the single source of its documentation
+              image; `--draw-with` adds extra named points to the diagram,
+              and `--draw-short-labels` names the vectors S1, S2, ...;
+              the diagrams carry tick marks again, with an automatic
+              round step
+  - [Added]   the topodraw scene parser and renderer as a library, shared
+              by the topodraw tool and the TopoProof application
 
 - **[0.1.1] - 2026-10-19**
   - [Changed] the grid domain is now derived from the machine, not the other

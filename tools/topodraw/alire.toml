@@ -10,7 +10,7 @@ website = "https://github.com/LionelDraghi/topoproof"
 tags = ["documentation", "svg", "diagrams", "isometric"]
 
 executables = ["topodraw"]
-project-files = ["topodraw.gpr"]
+project-files = ["topodraw_lib.gpr", "topodraw.gpr"]
 
 [build-switches]
 "*".style_checks = "No"

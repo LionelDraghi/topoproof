@@ -141,10 +141,10 @@ package body Topodraw is
                   else
                      S.Tick_Step := Integer'Value (To_String (Rest));
                   end if;
-                  if S.Tick_Step <= 0 then
+                  if S.Tick_Step < 0 then
                      raise Scene_Error
                        with "line" & Integer'Image (Line_No)
-                            & ": STEP must be positive";
+                            & ": STEP must not be negative";
                   end if;
                   S.Draw_Axes := True;
 
@@ -210,6 +210,26 @@ package body Topodraw is
       end if;
       return S;
    end Parse_Scene;
+
+   --  The automatic tick step: the smallest round 1-2-5 number keeping at
+   --  most eight tick marks over the scene extent.
+   function Nice_Step (Extent : Integer) return Integer is
+      B  : Long_Integer := 1;
+      Ks : constant array (1 .. 3) of Long_Integer := [1, 2, 5];
+
+   begin
+      while Long_Integer (Extent) > 8 * B * 5 loop
+         B := B * 10;
+
+      end loop;
+      for K of Ks loop
+         if Long_Integer (Extent) <= 8 * B * K then
+            return Integer'Max (1, Integer (B * K));
+
+         end if;
+      end loop;
+      return Integer'Max (1, Integer (B));
+   end Nice_Step;
 
    function Render (S : Scene) return String is
       use Ada.Numerics.Long_Elementary_Functions;
@@ -449,7 +469,7 @@ package body Topodraw is
                declare
                   Step : constant Integer :=
                     (if S.Tick_Step = 0
-                     then Integer'Max (1, (Unit + 9) / 10)
+                     then Nice_Step (Unit)
                      else S.Tick_Step);
                   Pairs : constant array (1 .. 3) of Pair_Def :=
                       [((1, 0, 0), (0, 1, 0)),

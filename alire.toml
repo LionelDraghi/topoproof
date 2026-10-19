@@ -21,6 +21,14 @@ generate_C = false
 gnat = ">=16"
 
 [[depends-on]]
+# diagram rendering: topoproof --draw and the topodraw tool share the
+# scene parser and the isometric SVG renderer
+topodraw = "0.1.0-dev"
+
+[[pins]]
+topodraw = { path = "tools/topodraw" }
+
+[[depends-on]]
 # executable documentation: make test runs the Markdown pages through bbt
 bbt = ">=0.5.0"
 
