@@ -13,6 +13,14 @@ TopoProof replaces the historical model of continuous geometry, approximate comp
 Why? Because of one too many of these:
 > Job 1, 'freecad&' terminated by signal SIGSEGV
 
+## Contents
+
+- [Status](#status)
+- [Development cycle](#development-cycle)
+- [Documentation](#documentation)
+- [Licence](#licence)
+- [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
+
 ## Status
 
 TopoProof is in its initial development phase. The first deliverable is a complete verified vertical slice covering numeric types, points, vectors, translation, displacement, SPARK contracts, proofs, executable tests, and documentation.

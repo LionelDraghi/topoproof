@@ -1,5 +1,17 @@
 # TopoProof development plan
 
+## Contents
+
+- [Strategy](#strategy)
+- [Milestone 1: first proved geometric operation](#milestone-1-first-proved-geometric-operation)
+- [Milestone 2: first geometric predicate](#milestone-2-first-geometric-predicate)
+- [Milestone 3: segment intersection in 2D](#milestone-3-segment-intersection-in-2d)
+- [Milestone 4: contours and loops in 2D](#milestone-4-contours-and-loops-in-2d)
+- [Milestone 5: first topological structure](#milestone-5-first-topological-structure)
+- [Milestone 6: transition to 3D](#milestone-6-transition-to-3d)
+- [Milestone 7: minimal B-Rep](#milestone-7-minimal-b-rep)
+- [Completion rule](#completion-rule)
+
 ## Strategy
 
 TopoProof is developed vertically through complete, formally verified increments. Every increment covers types, operations, contracts, proof, executable tests, and documentation while preserving existing invariants.

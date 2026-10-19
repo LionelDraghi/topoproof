@@ -18,12 +18,33 @@ vector P Q (5, 7, -9)
 
 ![Translation diagram](images/translation_1.svg)
 
+## Contents
+
+- [Scenario: translate command-line values](#scenario-translate-command-line-values)
+- [Scenario: reject an unrepresentable result](#scenario-reject-an-unrepresentable-result)
+- [Scenario: write the result to a file](#scenario-write-the-result-to-a-file)
+- [Proved property](#proved-property)
+- [Scenario: translation and displacement compose to the identity](#scenario-translation-and-displacement-compose-to-the-identity)
+
 ## Scenario: translate command-line values
-- When I run `../bin/topoproof translate 10 -20 30 5 7 -9`
+- When I successfully run `../bin/topoproof translate 10 -20 30 5 7 -9`
 - Then the output is `point 15 -13 21`
-- And there is no error
 
 ## Scenario: reject an unrepresentable result
+
+The point starts on the corner of the grid; the translation would move it
+one unit beyond the largest representable position.
+
+<!-- topodraw images/translation_2.svg
+axes
+anchors
+point P 1073741823 0 0
+point Q 1073741824 0 0
+vector P Q (1, 0, 0)
+-->
+
+![Translation beyond the grid corner](images/translation_2.svg)
+
 - When I run `../bin/topoproof translate 1073741823 0 0 1 0 0`
 - Then the output is `error: translation is not representable`
 - And there is an error
@@ -41,8 +62,12 @@ The composed translation is always representable, for any two points of the
 model.
 
 ## Scenario: translation and displacement compose to the identity
-- When I run `../bin/topoproof displacement 10 -20 30 15 -13 21`
+
+The geometry of the first scenario: from `P` to `Q` and back.
+
+![Translation diagram](images/translation_1.svg)
+
+- When I successfully run `../bin/topoproof displacement 10 -20 30 15 -13 21`
 - Then the output is `vector 5 7 -9`
-- When I run `../bin/topoproof translate 10 -20 30 5 7 -9`
+- When I successfully run `../bin/topoproof translate 10 -20 30 5 7 -9`
 - Then the output is `point 15 -13 21`
-- And there is no error

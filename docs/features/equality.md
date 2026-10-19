@@ -26,17 +26,34 @@ point B 1 2 4
 
 ![Distinct points](images/equality_2.svg)
 
+## Contents
+
+- [Scenario: identical points are equal](#scenario-identical-points-are-equal)
+- [Scenario: different points are not equal](#scenario-different-points-are-not-equal)
+- [Scenario: opposite points are not equal](#scenario-opposite-points-are-not-equal)
+
 ## Scenario: identical points are equal
-- When I run `../bin/topoproof equal 1 2 3 1 2 3`
+- When I successfully run `../bin/topoproof equal 1 2 3 1 2 3`
 - Then the output is `equal true`
-- And there is no error
 
 ## Scenario: different points are not equal
-- When I run `../bin/topoproof equal 1 2 3 1 2 4`
+- When I successfully run `../bin/topoproof equal 1 2 3 1 2 4`
 - Then the output is `equal false`
-- And there is no error
 
 ## Scenario: opposite points are not equal
-- When I run `../bin/topoproof equal -1 2 -3 1 -2 3`
+
+`A` and `B` differ on all three axes: two positions symmetric about the
+origin.
+
+<!-- topodraw images/equality_3.svg
+axes
+ticks 1
+anchors
+point A -1 2 -3
+point B 1 -2 3
+-->
+
+![Opposite points](images/equality_3.svg)
+
+- When I successfully run `../bin/topoproof equal -1 2 -3 1 -2 3`
 - Then the output is `equal false`
-- And there is no error

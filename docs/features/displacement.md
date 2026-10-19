@@ -18,10 +18,18 @@ vector A B (5, -7, 9)
 
 ![Displacement diagram](images/displacement_1.svg)
 
+## Contents
+
+- [Scenario: compute command-line values](#scenario-compute-command-line-values)
+- [Scenario: inject parameters from an input file](#scenario-inject-parameters-from-an-input-file)
+- [Scenario: read and write files](#scenario-read-and-write-files)
+
 ## Scenario: compute command-line values
-- When I run `../bin/topoproof displacement -1 2 -3 4 -5 6`
+
+![Displacement diagram](images/displacement_1.svg)
+
+- When I successfully run `../bin/topoproof displacement -1 2 -3 4 -5 6`
 - Then the output is `vector 5 -7 9`
-- And there is no error
 
 ## Scenario: inject parameters from an input file
 - Given the new file `displacement.in` containing `displacement 10 20 30 13 18 37`

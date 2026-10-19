@@ -5,7 +5,7 @@ pragma Style_Checks (Off);
 package Topoproof_Config is
    pragma Pure;
 
-   Crate_Version : constant String := "0.1.1-dev";
+   Crate_Version : constant String := "0.1.1";
    Crate_Name : constant String := "topoproof";
 
    Alire_Host_OS : constant String := "linux";

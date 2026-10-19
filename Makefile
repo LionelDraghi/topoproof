@@ -10,7 +10,8 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/displacement.md \
             ../docs/features/equality.md \
             ../docs/features/orientation.md \
-            ../docs/features/intersection.md
+            ../docs/features/intersection.md \
+            ../docs/features/contours.md
 
 .SILENT:
 

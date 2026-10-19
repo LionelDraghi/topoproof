@@ -46,30 +46,104 @@ vector B C (0, -1)
 
 ![Clockwise turn](images/orientation_2.svg)
 
+## Contents
+
+- [Scenario: a counter-clockwise path](#scenario-a-counter-clockwise-path)
+- [Scenario: a clockwise path](#scenario-a-clockwise-path)
+- [Scenario: three aligned points are collinear](#scenario-three-aligned-points-are-collinear)
+- [Scenario: two coincident points make a degenerate collinear path](#scenario-two-coincident-points-make-a-degenerate-collinear-path)
+- [Scenario: the extreme corners of the grid do not overflow](#scenario-the-extreme-corners-of-the-grid-do-not-overflow)
+- [Proved property](#proved-property)
+- [Scenario: a cyclic permutation keeps the orientation](#scenario-a-cyclic-permutation-keeps-the-orientation)
+- [Scenario: exchanging two points mirrors the orientation](#scenario-exchanging-two-points-mirrors-the-orientation)
+- [Scenario: the orientation is invariant under translation](#scenario-the-orientation-is-invariant-under-translation)
+
 ## Scenario: a counter-clockwise path
-- When I run `../bin/topoproof orientation 0 0 1 0 1 1`
+
+![Counter-clockwise turn](images/orientation_1.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 1 0 1 1`
 - Then the output is `orientation counter_clockwise`
-- And there is no error
 
 ## Scenario: a clockwise path
-- When I run `../bin/topoproof orientation 0 0 1 0 1 -1`
+
+The path turns right at `(1, 0)`.
+
+<!-- topodraw images/orientation_3.svg
+axes
+ticks 1
+anchors
+point A 0 0 0
+point B 1 0 0
+point C 1 -1 0
+vector A B (1, 0)
+vector B C (0, -1)
+-->
+
+![Clockwise turn](images/orientation_3.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 1 0 1 -1`
 - Then the output is `orientation clockwise`
-- And there is no error
 
 ## Scenario: three aligned points are collinear
-- When I run `../bin/topoproof orientation 0 0 2 2 4 4`
+
+The path stays on the diagonal line: no turn at all.
+
+<!-- topodraw images/orientation_4.svg
+axes
+ticks 2
+anchors
+point A 0 0 0
+point B 2 2 0
+point C 4 4 0
+vector A B (2, 2)
+vector B C (2, 2)
+-->
+
+![Collinear path](images/orientation_4.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 2 2 4 4`
 - Then the output is `orientation collinear`
-- And there is no error
 
 ## Scenario: two coincident points make a degenerate collinear path
-- When I run `../bin/topoproof orientation 5 7 5 7 9 -3`
+
+`A` and `B` are the same position `(5, 7)`: the path degenerates before
+reaching `C`.
+
+<!-- topodraw images/orientation_5.svg
+axes
+ticks 5
+anchors
+point A 5 7 0
+point B 5 7 0
+point C 9 -3 0
+vector B C (4, -10)
+-->
+
+![Degenerate path with coincident points](images/orientation_5.svg)
+
+- When I successfully run `../bin/topoproof orientation 5 7 5 7 9 -3`
 - Then the output is `orientation collinear`
-- And there is no error
 
 ## Scenario: the extreme corners of the grid do not overflow
-- When I run `../bin/topoproof orientation 1073741823 0 0 1073741823 -1073741823 -1073741823`
+
+The path visits three corners of the grid; the determinant of the extreme
+coordinates is computed exactly in the `Determinant` domain.
+
+<!-- topodraw images/orientation_6.svg
+axes
+anchors
+point A 1073741823 0 0
+point B 0 1073741823 0
+point C -1073741823 -1073741823 0
+vector A B S1
+vector B C S2
+-->
+
+![Path on the grid corners](images/orientation_6.svg)
+
+- When I successfully run `../bin/topoproof orientation 1073741823 0 0 1073741823 -1073741823 -1073741823`
 - Then the output is `orientation counter_clockwise`
-- And there is no error
 
 ## Proved property
 
@@ -85,20 +159,50 @@ the determinant of extreme coordinates is bounded by 8E18, within the proved
 `Determinant` domain.
 
 ## Scenario: a cyclic permutation keeps the orientation
-- When I run `../bin/topoproof orientation 0 0 1 0 1 1`
+
+The same triangle as the first scenario, visited from a different starting
+point.
+
+![Counter-clockwise turn](images/orientation_1.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 1 0 1 1`
 - Then the output is `orientation counter_clockwise`
-- When I run `../bin/topoproof orientation 1 0 1 1 0 0`
+- When I successfully run `../bin/topoproof orientation 1 0 1 1 0 0`
 - Then the output is `orientation counter_clockwise`
-- And there is no error
 
 ## Scenario: exchanging two points mirrors the orientation
-- When I run `../bin/topoproof orientation 0 0 1 1 1 0`
+
+The exchanged path of the first scenario.
+
+![Clockwise turn](images/orientation_2.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 1 1 1 0`
 - Then the output is `orientation clockwise`
-- And there is no error
 
 ## Scenario: the orientation is invariant under translation
-- When I run `../bin/topoproof orientation 0 0 1 0 1 1`
+
+The same path as the first scenario, translated by `(10, 20)`: the turn
+direction is unchanged.
+
+<!-- topodraw images/orientation_7.svg
+axes
+ticks 5
+anchors
+point A 0 0 0
+point B 1 0 0
+point C 1 1 0
+point E 10 20 0
+point F 11 20 0
+point G 11 21 0
+vector A B (1, 0)
+vector B C (0, 1)
+vector E F (1, 0)
+vector F G (0, 1)
+-->
+
+![A path and its translation](images/orientation_7.svg)
+
+- When I successfully run `../bin/topoproof orientation 0 0 1 0 1 1`
 - Then the output is `orientation counter_clockwise`
-- When I run `../bin/topoproof orientation 10 20 11 20 11 21`
+- When I successfully run `../bin/topoproof orientation 10 20 11 20 11 21`
 - Then the output is `orientation counter_clockwise`
-- And there is no error

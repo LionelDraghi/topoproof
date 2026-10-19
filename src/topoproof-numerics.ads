@@ -54,4 +54,16 @@ is
 
    type Cubic_Product is range -Cubic_Amplitude .. Cubic_Amplitude;
 
+   --  The signed-area sum of a contour, by the shoelace formula: one
+   --  determinant per vertex, so the amplitude is the determinant
+   --  amplitude times the largest number of accumulated terms. A
+   --  sequence length is a Natural discriminant, hence Natural'Last
+   --  terms at most, about 2E9 * 9.2E18 = 2E28, that is about 2**94,
+   --  on the same 128-bit machine width as the cubic products.
+   Area_Sum_Amplitude : constant :=
+     Natural'Last * (2 * Product_Amplitude);
+
+   --  Exact shoelace sum of a discrete contour.
+   type Area_Sum is range -Area_Sum_Amplitude .. Area_Sum_Amplitude;
+
 end TopoProof.Numerics;

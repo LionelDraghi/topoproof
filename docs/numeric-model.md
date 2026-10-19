@@ -1,5 +1,17 @@
 # Numeric model
 
+## Contents
+
+- [Status](#status)
+- [Geometric quantum](#geometric-quantum)
+- [Internal grid unit](#internal-grid-unit)
+- [Coordinates](#coordinates)
+- [Vector components](#vector-components)
+- [Intermediate arithmetic](#intermediate-arithmetic)
+- [Signed-area sums](#signed-area-sums)
+- [Representability](#representability)
+- [External conversion](#external-conversion)
+
 ## Status
 
 This document is normative for the first TopoProof milestone. Open decisions are explicitly identified.
@@ -107,6 +119,31 @@ type Cubic_Product is range
 The crossing point is accepted only when both exact quotients are integers
 whose coordinates stay in the grid domain; otherwise the crossing is
 reported as off-grid, never approximated. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
+
+## Signed-area sums
+
+The contour orientation of milestone 4 accumulates one orientation
+determinant per vertex of a loop, by the shoelace formula. A sum is not a
+fixed-degree expression: its bound also depends on the number of
+accumulated terms. A sequence length is a `Natural` discriminant, so the
+largest sum is bounded by the determinant amplitude times `Natural'Last`:
+
+```ada
+Area_Sum_Amplitude : constant :=
+  Natural'Last * (2 * Product_Amplitude);
+
+type Area_Sum is range
+  -Area_Sum_Amplitude ..
+   Area_Sum_Amplitude;
+```
+
+With this grid, that is about 2E28 (2**94), again below 2**127, so the
+sum stays on the same 128-bit machine width as the cubic products for any
+representable sequence length. GNATprove proves that the partial sums
+cannot overflow this domain: each term is bounded by the determinant
+amplitude, and the loop invariant bounds the partial sum by the number of
+accumulated terms.
+
 
 ## Representability
 

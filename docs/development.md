@@ -1,5 +1,15 @@
 # Development guide
 
+## Contents
+
+- [Repository responsibilities](#repository-responsibilities)
+- [Workflow](#workflow)
+- [Commands](#commands)
+- [Build profiles](#build-profiles)
+- [Change acceptance](#change-acceptance)
+- [Repository hygiene](#repository-hygiene)
+- [Executable documentation](#executable-documentation)
+
 ## Repository responsibilities
 
 ```text

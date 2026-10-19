@@ -2,6 +2,15 @@
 
 > **Status: research document.** This document is non-normative and does not define requirements for the current TopoProof core.
 
+## Contents
+
+- [Certified geometry and intervals](#certified-geometry-and-intervals)
+- [Progressive refinement](#progressive-refinement)
+- [Three-valued predicates](#three-valued-predicates)
+- [Adaptive computation](#adaptive-computation)
+- [Convex hulls](#convex-hulls)
+- [Long-term vision](#long-term-vision)
+
 ## Certified geometry and intervals
 
 TopoProof's core uses discrete geometry, integer coordinates, B-Rep topology, and SPARK proofs. Interval arithmetic is therefore unnecessary for representing a grid coordinate exactly.

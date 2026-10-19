@@ -3,20 +3,20 @@
 --  (https://github.com/LionelDraghi/topoproof)
 --  SPDX-License-Identifier: Apache-2.0
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
--- -----------------------------------------------------------------------------
-
-with Ada.Command_Line;                use Ada.Command_Line;
-with Ada.Strings;                     use Ada.Strings;
-with Ada.Strings.Fixed;               use Ada.Strings.Fixed;
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
-with Ada.Text_IO;                     use Ada.Text_IO;
+-- ----------------------------------------------------------------------------- 
+with Ada.Command_Line;                 use Ada.Command_Line;
+with Ada.Strings;                      use Ada.Strings;
+with Ada.Strings.Fixed;                use Ada.Strings.Fixed;
+with Ada.Strings.Unbounded;            use Ada.Strings.Unbounded;
+with Ada.Text_IO;                      use Ada.Text_IO;
 with TopoProof.Geometry.Intersections; use TopoProof.Geometry.Intersections;
 with TopoProof.Geometry.Orientations;  use TopoProof.Geometry.Orientations;
 with TopoProof.Geometry.Segments;      use TopoProof.Geometry.Segments;
-with TopoProof.Geometry.Points;       use TopoProof.Geometry.Points;
-with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
-with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
-with TopoProof.Numerics;              use TopoProof.Numerics;
+with TopoProof.Geometry.Segment_Sequences; use TopoProof.Geometry.Segment_Sequences;
+with TopoProof.Geometry.Points;            use TopoProof.Geometry.Points;
+with TopoProof.Geometry.Translations;      use TopoProof.Geometry.Translations;
+with TopoProof.Geometry.Vectors;           use TopoProof.Geometry.Vectors;
+with TopoProof.Numerics;                   use TopoProof.Numerics;
 
 procedure TopoProof_CLI is
    Usage_Error             : exception;
@@ -197,6 +197,150 @@ procedure TopoProof_CLI is
             end;
          end;
 
+      elsif Op = "contour_continuity" then
+         --  The n segments are given by their explicit endpoints,
+         --  four coordinates each: S_i = (P_2i-1, P_2i).
+         declare
+            N : constant Natural := Natural'Value (Token (R));
+         begin
+            if N = 0 then
+               if Token (R) /= "" then
+                  raise Usage_Error;
+
+               end if;
+               Emit ("continuity continuous");
+
+            else
+               declare
+                  Pts : Point_2D_Array (1 .. 2 * N);
+
+               begin
+                  for I in Pts'Range loop
+                     Pts (I) := (C (Token (R)), C (Token (R)));
+                  end loop;
+                  if Token (R) /= "" then
+                     raise Usage_Error;
+
+                  end if;
+                  declare
+                     Continuous : Boolean := True;
+
+                  begin
+                     for I in 1 .. N - 1 loop
+                        if Pts (2 * I) /= Pts (2 * I + 1) then
+                           Continuous := False;
+
+                        end if;
+                     end loop;
+                     if Continuous then
+                        Emit ("continuity continuous");
+
+                     else
+                        Emit ("continuity discontinuous");
+
+                     end if;
+                  end;
+               end;
+            end if;
+         end;
+
+      elsif Op = "contour_closure" then
+         declare
+            N   : constant Natural              := Natural'Value (Token (R));
+            Seq : Segment_Sequence_2D (N);
+         begin
+            for I in 1 .. N loop
+               Seq.Points (I) := (C (Token (R)), C (Token (R)));
+            end loop;
+            if Token (R) /= "" then
+               raise Usage_Error;
+
+            end if;
+            if Is_Closed (Seq) then
+               Emit ("closure closed");
+
+            else
+               Emit ("closure open");
+
+            end if;
+         end;
+
+      elsif Op = "contour_orientation" then
+         declare
+            N : constant Natural := Natural'Value (Token (R));
+            Seq : Segment_Sequence_2D (N);
+         begin
+            for I in 1 .. N loop
+               Seq.Points (I) := (C (Token (R)), C (Token (R)));
+            end loop;
+            if Token (R) /= "" then
+               raise Usage_Error;
+            end if;
+            if N < 3 then
+               Emit ("error: at least 3 points required for orientation");
+               Set_Exit_Status (Failure);
+            else
+               if not Is_Closed (Seq) then
+                  Emit ("error: sequence is not closed");
+                  Set_Exit_Status (Failure);
+               elsif not Is_Valid (Seq) then
+                  Emit ("error: sequence is not valid");
+                  Set_Exit_Status (Failure);
+               else
+                  case Orientation (Seq) is
+                     when Counter_Clockwise =>
+                        Emit ("orientation counter_clockwise");
+                     when Clockwise =>
+                        Emit ("orientation clockwise");
+                     when Degenerate =>
+                        Emit ("orientation degenerate");
+                  end case;
+               end if;
+            end if;
+         end;
+
+      elsif Op = "contour_self_intersects" then
+         declare
+            N   : constant Natural              := Natural'Value (Token (R));
+            Seq : Segment_Sequence_2D (N);
+         begin
+            for I in 1 .. N loop
+               Seq.Points (I) := (C (Token (R)), C (Token (R)));
+            end loop;
+            if Token (R) /= "" then
+               raise Usage_Error;
+
+            end if;
+            if Self_Intersects (Seq) then
+               Emit ("true");
+
+            else
+               Emit ("false");
+
+            end if;
+         end;
+
+      elsif Op = "contour_valid" then
+         declare
+            N   : constant Natural              := Natural'Value (Token (R));
+            Seq : Segment_Sequence_2D (N);
+         begin
+            for I in 1 .. N loop
+               Seq.Points (I) := (C (Token (R)), C (Token (R)));
+            end loop;
+            if Token (R) /= "" then
+               raise Usage_Error;
+
+            end if;
+            if Is_Valid (Seq) then
+               Emit ("true");
+
+            else
+               Emit ("false");
+
+            end if;
+         end;
+
       else
          raise Usage_Error;
 
@@ -236,6 +380,8 @@ begin
          Emit ("usage: topoproof OPERATION PARAMETERS [--output FILE]");
          Emit ("       topoproof --input FILE [--output FILE]");
          Emit ("operations: translate, displacement, equal, orientation, intersect");
+         Emit ("             contour_continuity, contour_closure, contour_orientation");
+         Emit ("             contour_self_intersects, contour_valid");
          return;
 
       else

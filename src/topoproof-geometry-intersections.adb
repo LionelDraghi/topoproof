@@ -157,6 +157,126 @@ is
       null;
    end Lemma_Parameter_Equivalence;
 
+   --  Two exact quotient identities exchange their axis factors: when the
+   --  same nonzero determinant scales both differences, the factors can
+   --  be exchanged, as both sides equal UN * DX * DY / TCD. Proved in
+   --  isolation: the degree-3 intermediate products exceed the
+   --  Cubic_Product domain, so the exchange cannot be decomposed into
+   --  writable rungs.
+   procedure Lemma_Axis_Exchange
+      (TCD, UN : Numerics.Determinant;
+       DX, DY, U, V : Numerics.Vector_Component)
+   with
+      Ghost,
+      Pre =>
+         TCD /= 0
+         and then
+           Numerics.Cubic_Product (TCD) * Numerics.Cubic_Product (U)
+         = Numerics.Cubic_Product (UN) * Numerics.Cubic_Product (DX)
+         and then
+           Numerics.Cubic_Product (TCD) * Numerics.Cubic_Product (V)
+         = Numerics.Cubic_Product (UN) * Numerics.Cubic_Product (DY),
+      Post =>
+         Numerics.Cubic_Product (U) * Numerics.Cubic_Product (DY)
+         = Numerics.Cubic_Product (V) * Numerics.Cubic_Product (DX)
+   is
+   begin
+      null;
+   end Lemma_Axis_Exchange;
+
+   --  A quotient between 0 and the component difference bounds the point
+   --  coordinate between the segment endpoints on that axis: the two
+   --  differences from the endpoints have opposite signs, so their exact
+   --  product is not positive, in the difference domain used by
+   --  Is_On_Segment.
+   procedure Lemma_Axis_Bounding
+      (P, F, T : Numerics.Grid_Coordinate;
+       Q       : Numerics.Cubic_Product;
+       D       : Numerics.Vector_Component)
+   with
+      Ghost,
+      Pre =>
+         Q = Numerics.Cubic_Product (P) - Numerics.Cubic_Product (F)
+         and then
+           D =
+            Numerics.Vector_Component
+              (Numerics.Extended_Component (T)
+               - Numerics.Extended_Component (F))
+         and then
+           Q * (Q - Numerics.Cubic_Product (D)) <= 0,
+      Post =>
+         Orientations.Component_Product
+           (Numerics.Vector_Component
+              (Numerics.Extended_Component (P)
+               - Numerics.Extended_Component (F)),
+            Numerics.Vector_Component
+              (Numerics.Extended_Component (P)
+               - Numerics.Extended_Component (T)))
+         <= 0
+   is
+   begin
+      null;
+   end Lemma_Axis_Bounding;
+
+   --  Exact quotient ordering: with UN strictly between 0 and TCD, the
+   --  quotient UN * DX / TCD lies strictly between 0 and DX, and the
+   --  quotient (UN - TCD) * DX / TCD lies strictly between DX and 0.
+   --  Proved in isolation, like Lemma_Axis_Exchange.
+   procedure Lemma_Quotient_Ordering
+      (TCD, UN : Numerics.Determinant;
+       DX, U, V : Numerics.Vector_Component)
+   with
+      Ghost,
+      Pre =>
+         TCD /= 0
+         and then
+           (if TCD > 0 then 0 < UN and then UN < TCD
+            elsif TCD < 0 then TCD < UN and then UN < 0)
+         and then
+           Numerics.Cubic_Product (TCD) * Numerics.Cubic_Product (U)
+         = Numerics.Cubic_Product (UN) * Numerics.Cubic_Product (DX)
+         and then
+           Numerics.Cubic_Product (TCD) * Numerics.Cubic_Product (V)
+         = Numerics.Cubic_Product (UN - TCD) * Numerics.Cubic_Product (DX),
+      Post =>
+         (if DX > 0 then U > 0 and then V < 0
+          elsif DX < 0 then U < 0 and then V > 0
+          else U = 0)
+   is
+   begin
+      null;
+   end Lemma_Quotient_Ordering;
+
+   --  When the vector from C to P is parallel to the direction (DX, DY)
+   --  of C to D, the three points are collinear: the orientation
+   --  determinant vanishes. Bridges the Cubic_Product domain of the
+   --  parallelism identity to the Determinant domain of the orientation.
+   procedure Lemma_Parallel_Collinear
+      (C, D, P : Points.Point_2D;
+       DX, DY  : Numerics.Vector_Component)
+   with
+      Ghost,
+      Pre =>
+         DX =
+            Numerics.Vector_Component
+              (Numerics.Extended_Component (D.X)
+               - Numerics.Extended_Component (C.X))
+         and then
+           DY =
+            Numerics.Vector_Component
+              (Numerics.Extended_Component (D.Y)
+               - Numerics.Extended_Component (C.Y))
+         and then
+           (Numerics.Cubic_Product (P.X) - Numerics.Cubic_Product (C.X))
+             * Numerics.Cubic_Product (DY)
+         = (Numerics.Cubic_Product (P.Y) - Numerics.Cubic_Product (C.Y))
+             * Numerics.Cubic_Product (DX),
+      Post => Orientations.Determinant (C, D, P) = 0
+   is
+   begin
+      null;
+   end Lemma_Parallel_Collinear;
+
    --  Membership of the exact crossing point, proved once for the
    --  canonical pair (X, Y): the crossing point of two properly crossing
    --  segments, when it falls on a grid position, is on both segments.
@@ -296,6 +416,18 @@ is
            * (Numerics.Cubic_Product (P.Y) - Numerics.Cubic_Product (D.Y))
          = Numerics.Cubic_Product (UN - TCD)
            * Numerics.Cubic_Product (Segments.Delta_Y (Y)));
+      --  The quotient along Y lies strictly between the endpoints of Y
+      --  on both axes.
+      Lemma_Quotient_Ordering
+        (TCD,
+         UN,
+         Segments.Delta_X (Y),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.X)
+            - Numerics.Extended_Component (C.X)),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.X)
+            - Numerics.Extended_Component (D.X)));
       pragma Assert
         ((if Segments.Delta_X (Y) > 0 then
              Numerics.Cubic_Product (C.X) < Numerics.Cubic_Product (P.X)
@@ -305,6 +437,16 @@ is
              and then Numerics.Cubic_Product (P.X) > Numerics.Cubic_Product (D.X)
          else
              P.X = C.X));
+      Lemma_Quotient_Ordering
+        (TCD,
+         UN,
+         Segments.Delta_Y (Y),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.Y)
+            - Numerics.Extended_Component (C.Y)),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.Y)
+            - Numerics.Extended_Component (D.Y)));
       pragma Assert
         ((if Segments.Delta_Y (Y) > 0 then
              Numerics.Cubic_Product (C.Y) < Numerics.Cubic_Product (P.Y)
@@ -314,6 +456,19 @@ is
              and then Numerics.Cubic_Product (P.Y) > Numerics.Cubic_Product (D.Y)
          else
              P.Y = C.Y));
+      --  The two quotient identities exchange their axis factors: the
+      --  vector from C to the crossing point is parallel to Y.
+      Lemma_Axis_Exchange
+        (TCD,
+         UN,
+         Segments.Delta_X (Y),
+         Segments.Delta_Y (Y),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.X)
+            - Numerics.Extended_Component (C.X)),
+         Numerics.Vector_Component
+           (Numerics.Extended_Component (P.Y)
+            - Numerics.Extended_Component (C.Y)));
       pragma Assert
         ((Numerics.Cubic_Product (P.X) - Numerics.Cubic_Product (C.X))
            * Numerics.Cubic_Product (Segments.Delta_Y (Y))
@@ -325,9 +480,19 @@ is
          and then
            (Numerics.Cubic_Product (P.Y) - Numerics.Cubic_Product (C.Y))
            * (Numerics.Cubic_Product (P.Y) - Numerics.Cubic_Product (D.Y)) <= 0);
+      --  The vector from C to the crossing point is parallel to Y, so the
+      --  three points are collinear.
+      Lemma_Parallel_Collinear
+        (C, D, P, Segments.Delta_X (Y), Segments.Delta_Y (Y));
       pragma Assert (Orientations.Determinant (C, D, P) = 0);
 
       --  The bounding boxes of both segments contain the crossing point.
+      --  The quotients bound the crossing point between the endpoints of
+      --  X on both axes, in the difference domain of Is_On_Segment.
+      Lemma_Axis_Bounding
+        (P.X, X.From_Point.X, X.To_Point.X, QX, Segments.Delta_X (X));
+      Lemma_Axis_Bounding
+        (P.Y, X.From_Point.Y, X.To_Point.Y, QY, Segments.Delta_Y (X));
       pragma Assert (Segments.Is_On_Segment (P, X));
       pragma Assert (Segments.Is_On_Segment (P, Y));
    end Crossing_Membership;

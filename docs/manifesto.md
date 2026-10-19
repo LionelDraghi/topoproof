@@ -1,5 +1,14 @@
 # TopoProof manifesto
 
+## Contents
+
+- [A provable 3D CAD kernel](#a-provable-3d-cad-kernel)
+- [The paradigm](#the-paradigm)
+- [Provable topology](#provable-topology)
+- [Why Ada and SPARK](#why-ada-and-spark)
+- [Proof obligations](#proof-obligations)
+- [Vision](#vision)
+
 ## A provable 3D CAD kernel
 
 **Replace continuous geometry plus tolerances with discrete geometry plus formal proof.**

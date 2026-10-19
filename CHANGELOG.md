@@ -5,7 +5,7 @@ All notable changes **from a user perspective** to this project will be document
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), (guidelines at the bottom of the page).  
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-- **[0.1.1-dev] - 2026-??-??**
+- **[0.1.1] - 2026-10-19**
   - [Changed] the grid domain is now derived from the machine, not the other
               way around: coordinates run to 2**30 - 1, the largest domain
               for which the whole arithmetic chain stays on native widths,
@@ -26,6 +26,18 @@ Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0
               domain: invariance under cyclic permutation, mirroring under
               exchange of two points, degenerate collinearity of paths with
               coincident points, and invariance under representable translation
+  - [Added]   the contour operations: exact classification of 2D segment
+              sequences with `contour_continuity`, `contour_closure`,
+              `contour_orientation`, `contour_self_intersects` and
+              `contour_valid`, documented with executable scenarios under
+              `docs/features/`
+  - [Added]   the contour properties proved by SPARK over the whole grid
+              domain: closure and validity by contract, orientation as the
+              exact sign of the shoelace sum, and signed-area sums that
+              cannot overflow for any sequence up to the maximum length
+  - [Added]   a diagram illustrating the geometry of every documentation
+              scenario, tables of contents in every page, and a README for
+              the topodraw diagram tool
 
 - **[0.1.0] - 2026-10-17**
   - [Added]   the TopoProof application and its first three operations: `translate`,
