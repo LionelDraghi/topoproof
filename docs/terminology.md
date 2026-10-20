@@ -126,6 +126,32 @@ The exact classification of two segments as sharing no grid position, exactly on
 
 A properly crossing pair of segments whose crossing point is not a grid position. The discrete model states this case exactly instead of snapping the crossing to a nearby grid position: on the grid, positions that do not exist are not fabricated.
 
+## Normative for milestone 4
+
+### `Segment_Sequence_2D`
+
+An ordered list of `Point_2D` values in which consecutive points define the segments of a polygonal chain. Storing points instead of duplicated endpoints makes continuity structural.
+
+### Closed sequence
+
+A segment sequence whose first and last points coincide. A closed sequence is the geometric candidate for a loop.
+
+### Validity
+
+A segment sequence is valid when no segment is degenerate. Validity is geometric: an intermediate collinear point never invalidates a sequence, because the chain describes the same geometry with or without it.
+
+### Flat turn
+
+Three consecutive collinear points: the chain has no well-defined turning direction at the middle point. The absence of flat turns is a canonical-representation property, observable with `Has_No_Flat_Turns`, and is not a validity rule (decision DD-001).
+
+### Signed area
+
+Twice the area enclosed by a closed sequence, by the shoelace formula: the exact integer sum of the cross determinants of the consecutive position vectors, including the closing term. Only the sign classifies the orientation; the exact value stays available.
+
+### Contour orientation
+
+The classification of a closed, valid sequence as counter-clockwise, clockwise or degenerate, by the sign of its signed area. The orientation is a property of the closed chain itself: it is invariant under rotation of the starting vertex, and mirrored by reversal of the traversal direction.
+
 ## Provisional geometric terms
 
 ### `Grid_Quantum`

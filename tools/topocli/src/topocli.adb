@@ -827,6 +827,39 @@ procedure TopoCLI is
             end;
          end;
 
+      elsif Op = "contour_no_flat_turns" then
+         declare
+            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+
+         begin
+            Require_End (R);
+            declare
+               N   : constant Natural := Natural (Chain.Length);
+               Seq : Segment_Sequence_2D (N);
+
+            begin
+               for I in 1 .. N loop
+                  Seq.Points (I) := Point_Of (Chain (I));
+               end loop;
+               if Length (Draw_Path) > 0 then
+                  declare
+                     S : Scene := New_Scene;
+
+                  begin
+                     Draw_Chain (S, Chain);
+                     Draw (S, With_Chain);
+                  end;
+               end if;
+               if Has_No_Flat_Turns (Seq) then
+                  Emit ("true");
+
+               else
+                  Emit ("false");
+
+               end if;
+            end;
+         end;
+
       else
          raise Usage_Error;
 
@@ -892,7 +925,8 @@ begin
                & "intersect");
          Emit ("             contour_continuity, contour_closure, "
                & "contour_orientation");
-         Emit ("             contour_self_intersects, contour_valid");
+         Emit ("             contour_self_intersects, contour_valid, "
+               & "contour_no_flat_turns");
          return;
 
       else

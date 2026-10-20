@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.2-dev] - 2026-??-??**
+  - [Changed] contour validity is now geometric: a sequence is valid when
+              no segment is degenerate; intermediate collinear points no
+              longer invalidate it, they are a matter of representation.
+              The former validity rule (no three consecutive collinear
+              points) is now the separate `contour_no_flat_turns`
+              operation, and `contour_orientation` accepts contours with
+              flat turns, whose signed area is well defined. This records
+              design decision DD-001
+  - [Added]   the contour invariance lemmas, closing milestone 4: the
+              signed area of a closed contour is invariant under
+              rotation of the starting vertex, and negated by reversal of
+              the traversal direction; the orientation is invariant under
+              rotation and mirrored by reversal. The public `Partial_Sum`
+              operation carries the proofs
   - [Changed] the command line now names its points: `NAME=(X, Y)` defines
               and uses a point, a bare `NAME` refers to an earlier point of
               the same command, and the point counts are gone; the closure

@@ -13,7 +13,7 @@ without approximation, tolerance, or floating-point arithmetic.
   - [Closure (Loop)](#closure-loop)
   - [Contour Orientation](#contour-orientation)
   - [Self-Intersection](#self-intersection)
-  - [Degenerate Segment Rejection](#degenerate-segment-rejection)
+  - [Validity and Flat Turns](#validity-and-flat-turns)
 - [Command-Line Interface](#command-line-interface)
 - [Scenarios: Continuity](#scenarios-continuity)
   - [Scenario: a continuous sequence of two segments](#scenario-a-continuous-sequence-of-two-segments)
@@ -29,15 +29,17 @@ without approximation, tolerance, or floating-point arithmetic.
   - [Scenario: clockwise square](#scenario-clockwise-square)
   - [Scenario: degenerate loop of zero area](#scenario-degenerate-loop-of-zero-area)
   - [Scenario: counter-clockwise triangle](#scenario-counter-clockwise-triangle)
+  - [Scenario: orientation of a contour with a flat turn](#scenario-orientation-of-a-contour-with-a-flat-turn)
 - [Scenarios: Self-Intersection](#scenarios-self-intersection)
   - [Scenario: a simple loop does not self-intersect](#scenario-a-simple-loop-does-not-self-intersect)
   - [Scenario: a bowtie self-intersects](#scenario-a-bowtie-self-intersects)
   - [Scenario: three segments meeting at a point is not a self-intersection](#scenario-three-segments-meeting-at-a-point-is-not-a-self-intersection)
   - [Scenario: a single segment does not self-intersect](#scenario-a-single-segment-does-not-self-intersect)
-- [Scenarios: Validity](#scenarios-validity)
-  - [Scenario: a valid contour (non-degenerate, no three collinear)](#scenario-a-valid-contour-non-degenerate-no-three-collinear)
+- [Scenarios: Validity and Flat Turns](#scenarios-validity-and-flat-turns)
+  - [Scenario: a valid contour (non-degenerate)](#scenario-a-valid-contour-non-degenerate)
   - [Scenario: invalid due to degenerate segment](#scenario-invalid-due-to-degenerate-segment)
-  - [Scenario: invalid due to three collinear consecutive points](#scenario-invalid-due-to-three-collinear-consecutive-points)
+  - [Scenario: valid with a flat turn](#scenario-valid-with-a-flat-turn)
+  - [Scenario: a contour with a flat turn is not reduced](#scenario-a-contour-with-a-flat-turn-is-not-reduced)
 - [Scenarios: Grid Domain Limits](#scenarios-grid-domain-limits)
   - [Scenario: continuity at grid corners](#scenario-continuity-at-grid-corners)
   - [Scenario: orientation of extreme loop](#scenario-orientation-of-extreme-loop)
@@ -47,6 +49,7 @@ without approximation, tolerance, or floating-point arithmetic.
   - [Numeric Safety](#numeric-safety)
   - [Self-Intersection](#self-intersection-2)
   - [Validity](#validity)
+  - [Invariance of the Signed Area](#invariance-of-the-signed-area)
 - [Design Notes](#design-notes)
 
 ## Types and Definitions
@@ -145,15 +148,20 @@ milestone 3.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
-### Degenerate Segment Rejection
+### Validity and Flat Turns
 
-A segment sequence is **valid** for contour formation when:
+A segment sequence is **valid** for contour formation when no segment is
+degenerate (both endpoints differ). This is the geometric validity of the
+chain: an edge exists between two consecutive points only when the two
+points differ. Sequences of less than two points are vacuously valid.
 
-1. No segment is degenerate (both endpoints differ)
-2. No three consecutive points are collinear (no "flat" angle)
-
-Property (2) ensures that the chain has a well-defined turning direction
-at every point. Sequences of less than two points are vacuously valid.
+An intermediate collinear point is **not** an invalidity: a valid chain
+with such a point describes exactly the same geometry as the chain
+without it. A chain **has no flat turns** when no three consecutive
+points are collinear, so that every point has a well-defined turning
+direction. The absence of flat turns is a canonical-representation
+property, observable separately with `contour_no_flat_turns`; it never
+invalidates a contour (design decision DD-001).
 
 ## Command-Line Interface
 
@@ -186,7 +194,9 @@ topocli contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
 Returns the orientation of a closed, valid sequence of points:
 `orientation counter_clockwise`, `orientation clockwise`, or `orientation`
 `degenerate`. An error is reported when the sequence has less than three
-points, is not closed, or is not valid.
+points, is not closed, or is not valid. A contour with intermediate
+collinear points is orientable: its flat turns are a matter of
+representation, not of validity.
 
 ```sh
 topocli contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A
@@ -197,8 +207,17 @@ otherwise.
 ```sh
 topocli contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
 ```
-Returns `true` if the sequence is valid (non-degenerate segments, no three
-consecutive collinear points), `false` otherwise.
+Returns `true` if the sequence is valid (non-degenerate segments),
+`false` otherwise. An intermediate collinear point does not invalidate
+the sequence: validity is geometric, not canonical.
+
+```sh
+topocli contour_no_flat_turns A=(0, 0) B=(1, 0) C=(2, 0) A
+```
+Returns `true` if no three consecutive points of the sequence are
+collinear (every point has a well-defined turning direction), `false`
+otherwise. A sequence with flat turns is still valid: it describes the
+same geometry as the same sequence without its redundant points.
 
 All operations use the same grid domain as the existing operations
 (`Grid_Coordinate` range), and sequences are limited to `Max_Points`
@@ -297,6 +316,18 @@ same area and opposite orientations, so the shoelace sums to zero.
 - When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 0) C=(1, 2) A --draw ../docs/features/images/contour_7.svg`
 - Then the output is `orientation counter_clockwise`
 
+### Scenario: orientation of a contour with a flat turn
+
+The square of the orientation definition, with the intermediate point
+`(1, 0)` on its bottom edge: the chain has a flat turn at that point, so
+it is not reduced, but it remains valid and encloses the same region,
+traversed counter-clockwise.
+
+![Square loop with a flat turn](images/contour_13.svg)
+
+- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(1, 0) C=(2, 0) D=(2, 2) E=(0, 2) A --draw ../docs/features/images/contour_13.svg`
+- Then the output is `orientation counter_clockwise`
+
 ## Scenarios: Self-Intersection
 
 ### Scenario: a simple loop does not self-intersect
@@ -335,9 +366,9 @@ non-consecutive segments, so it is a valid junction.
 - When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(1, 1)`
 - Then the output is `false`
 
-## Scenarios: Validity
+## Scenarios: Validity and Flat Turns
 
-### Scenario: a valid contour (non-degenerate, no three collinear)
+### Scenario: a valid contour (non-degenerate)
 
 The square of the orientation definition.
 
@@ -356,14 +387,27 @@ end.
 - When I successfully run `../bin/topocli contour_valid A=(0, 0) A B=(1, 0) A --draw ../docs/features/images/contour_9.svg`
 - Then the output is `false`
 
-### Scenario: invalid due to three collinear consecutive points
+### Scenario: valid with a flat turn
 
 The points `(0, 0)`, `(1, 0)`, `(2, 0)` are all on the X axis: the chain
-has no turning direction at `(1, 0)`.
+has no turning direction at `(1, 0)`. That point is redundant, but the
+chain has no degenerate segment, so it is valid: validity is geometric,
+not canonical.
 
 ![Three collinear consecutive points](images/contour_10.svg)
 
 - When I successfully run `../bin/topocli contour_valid A=(0, 0) B=(1, 0) C=(2, 0) A --draw ../docs/features/images/contour_10.svg`
+- Then the output is `true`
+
+### Scenario: a contour with a flat turn is not reduced
+
+The same chain, classified by the absence of flat turns: the collinear
+intermediate point makes the representation non-canonical, even though
+the contour itself is valid.
+
+![Three collinear consecutive points](images/contour_10.svg)
+
+- When I successfully run `../bin/topocli contour_no_flat_turns A=(0, 0) B=(1, 0) C=(2, 0) A`
 - Then the output is `false`
 
 ## Scenarios: Grid Domain Limits
@@ -408,10 +452,10 @@ any sequence up to `Max_Points` points.
 ### Numeric Safety
 - **`Signed_Area` cannot overflow**: each shoelace term is an orientation
   determinant of the proved expression chain, computed exactly in the
-  `Determinant` domain; the loop invariant bounds every partial sum by the
-  number of accumulated terms times the determinant amplitude, and the
-  total of at most `Max_Points` terms stays inside the `Area_Sum` domain
-  defined for orientation calculations (about 2**94, on the 128-bit
+  `Determinant` domain; the contract of `Partial_Sum` bounds every partial
+  sum by the number of accumulated terms times the determinant amplitude,
+  and the total of at most `Max_Points` terms stays inside the `Area_Sum`
+  domain defined for orientation calculations (about 2**94, on the 128-bit
   machine width, see Numeric Model).
 
 ### Self-Intersection
@@ -422,7 +466,28 @@ any sequence up to `Max_Points` points.
 
 ### Validity
 - **`Is_Valid`**: the contract is the definition: a valid sequence has no
-  degenerate segment and no three consecutive collinear points.
+  degenerate segment.
+- **`Has_No_Flat_Turns`**: the contract is the definition: no three
+  consecutive points are collinear. The property is orthogonal to
+  validity: a sequence with a flat turn remains valid.
+
+### Invariance of the Signed Area
+- **Cyclic-start invariance** (`Lemma_Rotation_Invariance`): for a closed
+  sequence, the signed area is invariant under rotation of the starting
+  vertex: the same chain described from any vertex encloses the same
+  area with the same orientation. The ghost function `Rotated` builds the
+  rotated chain, and the proof accumulates the rotated and original sums
+  in lockstep, then reorders the pieces with the splitting lemma of
+  `Partial_Sum`.
+- **Reversal** (`Lemma_Reversal`): traversing a closed sequence in the
+  opposite direction negates the signed area. The proof matches each term
+  of the reversed chain with the negation of the opposite term of the
+  original chain, by antisymmetry of the cross determinant.
+- **Orientation corollaries** (`Lemma_Orientation_Rotation`,
+  `Lemma_Orientation_Reversal`): the orientation is invariant under
+  rotation of the starting vertex, and mirrored by reversal
+  (counter-clockwise and clockwise are exchanged, degenerate stays
+  degenerate).
 
 ## Design Notes
 
@@ -436,7 +501,10 @@ any sequence up to `Max_Points` points.
    bounded by the `Determinant` domain, and a sequence has at most
    `Max_Points` points, so the total sum is bounded by
    `Max_Points * Determinant'Last`, about 2**79, which fits in the
-   `Area_Sum` domain defined in `numeric-model.md`.
+   `Area_Sum` domain defined in `numeric-model.md`. The public function
+   `Partial_Sum` computes the sum over any term range; its contract
+   characterizes it by its one-term back decomposition and its amplitude
+   bound, and it carries the invariance proofs.
 
 3. **Self-Intersection Check**: uses the existing exact `intersect`
    operation. For a sequence of `n` points, the check performs `O(n^2)`
@@ -454,9 +522,13 @@ any sequence up to `Max_Points` points.
    - `Edge`: a topological entity (to be introduced in milestone 5)
    - `Loop`: a closed sequence of segments forming a boundary
    - `Contour`: a loop with a well-defined orientation
+   - `Validity`: a geometric property (no degenerate segment), distinct
+     from the absence of flat turns, a canonical-representation property
+     (decision DD-001)
 
 6. **Future Extensions**: the `Segment_Sequence_2D` type will serve as
    the geometric support for topological `Edge` and `Loop` entities in
-   milestone 5. Invariance lemmas (orientation under translation, under
-   rotation of the starting point, and under reversal) are deferred until
-   the loop abstraction stabilizes.
+   milestone 5. The invariance lemmas delivered with this feature
+   (rotation of the starting point, reversal) are the milestone 4
+   algebraic invariants; invariance under representable translation
+   remains deferred until the loop abstraction stabilizes.

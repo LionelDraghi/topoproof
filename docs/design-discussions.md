@@ -1,76 +1,60 @@
 # TopoProof design discussions
 
-This document records design topics that are not yet decided. A discussion is not a
-normative rule until its status becomes **decided** and the decision is reflected in
-the terminology, contracts, executable documentation, and implementation.
+This document records design topics. A discussion is not a normative rule
+until its status becomes **decided** and the decision is reflected in the
+terminology, contracts, executable documentation, and implementation.
 
 ## DD-001: validity of segment sequences and future B-Rep boundaries
 
-- **Status:** not decided
-- **Related task:** `TDL-DESIGN-001`
+- **Status:** decided (2026-10-20)
+- **Related task:** former `TDL-DESIGN-001`
 - **Scope:** `Segment_Sequence_2D`, contours, loops, and future planar face boundaries
 
-### Current situation
+### Former situation
 
-`Segment_Sequences.Is_Valid` currently means:
+`Segment_Sequences.Is_Valid` used to mean:
 
 1. no segment has coincident endpoints; and
 2. no three consecutive points are collinear.
 
-This definition gives every retained vertex a non-flat turning direction. It is useful
-for a reduced polygonal representation, but it is not yet the complete validity rule
-for a B-Rep loop or face boundary.
+This definition gave every retained vertex a non-flat turning direction,
+mixing the geometric validity of the chain with a canonical-representation
+property of its vertex list.
 
-### Why `Is_Surface` would be misleading
+### Decision
 
-A segment sequence is a one-dimensional boundary representation. A surface is the
-geometric support of a face, not a property of the sequence itself. Renaming the
-predicate to `Is_Surface` would therefore conflate:
+Collinear intermediate points are **not an invalidity**: they are a matter
+of representation. Concretely:
 
-- a geometric support such as a plane;
-- a topological face;
-- the boundary loop of that face; and
-- the canonical or non-canonical representation of the loop.
+- validity is geometric: `Is_Valid` rejects only degenerate segments;
+- the former rule (2) becomes the separate predicate
+  `Has_No_Flat_Turns`, a canonical-representation property: a valid chain
+  with a flat turn describes exactly the same geometry as the chain
+  without the redundant point;
+- consequently, `Orientation` accepts any closed, valid sequence: the
+  signed area of a contour with a flat turn is well defined, and refusing
+  to classify it was a functional defect, not a safety rule;
+- canonicalisation (removing redundant points) is not specified at this
+  stage: it may enter the development plan with milestone 5, when loops
+  and face boundaries are introduced, as a representation choice and
+  never as a validity rule.
 
-### Candidate model
+### Rationale
 
-Split the current broad predicate into predicates with one responsibility:
+A redundant collinear vertex creates no geometric or topological
+ambiguity: the contour delimits exactly the same region. Treating it as
+an invalidity would have forced milestone 5 either to reopen the
+predicate or to reject geometrically correct face boundaries.
 
-```text
-Is_Non_Degenerate   no zero-length edge
-Is_Reduced          no redundant collinear intermediate point
-Is_Closed           first point equals last point
-Is_Simple           no invalid self-intersection
-Is_Valid_Loop       closed + non-degenerate + simple
-```
+### Remaining questions, deferred to milestone 5
 
-For a future planar face, introduce a separate predicate such as:
+The questions below were part of this discussion and are not settled by
+the decision above; they concern the future topological types:
 
-```text
-Is_Valid_Face_Boundary
-```
-
-That predicate may additionally require planarity, coherent orientation, valid inner
-loops, and containment rules. `Is_Reduced` need not necessarily be part of validity:
-a loop can describe the same boundary with an extra collinear point while remaining
-geometrically and topologically valid.
-
-### Recommended direction
-
-Keep `Is_Valid` unchanged until the decision is made, to avoid silently changing the
-current CLI contract. The likely direction is:
-
-- rename the current concept to `Is_Reduced` or `Has_No_Flat_Turns`;
-- define B-Rep-oriented validity through `Is_Valid_Loop` and later
-  `Is_Valid_Face_Boundary`;
-- treat collinear intermediate points as a canonicalisation issue unless a later
-  invariant gives a concrete reason to reject them.
-
-### Questions to arbitrate
-
-1. Are redundant collinear vertices accepted, rejected, or normalised?
-2. Is a closed two-edge backtrack a loop, a degenerate loop, or invalid?
-3. Are repeated non-consecutive vertices allowed when they are shared endpoints?
-4. Does `Is_Simple` follow the discrete model only, or must off-grid crossings also
-   invalidate a face boundary?
-5. Which properties belong to geometry, and which belong to the future topology types?
+1. Is a closed two-edge backtrack a loop, a degenerate loop, or invalid?
+2. Are repeated non-consecutive vertices allowed when they are shared
+   endpoints?
+3. Does loop simplicity follow the discrete model only, or must
+   off-grid crossings also invalidate a face boundary?
+4. Which properties belong to geometry, and which belong to the future
+   `Is_Valid_Loop` and `Is_Valid_Face_Boundary` predicates?
