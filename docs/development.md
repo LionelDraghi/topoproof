@@ -2,13 +2,16 @@
 
 ## Contents
 
-- [Repository responsibilities](#repository-responsibilities)
-- [Workflow](#workflow)
-- [Commands](#commands)
-- [Build profiles](#build-profiles)
-- [Change acceptance](#change-acceptance)
-- [Repository hygiene](#repository-hygiene)
-- [Executable documentation](#executable-documentation)
+- [Development guide](#development-guide)
+  - [Contents](#contents)
+  - [Repository responsibilities](#repository-responsibilities)
+  - [Workflow](#workflow)
+  - [Commands](#commands)
+  - [Build profiles](#build-profiles)
+  - [Change acceptance](#change-acceptance)
+    - [Integration gate](#integration-gate)
+  - [Repository hygiene](#repository-hygiene)
+  - [Executable documentation](#executable-documentation)
 
 ## Repository responsibilities
 
@@ -44,6 +47,7 @@ make prove   # run GNATprove (level 2: the daily, fast policy)
 make prove+  # escalate unproved checks (level 4: larger solver budgets
              # and counterexamples; proved checks come from the cache)
 make check   # run the complete verification chain
+make format  # reformat the Ada sources with GNATformat
 alr test     # build, then run the executable documentation through bbt
 ```
 
@@ -99,10 +103,10 @@ live with the client in `tools/topocli/src`. `make test` regenerates
 every diagram as a side effect of running the scenarios, and a scenario
 fails if the command behind its diagram fails.
 
-These commands are operational and require Alire. The toolchain and the tool
-crates (`gnat`, `bbt`, `gnatprove`, `gnatformat_bin`) are declared in
-`alire.toml` and resolved in the root workspace; the client crate in
-`tools/topocli` pins the root kernel crate. The Alire-generated
+These commands are operational and require [Alire](https://alire.ada.dev/). The
+toolchain and the tool crates (`gnat`, `bbt`, `gnatprove`, `gnatformat_bin`)
+are declared in `alire.toml` and resolved in the root workspace; the client
+crate in `tools/topocli` pins the root kernel crate. The Alire-generated
 configuration under `src/Alire_config/` and `tools/topocli/config/` is
 regenerated on every build and ignored by Git.
 
@@ -131,4 +135,4 @@ The integration gate is closed only when all of the following hold:
 Use Ada/GNAT semantic navigation when available. Avoid generated files in version control unless explicitly required. Keep commits focused and update `CHANGELOG.md` once releases begin.
 
 ## Executable documentation
-SPARK proves contracts and absence of run-time errors. bbt executes the public Markdown documentation against the compiled command-line application. A user-visible operation is incomplete until its Markdown page contains an executable scenario for its canonical output.
+SPARK proves contracts and absence of run-time errors. `bbt` executes the public Markdown documentation against the compiled command-line application. A user-visible operation is incomplete until its Markdown page contains an executable scenario for its canonical output.

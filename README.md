@@ -15,35 +15,18 @@ Why? Because of one too many of these:
 
 ## Contents
 
-- [Status](#status)
-- [Development cycle](#development-cycle)
-- [Documentation](#documentation)
-- [Licence](#licence)
-- [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
+- [TopoProof](#topoproof)
+  - [Contents](#contents)
+  - [Status](#status)
+  - [Documentation](#documentation)
+  - [Licence](#licence)
+  - [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
 
 ## Status
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
 the exact 2D predicates and contour foundations required before introducing 3D
 topology and B-Rep structures.
-
-## Development cycle
-
-```text
-Specify -> implement -> prove -> test -> document
-```
-
-The intended commands are:
-
-```sh
-make build
-make test
-make prove
-make check
-```
-
-They are operational and require [Alire](https://alire.ada.dev/), which provides
-the GNAT toolchain, GNATprove, GNATformat, and bbt.
 
 ## Documentation
 
