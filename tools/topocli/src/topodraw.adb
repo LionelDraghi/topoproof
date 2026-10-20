@@ -211,19 +211,28 @@ package body Topodraw is
       return S;
    end Parse_Scene;
 
+   --  Wide arithmetic for the automatic tick step: the intermediate
+   --  products (8 * B * 5, 8 * B * K) may leave Integer, so they are
+   --  computed in a wide type with an explicit range rather than a
+   --  predefined type whose size, and therefore the reachable values,
+   --  depends on the platform. Any point accepted on input (an Integer
+   --  coordinate, including points outside the kernel domain) stays
+   --  drawable.
+   type Wide_Integer is range -2**35 .. 2**35;
+
    --  The automatic tick step: the smallest round 1-2-5 number keeping at
    --  most eight tick marks over the scene extent.
    function Nice_Step (Extent : Integer) return Integer is
-      B  : Long_Integer := 1;
-      Ks : constant array (1 .. 3) of Long_Integer := [1, 2, 5];
+      B  : Wide_Integer := 1;
+      Ks : constant array (1 .. 3) of Wide_Integer := [1, 2, 5];
 
    begin
-      while Long_Integer (Extent) > 8 * B * 5 loop
+      while Wide_Integer (Extent) > 8 * B * 5 loop
          B := B * 10;
 
       end loop;
       for K of Ks loop
-         if Long_Integer (Extent) <= 8 * B * K then
+         if Wide_Integer (Extent) <= 8 * B * K then
             return Integer'Max (1, Integer (B * K));
 
          end if;
@@ -502,6 +511,10 @@ package body Topodraw is
                                     (A.X + Dx, A.Y + Dy),
                                     Axis_Col, 1.0);
                            end;
+                           --  A tick position one step beyond the extent
+                           --  would leave Integer: the last representable
+                           --  tick is the last one drawn.
+                           exit when T > Integer'Last - Step;
                            T := T + Step;
                         end loop;
                      end;

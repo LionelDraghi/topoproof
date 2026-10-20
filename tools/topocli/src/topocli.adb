@@ -22,7 +22,7 @@ with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;              use TopoProof.Numerics;
 with Topodraw;                        use Topodraw;
 
-procedure TopoProof_CLI is
+procedure TopoCLI is
    Usage_Error             : exception;
    Input_Path, Output_Path : Unbounded_String;
    Draw_Path               : Unbounded_String;
@@ -91,6 +91,14 @@ procedure TopoProof_CLI is
    --  labels, or a bare NAME referring to a point defined earlier in the
    --  same command. Repeating a name makes the closure of a chain visible.
    type Arity_Kind is (Two_D, Three_D);
+
+   --  Wide arithmetic for diagram geometry: the sum of two Integer
+   --  coordinates may leave Integer, so it is computed in a wide type.
+   --  The range is stated here rather than borrowed from a predefined
+   --  type such as Long_Integer, whose size, and therefore the
+   --  reachable values and the meaningful checks, depends on the
+   --  platform.
+   type Wide_Coordinate is range -2**32 .. 2**32;
 
    type Parsed_Point is record
       Name  : Unbounded_String;
@@ -419,21 +427,21 @@ procedure TopoProof_CLI is
                if Length (Draw_Path) > 0 then
                   declare
                      S  : Scene := New_Scene;
-                     QX : constant Long_Integer :=
-                       Long_Integer (P.X) + Long_Integer (D.X);
-                     QY : constant Long_Integer :=
-                       Long_Integer (P.Y) + Long_Integer (D.Y);
-                     QZ : constant Long_Integer :=
-                       Long_Integer (P.Z) + Long_Integer (D.Z);
+                     QX : constant Wide_Coordinate :=
+                       Wide_Coordinate (P.X) + Wide_Coordinate (D.X);
+                     QY : constant Wide_Coordinate :=
+                       Wide_Coordinate (P.Y) + Wide_Coordinate (D.Y);
+                     QZ : constant Wide_Coordinate :=
+                       Wide_Coordinate (P.Z) + Wide_Coordinate (D.Z);
 
                   begin
                      Add_Point (S, To_String (P.Name), P.X, P.Y, P.Z);
-                     if QX >= Long_Integer (Integer'First)
-                       and then QX <= Long_Integer (Integer'Last)
-                       and then QY >= Long_Integer (Integer'First)
-                       and then QY <= Long_Integer (Integer'Last)
-                       and then QZ >= Long_Integer (Integer'First)
-                       and then QZ <= Long_Integer (Integer'Last)
+                     if QX >= Wide_Coordinate (Integer'First)
+                       and then QX <= Wide_Coordinate (Integer'Last)
+                       and then QY >= Wide_Coordinate (Integer'First)
+                       and then QY <= Wide_Coordinate (Integer'Last)
+                       and then QZ >= Wide_Coordinate (Integer'First)
+                       and then QZ <= Wide_Coordinate (Integer'Last)
                      then
                         declare
                            Q : constant Parsed_Point :=
@@ -871,10 +879,10 @@ begin
          Short_Labels := True;
 
       elsif Argument (I) = "--help" or else Argument (I) = "-h" then
-         Emit ("usage: topoproof OPERATION POINTS [--output FILE] "
+         Emit ("usage: topocli OPERATION POINTS [--output FILE] "
                & "[--draw FILE] [--draw-with POINTS] "
                & "[--draw-short-labels]");
-         Emit ("       topoproof --input FILE [--output FILE] [--draw FILE]");
+         Emit ("       topocli --input FILE [--output FILE] [--draw FILE]");
          Emit ("points are named: NAME=(X, Y) or NAME=(X, Y, Z); a bare NAME");
          Emit ("refers to a point defined earlier in the same command");
          Emit ("--draw writes the SVG diagram of the command data and");
@@ -927,10 +935,10 @@ begin
 exception
    when Usage_Error =>
       Put_Line (Standard_Error, "error: invalid command line");
-      Put_Line (Standard_Error, "try 'topoproof --help'");
+      Put_Line (Standard_Error, "try 'topocli --help'");
       Set_Exit_Status (Failure);
    when Name_Error =>
       Put_Line (Standard_Error, "error: input or output file cannot be opened");
       Set_Exit_Status (Failure);
 
-end TopoProof_CLI;
+end TopoCLI;

@@ -1,7 +1,7 @@
 # Point equality
 
 `equal` compares two points exactly:
-`topoproof equal A=(AX, AY, AZ) B=(BX, BY, BZ)`.
+`topocli equal A=(AX, AY, AZ) B=(BX, BY, BZ)`.
 Two points are equal exactly when all three coordinates are equal; there is no
 tolerance and no notion of almost-equal points.
 The canonical result is `equal true` or `equal false`.
@@ -22,11 +22,11 @@ the points coincide exactly. On the right, `A` and `B` differ only on
 - [Scenario: opposite points are not equal](#scenario-opposite-points-are-not-equal)
 
 ## Scenario: identical points are equal
-- When I successfully run `../bin/topoproof equal A=(1, 2, 3) B=(1, 2, 3) --draw ../docs/features/images/equality_1.svg`
+- When I successfully run `../bin/topocli equal A=(1, 2, 3) B=(1, 2, 3) --draw ../docs/features/images/equality_1.svg`
 - Then the output is `equal true`
 
 ## Scenario: different points are not equal
-- When I successfully run `../bin/topoproof equal A=(1, 2, 3) B=(1, 2, 4) --draw ../docs/features/images/equality_2.svg`
+- When I successfully run `../bin/topocli equal A=(1, 2, 3) B=(1, 2, 4) --draw ../docs/features/images/equality_2.svg`
 - Then the output is `equal false`
 
 ## Scenario: opposite points are not equal
@@ -36,5 +36,5 @@ origin.
 
 ![Opposite points](images/equality_3.svg)
 
-- When I successfully run `../bin/topoproof equal A=(-1, 2, -3) B=(1, -2, 3) --draw ../docs/features/images/equality_3.svg`
+- When I successfully run `../bin/topocli equal A=(-1, 2, -3) B=(1, -2, 3) --draw ../docs/features/images/equality_3.svg`
 - Then the output is `equal false`

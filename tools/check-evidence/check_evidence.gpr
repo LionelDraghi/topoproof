@@ -1,0 +1,35 @@
+--  The proof-evidence gate: scans the GNATprove artefacts retained by
+--  make prove and fails when the evidence shows unproved checks, risky
+--  flow messages or unreviewed assumptions. It is the Ada replacement of
+--  the former Python gate, so the verification chain depends on the GNAT
+--  toolchain only. It is a build-time tool, outside the proof scope of
+--  the kernel (topoproof.gpr).
+project Check_Evidence is
+
+   for Languages use ("Ada");
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("check_evidence.adb");
+
+   package Builder is
+      for Executable ("check_evidence.adb") use "check-evidence";
+   end Builder;
+
+   --  Warnings are errors, same policy as the kernel and the client:
+   --  a style violation fails every build, locally and in CI.
+   Checker_Switches := ("-gnat2022", "-gnatwa", "-gnatwe", "-gnatf",
+                       "-gnatyabefhiklnprtx");
+   --  Style checking: same set as the kernel, see topoproof.gpr.
+
+   package Compiler is
+      for Default_Switches ("Ada") use Checker_Switches;
+   end Compiler;
+
+   package Format is
+      for Indentation ("Ada") use "3";
+      for Indentation_Continuation ("Ada") use "3";
+      for Width ("Ada") use "100";
+   end Format;
+
+end Check_Evidence;

@@ -1,0 +1,23 @@
+name = "topocli"
+description = "Command-line client of the TopoProof kernel"
+version = "0.1.2-dev"
+
+authors = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]
+maintainers-logins = ["LionelDraghi"]
+licenses = "Apache-2.0"
+website = "https://github.com/LionelDraghi/topoproof"
+tags = ["spark", "formal-methods", "geometry", "cad", "proof"]
+
+executables = ["topocli"]
+project-files = ["topocli.gpr"]
+
+[configuration]
+generate_C = false
+generate_gpr = false
+
+[[depends-on]]
+topoproof = "0.1.2-dev"
+
+[[pins]]
+topoproof = { path = "../.." }

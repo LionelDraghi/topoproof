@@ -23,8 +23,9 @@ Why? Because of one too many of these:
 
 ## Status
 
-TopoProof is in its initial development phase. The first deliverable is a complete verified vertical slice covering numeric types, points, vectors, translation, displacement, SPARK contracts, proofs, executable tests, and documentation.
-
+TopoProof targets a provable 3D CAD kernel. The current implementation establishes
+the exact 2D predicates and contour foundations required before introducing 3D
+topology and B-Rep structures.
 
 ## Development cycle
 

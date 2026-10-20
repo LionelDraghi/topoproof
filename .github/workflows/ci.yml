@@ -20,9 +20,38 @@ jobs:
       - name: Build and execute Markdown specifications
         shell: bash
         run: make test
+      - name: Upload bbt evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bbt-evidence
+          path: artifacts/bbt/
   prove:
     runs-on: ubuntu-latest
+    # The SARIF upload below creates code scanning alerts, which needs
+    # security-events: write on top of the workflow-wide contents: read.
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - uses: alire-project/setup-alire@latest
       - run: make prove
+
+      # Code scanning upload: GNATprove >= 26 writes the SARIF file (see
+      # SARIF_SWITCHES in the Makefile; not yet active with 16.1). The
+      # hashFiles guard skips the step until the file is generated, so it
+      # activates with the toolchain upgrade without any change here.
+      # if: always() also uploads the SARIF of failed proof runs.
+      - name: Upload GNATprove SARIF
+        if: always() && hashFiles('artifacts/gnatprove/gnatprove.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/gnatprove/gnatprove.sarif
+
+      - name: Upload GNATprove evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnatprove-evidence
+          path: artifacts/gnatprove/

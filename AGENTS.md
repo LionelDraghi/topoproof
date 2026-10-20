@@ -10,7 +10,9 @@ TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer 
 4. `docs/numeric-model.md`
 5. `docs/development-plan.md`
 6. `docs/development.md`
-7. `docs/perspectives.md`
+7. `docs/TDL.md`
+8. `docs/design-discussions.md`
+9. `docs/perspectives.md`
 
 ## Mandatory rules
 
@@ -44,7 +46,12 @@ make check
 Do not add a public operation without a contract. Keep each change within the current milestone. Justify all numeric bounds. Prefer Ada/GNAT semantic tools over textual search when inspecting declarations and references.
 
 ## Executable documentation
-- TopoProof is an application, not a library product.
+
+> **Doc is code**, not merely docs-as-code: public behaviour, examples, diagrams,
+> contracts, and bbt scenarios form one reviewed change. Documentation divergence
+> is a functional defect and blocks integration.
+
+- `TopoProof` is a library. `topocli` is the test driver.
 - Every user-visible mathematical operation has one Markdown page in `docs/` with its exact input/output contract and executable bbt scenarios.
 - Exercise the compiled executable through command-line arguments or `--input FILE`; use standard output or `--output FILE` for results.
 - Keep output deterministic and line-oriented. Diagnostics go to standard error and failures return non-zero status.

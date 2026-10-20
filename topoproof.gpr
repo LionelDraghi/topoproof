@@ -1,10 +1,12 @@
-with "topodraw_lib.gpr";
-
+--  The proved kernel: the SPARK units in src/, analysed by GNATprove
+--  (make prove). The command-line client lives in tools/topocli and
+--  withs this project; it is not part of the proof scope.
 project TopoProof is
 
    --  Build profiles, selected with the Topoproof_Build_Profile external:
    --    development (default): checks and contracts verified at run time
-   --    release: proved checks suppressed on the kernel, kept on the CLI
+   --    release: proved checks suppressed on the kernel; the client keeps
+   --      its own checks in every profile (see tools/topocli/topocli.gpr)
    type Build_Profile_Kind is ("release", "development");
    Build_Profile : Build_Profile_Kind :=
      External ("Topoproof_Build_Profile", "development");
@@ -13,11 +15,6 @@ project TopoProof is
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
    for Exec_Dir use "bin";
-   for Main use ("topoproof_cli.adb");
-
-   package Builder is
-      for Executable ("topoproof_cli.adb") use "topoproof";
-   end Builder;
 
    --  The SPARK kernel units are proved free of run-time errors (silver
    --  baseline, see docs/manifesto.md): in the release profile their
@@ -25,9 +22,6 @@ project TopoProof is
    --  the proof. The suppression lives here, in the build configuration
    --  only: never in the sources, because GNATprove honours pragma
    --  Suppress and would stop checking the silver property.
-   --  The command-line interface keeps its checks in every profile: its
-   --  input validation relies on Constraint_Error for out-of-domain
-   --  parameters.
    --  Warnings are errors: a style violation (trailing blanks, layout,
    --  casing) or any other warning fails every build, locally and in CI.
    --  The GNATprove runs of make prove use their own flag
@@ -55,10 +49,6 @@ project TopoProof is
          when "release" =>
             for Default_Switches ("Ada") use
               Kernel_Switches & ("-O2", "-gnatp");
-            --  The interface keeps its run-time checks: it validates
-            --  external input before it enters the proved kernel.
-            for Switches ("topoproof_cli.adb") use
-              Kernel_Switches & ("-O2", "-gnatVa");
          when others =>
             for Default_Switches ("Ada") use
               Kernel_Switches & ("-gnatVa", "-gnata");

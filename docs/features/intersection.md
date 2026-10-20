@@ -1,7 +1,7 @@
 # Intersection
 
 `intersect` classifies exactly the intersection of two 2D segments:
-`topoproof intersect A=(AX, AY) B=(BX, BY) C=(CX, CY) D=(DX, DY)`,
+`topocli intersect A=(AX, AY) B=(BX, BY) C=(CX, CY) D=(DX, DY)`,
 where the first segment runs from
 `A` to `B` and the second from `C` to `D`.
 The canonical result is one of:
@@ -48,14 +48,14 @@ says so instead of approximating.
 
 ![Crossing on a grid position](images/intersection_1.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`
 - Then the output is `intersection point_intersection 1 1`
 
 ## Scenario: a proper crossing off the grid
 
 ![Crossing off the grid](images/intersection_2.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(1, 1) C=(0, 1) D=(1, 0) --draw ../docs/features/images/intersection_2.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 1) C=(0, 1) D=(1, 0) --draw ../docs/features/images/intersection_2.svg`
 - Then the output is `intersection off_grid_crossing`
 
 ## Scenario: collinear segments overlap
@@ -65,7 +65,7 @@ The two segments lie on the X axis and share the part from `(2, 0)` to
 
 ![Collinear segments overlapping](images/intersection_3.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`
 - Then the output is `intersection overlap 2 0 4 0`
 
 ## Scenario: collinear segments touch at one point
@@ -75,7 +75,7 @@ of both.
 
 ![Collinear segments touching](images/intersection_4.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(2, 0) C=(2, 0) D=(4, 0) --draw ../docs/features/images/intersection_4.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 0) C=(2, 0) D=(4, 0) --draw ../docs/features/images/intersection_4.svg`
 - Then the output is `intersection point_intersection 2 0`
 
 ## Scenario: collinear segments do not meet
@@ -85,7 +85,7 @@ The two segments lie on the same line with a gap between `(1, 0)` and
 
 ![Collinear segments with a gap](images/intersection_5.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(1, 0) C=(2, 0) D=(3, 0) --draw ../docs/features/images/intersection_5.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 0) C=(2, 0) D=(3, 0) --draw ../docs/features/images/intersection_5.svg`
 - Then the output is `intersection no_intersection`
 
 ## Scenario: an endpoint on the other segment
@@ -95,7 +95,7 @@ segment: a junction on the edge.
 
 ![Endpoint on the other segment](images/intersection_6.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(2, 0) C=(1, 0) D=(1, 1) --draw ../docs/features/images/intersection_6.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 0) C=(1, 0) D=(1, 1) --draw ../docs/features/images/intersection_6.svg`
 - Then the output is `intersection point_intersection 1 0`
 
 ## Scenario: a degenerate point segment on another segment
@@ -105,15 +105,15 @@ the second segment.
 
 ![Degenerate point segment on a segment](images/intersection_7.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(2, 1) A C=(0, 0) D=(4, 2) --draw ../docs/features/images/intersection_7.svg`
+- When I successfully run `../bin/topocli intersect A=(2, 1) A C=(0, 0) D=(4, 2) --draw ../docs/features/images/intersection_7.svg`
 - Then the output is `intersection point_intersection 2 1`
 
 ## Scenario: two identical degenerate point segments
-- When I successfully run `../bin/topoproof intersect A=(1, 1) A B=(1, 1) B`
+- When I successfully run `../bin/topocli intersect A=(1, 1) A B=(1, 1) B`
 - Then the output is `intersection point_intersection 1 1`
 
 ## Scenario: disjoint segments
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(1, 0) C=(0, 2) D=(1, 2)`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 0) C=(0, 2) D=(1, 2)`
 - Then the output is `intersection no_intersection`
 
 ## Scenario: the grid corners do not overflow
@@ -123,7 +123,7 @@ at the origin.
 
 ![Grid corner diagonals](images/intersection_8.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, -1073741823) B=(0, 1073741823) C=(-1073741823, 0) D=(1073741823, 0) --draw ../docs/features/images/intersection_8.svg --draw-short-labels`
+- When I successfully run `../bin/topocli intersect A=(0, -1073741823) B=(0, 1073741823) C=(-1073741823, 0) D=(1073741823, 0) --draw ../docs/features/images/intersection_8.svg --draw-short-labels`
 - Then the output is `intersection point_intersection 0 0`
 
 ## Proved property
@@ -144,9 +144,9 @@ The crossing of the first scenario, with the two segments exchanged.
 
 ![Crossing on a grid position](images/intersection_1.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`
 - Then the output is `intersection point_intersection 1 1`
-- When I successfully run `../bin/topoproof intersect A=(2, 0) B=(0, 2) C=(0, 0) D=(2, 2)`
+- When I successfully run `../bin/topocli intersect A=(2, 0) B=(0, 2) C=(0, 0) D=(2, 2)`
 - Then the output is `intersection point_intersection 1 1`
 
 ## Scenario: the overlap is returned identically in both orders
@@ -155,7 +155,7 @@ The overlap of the collinear scenario, with the two segments exchanged.
 
 ![Collinear segments overlapping](images/intersection_3.svg)
 
-- When I successfully run `../bin/topoproof intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`
+- When I successfully run `../bin/topocli intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`
 - Then the output is `intersection overlap 2 0 4 0`
-- When I successfully run `../bin/topoproof intersect A=(2, 0) B=(6, 0) C=(0, 0) D=(4, 0)`
+- When I successfully run `../bin/topocli intersect A=(2, 0) B=(6, 0) C=(0, 0) D=(4, 0)`
 - Then the output is `intersection overlap 2 0 4 0`

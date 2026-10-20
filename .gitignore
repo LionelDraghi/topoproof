@@ -6,6 +6,9 @@ bin/
 **/obj/
 **/bin/
 gnatprove/
+artifacts/
+src/Alire_config/
+tools/topocli/config/
 *.ali
 *.o
 *.in
