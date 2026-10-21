@@ -21,6 +21,7 @@ with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;              use TopoProof.Numerics;
 with TopoProof.Topology.Edges;        use TopoProof.Topology.Edges;
+with TopoProof.Topology.Faces;        use TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;        use TopoProof.Topology.Loops;
 with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with Topodraw;                        use Topodraw;
@@ -1138,6 +1139,137 @@ procedure TopoCLI is
             end;
          end;
 
+      elsif Op = "face" then
+         declare
+            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+            N     : constant Natural := Natural (Chain.Length);
+
+         begin
+            Require_End (R);
+            if N < 2 then
+               raise Usage_Error;
+
+            end if;
+            for C of Chain loop
+               Require_2D (C);
+            end loop;
+            --  Same construction as the loop command: the chain closes
+            --  when it returns to its first name, one vertex per
+            --  distinct name, one edge per consecutive pair. The face
+            --  classification then completes the loop classification.
+            if N - 1 > Max_Loop_Length then
+               Emit ("error: too many edges for one loop");
+               Set_Exit_Status (Failure);
+               return;
+
+            end if;
+            declare
+               Store    : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+               Edges    : Edge_Store (Edge_Count_Range (N - 1));
+               Names    : Point_Vectors.Vector;
+               Vertices : Handle_Vectors.Vector;
+               Tokens   : Handle_Vectors.Vector;
+               Handles  : Edge_Handle_Array (1 .. N - 1);
+               S        : Scene := New_Scene;
+
+            begin
+               for I in 1 .. N loop
+                  declare
+                     H : Vertex_Handle;
+
+                  begin
+                     Ensure_Vertex (Store, Names, Vertices, S, Chain (I), H);
+                     Tokens.Append (H);
+                  end;
+               end loop;
+               for I in 2 .. N loop
+                  declare
+                     E : Edge_Handle;
+
+                  begin
+                     --  The degeneracy precondition of the edge is
+                     --  checked before the call: the kernel contract
+                     --  is never violated from the command line.
+                     if Tokens (I - 1) = Tokens (I) then
+                        Emit ("error: degenerate edge");
+                        Set_Exit_Status (Failure);
+                        return;
+
+                     end if;
+                     Create (Edges, Store, Tokens (I - 1), Tokens (I), E);
+                     Handles (I - 1) := E;
+                     if Length (Draw_Path) > 0 then
+                        Add_Segment (S, Chain (I - 1), Chain (I));
+                     end if;
+                     Emit
+                       ("edge " & Img (E) & " vertex " & Img (Tokens (I - 1))
+                        & " vertex " & Img (Tokens (I)));
+                  end;
+               end loop;
+               declare
+                  --  The chain is classified exactly, then a valid
+                  --  loop is classified again as a face boundary:
+                  --  only a valid boundary reaches Make_Face, so the
+                  --  kernel precondition holds.
+                  Status : constant Loop_Validity :=
+                     Classify_Loop (Edges, Store, Handles);
+
+               begin
+                  if Status /= Valid_Loop then
+                     case Status is
+                        when Open_Chain =>
+                           Emit ("error: open loop");
+                        when Degenerate_Support =>
+                           Emit ("error: degenerate edge support");
+                        when Orphan_Edge =>
+                           Emit ("error: orphan edge");
+                        when Missing_Endpoint =>
+                           Emit ("error: missing endpoint");
+                        when Disconnected_Chain =>
+                           Emit ("error: disconnected chain");
+                        when Valid_Loop =>
+                           null;
+
+                     end case;
+                     Set_Exit_Status (Failure);
+
+                  else
+                     declare
+                        L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
+
+                     begin
+                        case Classify_Face (Edges, Store, L) is
+                           when Valid_Face =>
+                              declare
+                                 F : constant Face_2D :=
+                                    Make_Face (Edges, Store, L);
+
+                              begin
+                                 case Face_Orientation (Edges, Store, F) is
+                                    when Counter_Clockwise =>
+                                       Emit ("face counter_clockwise");
+                                    when Clockwise =>
+                                       Emit ("face clockwise");
+                                    when Degenerate =>
+                                       Emit ("face degenerate");
+
+                                 end case;
+                              end;
+                           when Invalid_Boundary =>
+                              Emit ("error: invalid loop");
+                              Set_Exit_Status (Failure);
+                           when Degenerate_Boundary =>
+                              Emit ("error: degenerate face boundary");
+                              Set_Exit_Status (Failure);
+
+                        end case;
+                     end;
+                  end if;
+               end;
+               Draw (S, With_Chain);
+            end;
+         end;
+
       else
          raise Usage_Error;
 
@@ -1205,7 +1337,7 @@ begin
                & "contour_orientation");
          Emit ("             contour_self_intersects, contour_valid, "
                & "contour_no_flat_turns");
-         Emit ("             vertex, edge, loop");
+         Emit ("             vertex, edge, loop, face");
          return;
 
       else

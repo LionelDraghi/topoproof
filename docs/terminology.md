@@ -30,13 +30,15 @@
     - [`Loop_2D`](#loop_2d)
     - [`Loop_Validity`](#loop_validity)
     - [Loop orientation](#loop-orientation)
+    - [`Face_2D`](#face_2d)
+    - [`Face_Validity`](#face_validity)
+    - [Face orientation](#face-orientation)
   - [Provisional geometric terms](#provisional-geometric-terms)
     - [`Grid_Quantum`](#grid_quantum)
     - [`Grid_Unit`](#grid_unit)
     - [`Length`](#length)
     - [Geometric predicate](#geometric-predicate)
   - [Provisional topological terms](#provisional-topological-terms)
-    - [`Face`](#face)
     - [B-Rep](#b-rep)
   - [Open decisions](#open-decisions)
 
@@ -202,6 +204,18 @@ The exact classification of an edge chain as a valid loop, or as rejected for it
 
 The orientation of a valid loop is exactly the contour orientation (milestone 4) of the closed point sequence the loop induces: the positions of the starting vertices of its edges, closed by the position of the first one.
 
+### `Face_2D`
+
+A planar face: a region of the plane bounded by one loop. A face is a value carrying its boundary loop, relative to the edge and vertex stores the boundary's edges come from. A valid face boundary is a valid loop whose orientation is not degenerate: a closed two-edge backtrack is a valid loop, but never a valid face boundary (DD-002, decision 3).
+
+### `Face_Validity`
+
+The exact classification of a loop as a face boundary: valid, invalid boundary, or degenerate boundary orientation. `Make_Face` builds a face only from a loop classifying as a valid boundary, so invalid faces cannot be obtained from the public API.
+
+### Face orientation
+
+The orientation of a valid face is exactly the orientation of its boundary loop, which a valid boundary guarantees to be counter-clockwise or clockwise: face orientation is consistent with loop orientation by construction.
+
 ## Provisional geometric terms
 
 ### `Grid_Quantum`
@@ -221,10 +235,6 @@ A non-negative physical magnitude. It is distinct from a coordinate and from an 
 A function that classifies a configuration without constructing a new geometric entity. A predicate used for topology must return an exact result or explicitly report that it cannot conclude.
 
 ## Provisional topological terms
-
-### `Face`
-
-A topological entity bounded by an outer loop and optionally inner loops, associated with a geometric support.
 
 ### B-Rep
 

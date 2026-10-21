@@ -1,8 +1,10 @@
 # TopoProof
 
-![Ada](https://img.shields.io/badge/language-Ada-002F6D)
-![SPARK](https://img.shields.io/badge/proof-SPARK-2ea44f)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![image](https://img.shields.io/badge/-inside-blue?logo=ada&logoColor=white&labelColor=grey&logoSize=auto)](https://ada-lang.io/)
+[![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/topoproof.json)](https://alire.ada.dev/crates/topoproof.html)
+[![Version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Falire.toml&query=%24.version&label=latest&style=flat-square)](https://github.com/LionelDraghi/topoproof/blob/main/alire.toml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![SPARK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fproof-status.json)](docs/dev/development.md)
 
 **A provable 3D CAD kernel based on discrete geometry, exact arithmetic, and formal proof.**
 
@@ -29,6 +31,7 @@ Why? Because of one too many of these:
 ## Status
 
 [![CI](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml/badge.svg)](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml)
+[![Tests](docs/tests/badge.svg)](docs/tests/results.md)
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
 the exact 2D predicates and contour foundations required before introducing 3D
@@ -39,8 +42,8 @@ topology and B-Rep structures.
 - [Manifesto](docs/manifesto.md): vision and founding rationale.
 - [Terminology](docs/terminology.md): project vocabulary and conceptual invariants.
 - [Numeric model](docs/numeric-model.md): units, numeric domains, representability, and overflow policy.
-- [Development plan](docs/development-plan.md): milestones and completion criteria.
-- [Development guide](docs/development.md): repository workflow and verification commands.
+- [Development plan](docs/dev/development-plan.md): milestones and completion criteria.
+- [Development guide](docs/dev/development.md): repository workflow and verification commands.
 - [Release procedure](docs/dev/release_procedure.md): versioning, tagging, GitHub and Alire publication.
 - [Perspectives](docs/perspectives.md): non-normative research directions.
 
@@ -69,5 +72,6 @@ contract and executable bbt scenarios:
 - [Vertices](docs/features/vertices.md)
 - [Edges](docs/features/edges.md)
 - [Loops](docs/features/loops.md)
+- [Faces](docs/features/faces.md)
 
 `make test` executes the documentation against the compiled application; `make prove` runs SPARK; `make check` runs both.

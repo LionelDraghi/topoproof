@@ -20,11 +20,11 @@ src/           the proved kernel: delivered Ada/SPARK sources and contracts
 tools/topocli/ the command-line client of the kernel: parsing, output, and
                the --draw diagrams rendered by the former topodraw sources
 tests/         executable tests
-docs/          central documents: manifesto, terminology, numeric model,
-               development plan and guide, perspectives
+docs/          central documents: manifesto, terminology, numeric
+               model, perspectives
 docs/features/ one page per user-visible operation, with executable bbt
                scenarios
-docs/dev/      development procedures (release procedure)
+docs/dev/      development documents: plan, guide, release procedure
 tools/         development scripts
 ```
 

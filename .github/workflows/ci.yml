@@ -21,15 +21,39 @@ jobs:
       - name: Install make (Windows)
         if: runner.os == 'Windows'
         run: choco install -y make
-      # bbt is a binary-tool dependency: alr build builds it into the
-      # dependency cache, but does not put it on PATH; alr install does.
-      - name: Install bbt
-        run: alr install bbt
+      # The macos-26 runner image ships Command Line Tools 27, whose
+      # SDK breaks the GNAT FSF linker: the system and unwinder
+      # symbols of libgnat fail to resolve (alire-project/GNAT-FSF-
+      # builds issue 112). The image still carries the macOS 26 SDK:
+      # point the Command Line Tools SDK back at it, as the alire
+      # index CI does (setting SDKROOT has no effect).
+      - name: Select the macOS 26 SDK (macOS)
+        if: runner.os == 'macOS'
+        run: sudo ln -sfn MacOSX26.sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+
+      # bbt 0.6 is not released to the Alire index yet, and the released
+      # version does not compile with GNAT 16: the CI builds the latest
+      # bbt from its repository, until 0.6 lands in the index and alr
+      # install becomes enough again. The binary joins the PATH for
+      # the make test recipes. RUNNER_TEMP is used instead of /tmp so
+      # that the PATH entry is also a valid path on the Windows runner.
+      - name: Install bbt (latest)
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
+          cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
+          echo "$RUNNER_TEMP/bbt/bin" >> "$GITHUB_PATH"
       # The recipes run under bash: the POSIX shell of the Linux and
       # macOS runners, and Git Bash on Windows.
       - name: Build and execute Markdown specifications
         shell: bash
         run: make test
+      # The tests evidence is part of the repository: badge and results
+      # index must match the fresh run of this job.
+      - name: Check the committed tests evidence
+        if: matrix.os == 'ubuntu-latest'
+        run: git diff --exit-code docs/tests/
+        shell: bash
       - name: Upload bbt evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -53,7 +77,24 @@ jobs:
       - name: Install make (Windows)
         if: runner.os == 'Windows'
         run: choco install -y make
+      # The macos-26 runner image ships Command Line Tools 27, whose
+      # SDK breaks the GNAT FSF linker: the system and unwinder
+      # symbols of libgnat fail to resolve (alire-project/GNAT-FSF-
+      # builds issue 112). The image still carries the macOS 26 SDK:
+      # point the Command Line Tools SDK back at it, as the alire
+      # index CI does (setting SDKROOT has no effect).
+      - name: Select the macOS 26 SDK (macOS)
+        if: runner.os == 'macOS'
+        run: sudo ln -sfn MacOSX26.sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+
       - run: make prove
+        shell: bash
+
+      # The SPARK badge data is part of the repository: it must match
+      # the fresh evidence of this run.
+      - name: Check the committed SPARK badge data
+        if: matrix.os == 'ubuntu-latest'
+        run: git diff --exit-code proof-status.json
         shell: bash
 
       # Code scanning upload: GNATprove >= 26 writes the SARIF file (see

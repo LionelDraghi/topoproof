@@ -19,7 +19,8 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/contours.md \
             ../docs/features/vertices.md \
             ../docs/features/edges.md \
-            ../docs/features/loops.md
+            ../docs/features/loops.md \
+            ../docs/features/faces.md
 
 ARTIFACTS_DIR ?= artifacts
 BBT_ARTIFACTS := $(ARTIFACTS_DIR)/bbt
@@ -44,7 +45,7 @@ SARIF_SWITCHES := --sarif-file=$(SARIF_FILE) --sarif-base-uri=$(SARIF_BASE_URI)
 .SILENT:
 
 .DEFAULT_GOAL := all
-.PHONY: help all build release test prove prove+ format check clean
+.PHONY: help all build release test prove prove+ proof-badge format check clean
 .PHONY: evidence-dirs proof-evidence evidence-checker check-proof-evidence
 
 help:
@@ -94,7 +95,16 @@ test: build evidence-dirs
 	echo
 	echo === running the executable documentation
 
-	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
+	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
+	# The bbt run stores the scenario paths as given on the command
+	# line, relative to tests/: reanchored to the index location, the
+	# links resolve from docs/tests/results.md.
+	sed -i 's|](\.\./docs/features/|](\.\./features/|g' docs/tests/results.md
+	# The tests badge of the README: the bbt run writes the shields.io
+	# URL of the badge, and the badge is fetched from it, published with
+	# the repository through docs/tests/badge.svg. Like every evidence,
+	# the committed file must match the fresh run.
+	curl -s -o docs/tests/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)" 
 
 evidence-dirs:
 	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS)
@@ -129,7 +139,24 @@ evidence-checker:
 check-proof-evidence: evidence-checker proof-evidence
 	$(CHECK_EVIDENCE) $(PROOF_ARTIFACTS)
 
-prove: check-proof-evidence
+# The SPARK badge data of the README: the shields.io endpoint badge
+# published with the repository serves this JSON, refreshed by every
+# proof run. The gate summarizes the analysis: green when every check
+# is proved, red as soon as one check or one flow error remains. The
+# committed file is part of the reviewed change, and must always match
+# the fresh evidence.
+proof-badge: check-proof-evidence
+	$(CHECK_EVIDENCE) $(PROOF_ARTIFACTS) > $(PROOF_ARTIFACTS)/gate-summary.log
+	PROVED=$$(grep -o '[0-9]\+ checks proved' $(PROOF_ARTIFACTS)/gate-summary.log | grep -o '[0-9]\+'); \
+	UNPROVED=$$(grep -o '[0-9]\+ unproved checks' $(PROOF_ARTIFACTS)/gate-summary.log | grep -o '[0-9]\+'); \
+	FLOW=$$(grep -o '[0-9]\+ flow errors' $(PROOF_ARTIFACTS)/gate-summary.log | grep -o '[0-9]\+'); \
+	if [ "$$UNPROVED" = "0" ] && [ "$$FLOW" = "0" ]; then \
+	  printf '{"schemaVersion": 1, "label": "spark", "message": "%s checks proved", "color": "green"}\n' "$$PROVED" > proof-status.json; \
+	else \
+	  printf '{"schemaVersion": 1, "label": "spark", "message": "%s checks proved, %s unproved, %s flow errors", "color": "red"}\n' "$$PROVED" "$$UNPROVED" "$$FLOW" > proof-status.json; \
+	fi
+
+prove: proof-badge
 	echo
 	echo === running GNATprove on every kernel unit and checking the evidence
 
@@ -151,7 +178,7 @@ format:
 	$(ALR) exec -- gnatformat -P tools/topocli/topocli.gpr
 	$(ALR) exec -- gnatformat -P $(CHECK_EVIDENCE_DIR)/check_evidence.gpr
 
-check: build test check-proof-evidence
+check: build test proof-badge
 
 clean:
 	echo

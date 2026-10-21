@@ -8,8 +8,8 @@ TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer 
 2. `docs/manifesto.md`
 3. `docs/terminology.md`
 4. `docs/numeric-model.md`
-5. `docs/development-plan.md`
-6. `docs/development.md`
+5. `docs/dev/development-plan.md`
+6. `docs/dev/development.md`
 7. `docs/TDL.md`
 8. `docs/design-discussions.md`
 9. `docs/perspectives.md`
