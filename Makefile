@@ -16,7 +16,8 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/intersection.md \
             ../docs/features/contours.md \
             ../docs/features/vertices.md \
-            ../docs/features/edges.md
+            ../docs/features/edges.md \
+            ../docs/features/loops.md
 
 ARTIFACTS_DIR ?= artifacts
 BBT_ARTIFACTS := $(ARTIFACTS_DIR)/bbt

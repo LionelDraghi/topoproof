@@ -9,11 +9,14 @@ package body TopoProof.Topology.Edges
    with SPARK_Mode
 is
 
-   --  Creation appends the new edge: the next handle is Count + 1, which
-   --  the precondition keeps inside the store, then the pair lands at
-   --  that index. The returned handle is the index of the new pair, and
-   --  the indices of the previous edges are untouched, so their
-   --  references keep their meaning.
+   --  Creation appends the new edge. The pair is written before the
+   --  count is incremented: the type predicate constrains only the
+   --  stored edges, 1 .. Count, so writing the pair at Count + 1 keeps
+   --  it, and incrementing the count then covers a pair already known
+   --  non-degenerate, instead of exposing arbitrary content to the
+   --  predicate for an instant. The returned handle is the index of
+   --  the new pair, and the indices of the previous edges are
+   --  untouched, so their references keep their meaning.
    procedure Create
       (Store        : in out Edge_Store;
        Vertex_Store :        Vertices.Vertex_Store;
@@ -23,8 +26,8 @@ is
       pragma Unreferenced (Vertex_Store);
 
    begin
+      Store.Pairs (Store.Count + 1) := (From_Vertex => A, To_Vertex => B);
       Store.Count := Store.Count + 1;
-      Store.Pairs (Store.Count) := (From_Vertex => A, To_Vertex => B);
       E := Store.Count;
    end Create;
 

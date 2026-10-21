@@ -46,7 +46,8 @@ is
    --  object pays only its declared capacity, and the capacity is
    --  frozen for the object lifetime: no assignment can invalidate
    --  handles. The type predicate guarantees that the pair array
-   --  always covers the stored edges.
+   --  always covers the stored edges, and that degenerate edges are
+   --  forbidden: every stored edge connects two distinct vertices.
    type Edge_Store (Capacity : Edge_Count_Range) is record
       --  The default pair is vertex 1 to vertex 1: unreachable, like
       --  the default points of a vertex store, because a freshly
@@ -56,7 +57,10 @@ is
       Pairs : Vertex_Pair_Array (1 .. Capacity) :=
          [others => (From_Vertex => 1, To_Vertex => 1)];
    end record
-   with Dynamic_Predicate => Count <= Capacity;
+   with Dynamic_Predicate =>
+      Count <= Capacity
+      and then
+        (for all I in 1 .. Count => Pairs (I).From_Vertex /= Pairs (I).To_Vertex);
 
    --  The handle E designates a stored edge of Store.
    function Contains (Store : Edge_Store; E : Edge_Handle) return Boolean

@@ -21,6 +21,7 @@ with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;              use TopoProof.Numerics;
 with TopoProof.Topology.Edges;        use TopoProof.Topology.Edges;
+with TopoProof.Topology.Loops;        use TopoProof.Topology.Loops;
 with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with Topodraw;                        use Topodraw;
 
@@ -394,6 +395,63 @@ procedure TopoCLI is
       Put_Line (F, Render (S));
       Close (F);
    end Draw;
+
+   --  The number of distinct names in a chain: a repeated name is one
+   --  vertex.
+   function Distinct_Names (Chain : Point_Vectors.Vector) return Natural is
+      Distinct : Natural := 0;
+      Seen     : Boolean;
+
+   begin
+      for I in 1 .. Natural (Chain.Length) loop
+         Seen := False;
+         for J in 1 .. I - 1 loop
+            if To_String (Chain (J).Name) = To_String (Chain (I).Name) then
+               Seen := True;
+
+            end if;
+         end loop;
+         if not Seen then
+            Distinct := Distinct + 1;
+
+         end if;
+      end loop;
+      return Distinct;
+   end Distinct_Names;
+
+   --  Return the handle of the vertex designated by P, creating the
+   --  vertex on first use: within one command, a name designates one
+   --  vertex. The vertex store capacity is the number of distinct
+   --  names, so the kernel precondition of Create holds structurally.
+   --  The vertex line is emitted at creation, and the vertex joins the
+   --  diagram under its name.
+   procedure Ensure_Vertex
+      (Store   : in out Vertex_Store;
+       Names   : in out Point_Vectors.Vector;
+       Handles : in out Handle_Vectors.Vector;
+       S       : in out Scene;
+       P       :        Parsed_Point;
+       H       :    out Vertex_Handle)
+   is
+   begin
+      for K in 1 .. Natural (Names.Length) loop
+         if To_String (Names (K).Name) = To_String (P.Name) then
+            H := Handles (K);
+            return;
+
+         end if;
+      end loop;
+      Create (Store, Point_Of (P), H);
+      Names.Append (P);
+      Handles.Append (H);
+      if Length (Draw_Path) > 0 then
+         Add_Point (S, To_String (P.Name), P.X, P.Y, 0);
+      end if;
+      Emit
+        ("vertex " & Img (H) & " point "
+         & Img (Point_Of (Store, H).X) & " "
+         & Img (Point_Of (Store, H).Y));
+   end Ensure_Vertex;
 
    procedure Execute (Line : String);
 
@@ -927,88 +985,156 @@ procedure TopoCLI is
             --  Within the command, a name designates one vertex: a
             --  repeated name is the same handle, never a new vertex.
             --  Distinct names at the same position are distinct
-            --  vertices: identity is not position.
+            --  vertices: identity is not position. One store holds
+            --  the distinct names, the other one edge per pair.
             declare
-               Distinct : Natural := 0;
-               Seen     : Boolean;
+               Store   : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+               Edges   : Edge_Store (Edge_Count_Range (Natural (Chain.Length) / 2));
+               Names   : Point_Vectors.Vector;
+               Handles : Handle_Vectors.Vector;
+               S       : Scene := New_Scene;
 
             begin
-               for I in 1 .. Natural (Chain.Length) loop
-                  Seen := False;
-                  for J in 1 .. I - 1 loop
-                     if To_String (Chain (J).Name) = To_String (Chain (I).Name)
-                     then
-                        Seen := True;
+               for P in 1 .. Natural (Chain.Length) / 2 loop
+                  declare
+                     A, B : Vertex_Handle;
+                     E    : Edge_Handle;
+
+                  begin
+                     Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P - 1), A);
+                     Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P), B);
+                     --  The degeneracy precondition is checked before
+                     --  the call: the kernel contract is never
+                     --  violated from the command line.
+                     if A = B then
+                        Emit ("error: degenerate edge");
+                        Set_Exit_Status (Failure);
+                        return;
 
                      end if;
-                  end loop;
-                  if not Seen then
-                     Distinct := Distinct + 1;
-
-                  end if;
-               end loop;
-               declare
-                  Store : Vertex_Store (Vertex_Count_Range (Distinct));
-                  Edges : Edge_Store (Edge_Count_Range (Natural (Chain.Length) / 2));
-                  Names : Point_Vectors.Vector;
-                  Handles : Handle_Vectors.Vector;
-                  S     : Scene := New_Scene;
-
-                  --  Return the handle of the vertex designated by P,
-                  --  creating the vertex on first use. The vertex store
-                  --  capacity is the number of distinct names, so the
-                  --  kernel precondition of Create holds structurally.
-                  procedure Ensure_Vertex (P : Parsed_Point; H : out Vertex_Handle)
-                  is
-                  begin
-                     for K in 1 .. Natural (Names.Length) loop
-                        if To_String (Names (K).Name) = To_String (P.Name) then
-                           H := Handles (K);
-                           return;
-
-                        end if;
-                     end loop;
-                     Create (Store, Point_Of (P), H);
-                     Names.Append (P);
-                     Handles.Append (H);
+                     Create (Edges, Store, A, B, E);
                      if Length (Draw_Path) > 0 then
-                        Add_Point (S, To_String (P.Name), P.X, P.Y, 0);
+                        Add_Segment (S, Chain (2 * P - 1), Chain (2 * P));
                      end if;
                      Emit
-                       ("vertex " & Img (H) & " point "
-                        & Img (Point_Of (Store, H).X) & " "
-                        & Img (Point_Of (Store, H).Y));
-                  end Ensure_Vertex;
+                       ("edge " & Img (E) & " vertex " & Img (A) & " vertex "
+                        & Img (B));
+                  end;
+               end loop;
+               Draw (S, With_Chain);
+            end;
+         end;
+
+      elsif Op = "loop" then
+         declare
+            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+            N     : constant Natural := Natural (Chain.Length);
+
+         begin
+            Require_End (R);
+            if N < 2 then
+               raise Usage_Error;
+
+            end if;
+            for C of Chain loop
+               Require_2D (C);
+            end loop;
+            --  The chain closes when it returns to its first name.
+            --  One vertex per distinct name, one edge per consecutive
+            --  pair, so the loop of N - 1 edges must fit the longest
+            --  loop.
+            if N - 1 > Max_Loop_Length then
+               Emit ("error: too many edges for one loop");
+               Set_Exit_Status (Failure);
+               return;
+
+            end if;
+            declare
+               Store    : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+               Edges    : Edge_Store (Edge_Count_Range (N - 1));
+               Names    : Point_Vectors.Vector;
+               Vertices : Handle_Vectors.Vector;
+               Tokens   : Handle_Vectors.Vector;
+               Handles  : Edge_Handle_Array (1 .. N - 1);
+               S        : Scene := New_Scene;
+
+            begin
+               for I in 1 .. N loop
+                  declare
+                     H : Vertex_Handle;
+
+                  begin
+                     Ensure_Vertex (Store, Names, Vertices, S, Chain (I), H);
+                     Tokens.Append (H);
+                  end;
+               end loop;
+               for I in 2 .. N loop
+                  declare
+                     E : Edge_Handle;
+
+                  begin
+                     --  The degeneracy precondition of the edge is
+                     --  checked before the call: the kernel contract
+                     --  is never violated from the command line.
+                     if Tokens (I - 1) = Tokens (I) then
+                        Emit ("error: degenerate edge");
+                        Set_Exit_Status (Failure);
+                        return;
+
+                     end if;
+                     Create (Edges, Store, Tokens (I - 1), Tokens (I), E);
+                     Handles (I - 1) := E;
+                     if Length (Draw_Path) > 0 then
+                        Add_Segment (S, Chain (I - 1), Chain (I));
+                     end if;
+                     Emit
+                       ("edge " & Img (E) & " vertex " & Img (Tokens (I - 1))
+                        & " vertex " & Img (Tokens (I)));
+                  end;
+               end loop;
+               declare
+                  --  The loop is classified exactly before it is
+                  --  built: only a valid loop reaches Make_Loop, so
+                  --  the kernel precondition holds.
+                  Status : constant Loop_Validity :=
+                     Classify_Loop (Edges, Store, Handles);
 
                begin
-                  for P in 1 .. Natural (Chain.Length) / 2 loop
-                     declare
-                        A, B : Vertex_Handle;
-                        E     : Edge_Handle;
+                  case Status is
+                     when Valid_Loop =>
+                        declare
+                           L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
 
-                     begin
-                        Ensure_Vertex (Chain (2 * P - 1), A);
-                        Ensure_Vertex (Chain (2 * P), B);
-                        --  The degeneracy precondition is checked before
-                        --  the call: the kernel contract is never
-                        --  violated from the command line.
-                        if A = B then
-                           Emit ("error: degenerate edge");
-                           Set_Exit_Status (Failure);
-                           return;
+                        begin
+                           case Loop_Orientation (Edges, Store, L) is
+                              when Counter_Clockwise =>
+                                 Emit ("loop closed counter_clockwise");
+                              when Clockwise =>
+                                 Emit ("loop closed clockwise");
+                              when Degenerate =>
+                                 Emit ("loop closed degenerate");
 
-                        end if;
-                        Create (Edges, Store, A, B, E);
-                        if Length (Draw_Path) > 0 then
-                           Add_Segment (S, Chain (2 * P - 1), Chain (2 * P));
-                        end if;
-                        Emit
-                          ("edge " & Img (E) & " vertex " & Img (A) & " vertex "
-                           & Img (B));
-                     end;
-                  end loop;
-                  Draw (S, With_Chain);
+                           end case;
+                        end;
+                     when Open_Chain =>
+                        Emit ("error: open loop");
+                        Set_Exit_Status (Failure);
+                     when Degenerate_Support =>
+                        Emit ("error: degenerate edge support");
+                        Set_Exit_Status (Failure);
+                     when Orphan_Edge =>
+                        Emit ("error: orphan edge");
+                        Set_Exit_Status (Failure);
+                     when Missing_Endpoint =>
+                        Emit ("error: missing endpoint");
+                        Set_Exit_Status (Failure);
+                     when Disconnected_Chain =>
+                        Emit ("error: disconnected chain");
+                        Set_Exit_Status (Failure);
+
+                  end case;
                end;
+               Draw (S, With_Chain);
             end;
          end;
 
@@ -1079,7 +1205,7 @@ begin
                & "contour_orientation");
          Emit ("             contour_self_intersects, contour_valid, "
                & "contour_no_flat_turns");
-         Emit ("             vertex, edge");
+         Emit ("             vertex, edge, loop");
          return;
 
       else

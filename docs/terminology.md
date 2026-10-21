@@ -27,13 +27,15 @@
     - [`Edge`](#edge)
     - [`Edge_Handle`](#edge_handle)
     - [`Edge_Store`](#edge_store)
+    - [`Loop_2D`](#loop_2d)
+    - [`Loop_Validity`](#loop_validity)
+    - [Loop orientation](#loop-orientation)
   - [Provisional geometric terms](#provisional-geometric-terms)
     - [`Grid_Quantum`](#grid_quantum)
     - [`Grid_Unit`](#grid_unit)
     - [`Length`](#length)
     - [Geometric predicate](#geometric-predicate)
   - [Provisional topological terms](#provisional-topological-terms)
-    - [`Loop`](#loop)
     - [`Face`](#face)
     - [B-Rep](#b-rep)
   - [Open decisions](#open-decisions)
@@ -186,7 +188,19 @@ The identity of one stored edge: valid only in the `Edge_Store` it comes from, a
 
 ### `Edge_Store`
 
-A store of edges with a declared capacity, with the same discipline as `Vertex_Store`: the capacity is a discriminant without a default value, so an object occupies only its declared capacity, and the capacity is frozen for the object lifetime. The type predicate guarantees `Count <= Capacity`. Edge endpoints are vertex handles that must exist in the vertex store at creation; since stored vertices are never removed, endpoints stay valid for the whole lifetime of both stores.
+A store of edges with a declared capacity, with the same discipline as `Vertex_Store`: the capacity is a discriminant without a default value, so an object occupies only its declared capacity, and the capacity is frozen for the object lifetime. The type predicate guarantees `Count <= Capacity`, and that every stored edge connects two distinct vertices. Edge endpoints are vertex handles that must exist in the vertex store at creation; since stored vertices are never removed, endpoints stay valid for the whole lifetime of both stores.
+
+### `Loop_2D`
+
+An oriented loop: an ordered chain of connected edges that returns to its starting vertex. `loop` is an Ada reserved word, so the type is named `Loop_2D`. A loop is a value, not a stored entity: it has no handle, and its validity is relative to the edge and vertex stores its edges come from. A valid loop contains no orphan edge, every endpoint exists in the vertex store, consecutive edges are connected, the chain closes on its starting vertex, and no edge support is reduced to a point: the geometric degeneracy is judged at loop level (DD-002, decisions 3 and 6). A closed two-edge backtrack is a valid loop of degenerate orientation, and is never a valid face boundary.
+
+### `Loop_Validity`
+
+The exact classification of an edge chain as a valid loop, or as rejected for its first violated property, decided in a fixed order without tolerance: orphan edge, missing endpoint, open chain, disconnected chain, degenerate support. `Make_Loop` builds a loop only from a chain classifying as valid, so invalid loops cannot be obtained from the public API.
+
+### Loop orientation
+
+The orientation of a valid loop is exactly the contour orientation (milestone 4) of the closed point sequence the loop induces: the positions of the starting vertices of its edges, closed by the position of the first one.
 
 ## Provisional geometric terms
 
@@ -207,10 +221,6 @@ A non-negative physical magnitude. It is distinct from a coordinate and from an 
 A function that classifies a configuration without constructing a new geometric entity. A predicate used for topology must return an exact result or explicitly report that it cannot conclude.
 
 ## Provisional topological terms
-
-### `Loop`
-
-An oriented closed sequence of connected edges forming a boundary. The term should be reserved for a chain whose closure is guaranteed by construction or proof.
 
 ### `Face`
 
