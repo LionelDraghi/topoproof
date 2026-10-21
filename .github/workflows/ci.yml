@@ -6,6 +6,12 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  # A new push cancels the run still in flight: iterating on main
+  # starts a fresh run immediately instead of queueing behind the
+  # outdated one.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build-and-bbt:
     strategy:
@@ -21,6 +27,30 @@ jobs:
       - name: Install make (Windows)
         if: runner.os == 'Windows'
         run: choco install -y make
+      - name: Cache Alire dependencies
+        uses: actions/cache@v4
+        with:
+          # On Linux, alire data is in ~/.cache/alire and
+          # ~/.local/share/alire; on Windows runners (runneradmin
+          # user), it is in %LOCALAPPDATA%\alire, and the relocated
+          # cache is C:\alr-cache. The cached toolchains are the slow
+          # part of every job: without the cache, gnat_native,
+          # gnatprove and gnatformat_bin are re-downloaded at each
+          # run. The key is per job, so that the prove job, which
+          # caches the toolchains only, does not save the entry of
+          # build-and-bbt, which also caches the bbt dependency
+          # builds: both jobs end on the same key otherwise, and the
+          # first to finish wins.
+          path: |
+            ~/.cache/alire
+            ~/.local/share/alire
+            ~/AppData/Local/alire
+            C:/alr-cache
+          key: ${{ matrix.os }}-alire-${{ github.job }}-${{ hashFiles('alire.toml', 'tools/topocli/alire.toml') }}
+          restore-keys: |
+            ${{ matrix.os }}-alire-${{ github.job }}-
+            ${{ matrix.os }}-alire-
+
       # The macos-26 runner image ships Command Line Tools 27, whose
       # SDK breaks the GNAT FSF linker: the system and unwinder
       # symbols of libgnat fail to resolve (alire-project/GNAT-FSF-
@@ -31,13 +61,15 @@ jobs:
         if: runner.os == 'macOS'
         run: sudo ln -sfn MacOSX26.sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
-      # The Windows default Alire cache lives deep under %LOCALAPPDATA%:
-      # the dependency builds of the bbt clone exceed the 260-character
-      # path limit and Alire fails to sync them. A short cache path
-      # avoids the limit.
-      - name: Use a short Alire cache path (Windows)
+      # The alr GNAT runtime copies files through a 256-character path
+      # buffer: with the default cache under %LOCALAPPDATA%\alire\cache,
+      # the build dir of dependencies with deep trees, such as sparklib,
+      # exceeds it and alr build fails with "Could not sync build dir"
+      # (cf. alire-project/alire issue 1762). A short cache root keeps
+      # every path under the limit, as in the bbt CI.
+      - name: Relocate the Alire cache (Windows)
         if: runner.os == 'Windows'
-        run: alr settings --global --set cache.dir "D:\alire-cache"
+        run: alr settings --global --set cache.dir C:\alr-cache
       # bbt 0.6 is not released to the Alire index yet, and the released
       # version does not compile with GNAT 16: the CI builds the latest
       # bbt from its repository, until 0.6 lands in the index and alr
@@ -84,6 +116,30 @@ jobs:
       - name: Install make (Windows)
         if: runner.os == 'Windows'
         run: choco install -y make
+      - name: Cache Alire dependencies
+        uses: actions/cache@v4
+        with:
+          # On Linux, alire data is in ~/.cache/alire and
+          # ~/.local/share/alire; on Windows runners (runneradmin
+          # user), it is in %LOCALAPPDATA%\alire, and the relocated
+          # cache is C:\alr-cache. The cached toolchains are the slow
+          # part of every job: without the cache, gnat_native,
+          # gnatprove and gnatformat_bin are re-downloaded at each
+          # run. The key is per job, so that the prove job, which
+          # caches the toolchains only, does not save the entry of
+          # build-and-bbt, which also caches the bbt dependency
+          # builds: both jobs end on the same key otherwise, and the
+          # first to finish wins.
+          path: |
+            ~/.cache/alire
+            ~/.local/share/alire
+            ~/AppData/Local/alire
+            C:/alr-cache
+          key: ${{ matrix.os }}-alire-${{ github.job }}-${{ hashFiles('alire.toml', 'tools/topocli/alire.toml') }}
+          restore-keys: |
+            ${{ matrix.os }}-alire-${{ github.job }}-
+            ${{ matrix.os }}-alire-
+
       # The macos-26 runner image ships Command Line Tools 27, whose
       # SDK breaks the GNAT FSF linker: the system and unwinder
       # symbols of libgnat fail to resolve (alire-project/GNAT-FSF-
