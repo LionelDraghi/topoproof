@@ -61,5 +61,6 @@ contract and executable bbt scenarios:
 - [Intersection](docs/features/intersection.md)
 - [Contours](docs/features/contours.md)
 - [Vertices](docs/features/vertices.md)
+- [Edges](docs/features/edges.md)
 
 `make test` executes the documentation against the compiled application; `make prove` runs SPARK; `make check` runs both.

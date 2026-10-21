@@ -107,6 +107,12 @@ excludes allocators, so topological references cannot be pointers.
    orphan edges, and orientation consistency; each reuses the geometric
    predicates of the underlying point sequence. `Is_Valid_Loop` and
    `Is_Valid_Face_Boundary` are topological compositions.
+6. **Edge degeneracy is topological.** Edge creation rejects only an
+   edge whose two ends are the same vertex (`A = B`): a repeated handle
+   is one vertex twice. An edge between two distinct vertices at the
+   same point is a valid edge, because identity is not position; the
+   geometric degeneracy of its support is judged later, at loop level,
+   where `Segment_Sequences.Is_Valid` applies.
 
 ### Vertical increments
 

@@ -24,13 +24,15 @@
     - [`Vertex_Handle`](#vertex_handle)
     - [`Vertex_Store`](#vertex_store)
     - [`Create`](#create)
+    - [`Edge`](#edge)
+    - [`Edge_Handle`](#edge_handle)
+    - [`Edge_Store`](#edge_store)
   - [Provisional geometric terms](#provisional-geometric-terms)
     - [`Grid_Quantum`](#grid_quantum)
     - [`Grid_Unit`](#grid_unit)
     - [`Length`](#length)
     - [Geometric predicate](#geometric-predicate)
   - [Provisional topological terms](#provisional-topological-terms)
-    - [`Edge`](#edge)
     - [`Loop`](#loop)
     - [`Face`](#face)
     - [B-Rep](#b-rep)
@@ -174,6 +176,18 @@ A store of vertices with a declared capacity. Stored vertices are never removed,
 
 Creates one vertex referring to a given point and returns its handle. Creation allocates the next handle and never merges with an existing vertex at the same point, so every previously stored vertex keeps its handle and its point: reference validity is preserved by construction.
 
+### `Edge`
+
+An oriented topological entity connecting two distinct vertices, by handles. An edge refers to its endpoints, never to positions: geometry is reached only through the vertex store. Degeneracy is topological: creation rejects only an edge whose two ends are the same vertex; an edge between two distinct vertices at the same point is a valid edge, and the geometric degeneracy of its support is judged at loop level (DD-002).
+
+### `Edge_Handle`
+
+The identity of one stored edge: valid only in the `Edge_Store` it comes from, and valid in a store exactly when the store contains it. Like vertex handles, edge handles are compared for equality only.
+
+### `Edge_Store`
+
+A store of edges with a declared capacity, with the same discipline as `Vertex_Store`: the capacity is a discriminant without a default value, so an object occupies only its declared capacity, and the capacity is frozen for the object lifetime. The type predicate guarantees `Count <= Capacity`. Edge endpoints are vertex handles that must exist in the vertex store at creation; since stored vertices are never removed, endpoints stay valid for the whole lifetime of both stores.
+
 ## Provisional geometric terms
 
 ### `Grid_Quantum`
@@ -193,10 +207,6 @@ A non-negative physical magnitude. It is distinct from a coordinate and from an 
 A function that classifies a configuration without constructing a new geometric entity. A predicate used for topology must return an exact result or explicitly report that it cannot conclude.
 
 ## Provisional topological terms
-
-### `Edge`
-
-An oriented topological entity connecting two valid vertices.
 
 ### `Loop`
 
