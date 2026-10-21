@@ -98,8 +98,11 @@ test: build evidence-dirs
 	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
 	# The bbt run stores the scenario paths as given on the command
 	# line, relative to tests/: reanchored to the index location, the
-	# links resolve from docs/tests/results.md.
-	sed -i 's|](\.\./docs/features/|](\.\./features/|g' docs/tests/results.md
+	# links resolve from docs/tests/results.md. The reanchoring goes
+	# through a temporary file and a move: sed -i has no portable
+	# syntax across its BSD and GNU implementations.
+	sed 's|](\.\./docs/features/|](\.\./features/|g' docs/tests/results.md > docs/tests/results.tmp
+	mv docs/tests/results.tmp docs/tests/results.md
 	# The tests badge of the README: the bbt run writes the shields.io
 	# URL of the badge, and the badge is fetched from it, published with
 	# the repository through docs/tests/badge.svg. Like every evidence,
