@@ -8,15 +8,25 @@ permissions:
   contents: read
 jobs:
   build-and-bbt:
-    # TopoProof targets Linux only for now
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: alire-project/setup-alire@latest
+      # GNU make is preinstalled on the Linux and macOS runners; the
+      # Windows runner needs it.
+      - name: Install make (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y make
       # bbt is a binary-tool dependency: alr build builds it into the
       # dependency cache, but does not put it on PATH; alr install does.
       - name: Install bbt
         run: alr install bbt
+      # The recipes run under bash: the POSIX shell of the Linux and
+      # macOS runners, and Git Bash on Windows.
       - name: Build and execute Markdown specifications
         shell: bash
         run: make test
@@ -24,10 +34,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bbt-evidence
+          name: bbt-evidence-${{ matrix.os }}
           path: artifacts/bbt/
   prove:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     # The SARIF upload below creates code scanning alerts, which needs
     # security-events: write on top of the workflow-wide contents: read.
     permissions:
@@ -36,15 +50,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: alire-project/setup-alire@latest
+      - name: Install make (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y make
       - run: make prove
+        shell: bash
 
       # Code scanning upload: GNATprove >= 26 writes the SARIF file (see
       # SARIF_SWITCHES in the Makefile; not yet active with 16.1). The
       # hashFiles guard skips the step until the file is generated, so it
       # activates with the toolchain upgrade without any change here.
       # if: always() also uploads the SARIF of failed proof runs.
+      # The upload runs once, from the Linux run only: uploading the
+      # same alerts once per platform would duplicate them.
       - name: Upload GNATprove SARIF
-        if: always() && hashFiles('artifacts/gnatprove/gnatprove.sarif') != ''
+        if: always() && matrix.os == 'ubuntu-latest' && hashFiles('artifacts/gnatprove/gnatprove.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: artifacts/gnatprove/gnatprove.sarif
@@ -53,5 +73,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gnatprove-evidence
+          name: gnatprove-evidence-${{ matrix.os }}
           path: artifacts/gnatprove/

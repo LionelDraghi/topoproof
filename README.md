@@ -1,5 +1,9 @@
 # TopoProof
 
+![Ada](https://img.shields.io/badge/language-Ada-002F6D)
+![SPARK](https://img.shields.io/badge/proof-SPARK-2ea44f)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 **A provable 3D CAD kernel based on discrete geometry, exact arithmetic, and formal proof.**
 
 TopoProof replaces the historical model of continuous geometry, approximate computation, and tolerances with an explicit discrete model:
@@ -23,6 +27,8 @@ Why? Because of one too many of these:
   - [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
 
 ## Status
+
+[![CI](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml/badge.svg)](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml)
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
 the exact 2D predicates and contour foundations required before introducing 3D

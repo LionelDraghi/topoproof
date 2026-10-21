@@ -6,8 +6,10 @@
 
 ALR ?= alr
 # The recipes use pipefail, which requires a POSIX-shell feature set that
-# /bin/sh does not guarantee (dash lacks it).
-SHELL := /bin/bash
+# /bin/sh does not guarantee (dash lacks it). The shell is resolved from
+# the PATH, not from an absolute path, so that a native make on Windows
+# can run the recipes with Git Bash.
+SHELL := bash
 SCENARII := ../docs/features/command-line.md \
             ../docs/features/translation.md \
             ../docs/features/displacement.md \
