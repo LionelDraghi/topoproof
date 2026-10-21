@@ -22,7 +22,9 @@ gnat = ">=16"
 
 [[depends-on]]
 # executable documentation: make test runs the Markdown pages through bbt
-bbt = ">=0.6.0"
+# Needs 0.6 because of the use of --cleanup=full 
+bbt = ">=0.6.0" 
+
 
 [[depends-on]]
 # formal verification: make prove runs GNATprove

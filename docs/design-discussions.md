@@ -58,3 +58,67 @@ the decision above; they concern the future topological types:
    off-grid crossings also invalidate a face boundary?
 4. Which properties belong to geometry, and which belong to the future
    `Is_Valid_Loop` and `Is_Valid_Face_Boundary` predicates?
+
+## DD-002: geometry and topology separation, and the vertex store
+
+- **Status:** proposed (2026-10-21)
+- **Related milestone:** 5, first topological structure
+- **Scope:** `Vertex`, `Edge`, `Loop`, `Face`, and the answers to the
+  questions DD-001 deferred to milestone 5
+
+### Problem
+
+Milestones 1 to 4 deliver geometry as values: a `Point_2D` has no
+identity, and two equal points are interchangeable. Milestone 5
+introduces entities with identity: a vertex is not a point. SPARK
+excludes allocators, so topological references cannot be pointers.
+
+### Proposed decisions
+
+1. **Store-and-handle representation.** Topological entities live in
+   explicit bounded stores (arrays); references are handles into a
+   store, and validity is a predicate over the store. Each store
+   declares its capacity as a discriminant without a default value: an
+   object pays only its declared capacity, and the capacity is frozen
+   for the whole object lifetime, so no assignment can invalidate
+   handles. The growth-by-reassignment of a mutable discriminated
+   record was rejected: it would copy the whole store at every
+   creation. This keeps the
+   reference-validity objectives (`every vertex references a valid
+   point`, `edge endpoints exist`) provable, and lets invalid states be
+   rejected by construction through contracts on the store.
+2. **Identity is not position.** Two distinct vertices may carry the
+   same point. Connectivity is decided on handles, never on positions;
+   geometric predicates (closure, degeneracy, self-intersection,
+   orientation) are decided on the underlying point sequence and reused
+   as-is. Automatic merging of same-point vertices is not introduced;
+   it stays an open question.
+3. **Closed two-edge backtrack (`A -> B -> A`).** It is a degenerate
+   loop: closed, valid, zero-area, classified `Degenerate`. It is never
+   a valid face boundary.
+4. **Simplicity follows the discrete model.** An off-grid crossing of
+   two edges shares no grid position, so it does not invalidate a face
+   boundary. This is consistent with `Segment_Sequences.Crosses` and is
+   a documented representational limit of the discrete model, not a
+   defect.
+5. **Predicate ownership.** Geometry owns position-level predicates
+   (already delivered by milestones 1 to 4). Topology owns
+   handle-level predicates: reference validity, connectivity, absence of
+   orphan edges, and orientation consistency; each reuses the geometric
+   predicates of the underlying point sequence. `Is_Valid_Loop` and
+   `Is_Valid_Face_Boundary` are topological compositions.
+
+### Vertical increments
+
+```text
+a) Vertex: creation from a point, reference validity
+b) Edge: between two distinct vertices, degenerate rejection
+c) Loop: connected edges, closure guaranteed
+d) Face: valid loop, orientation consistency
+```
+
+### Open questions
+
+- half-edge versus simple edge representation (minimal milestone 5
+  proposes simple oriented edges; half-edge is a milestone 7 concern);
+- final names among `Loop`, `Wire`, `Contour`, `Ring`.

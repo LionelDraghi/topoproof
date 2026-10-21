@@ -19,13 +19,17 @@
     - [Exact point-on-segment](#exact-point-on-segment)
     - [`Intersection`](#intersection)
     - [`Off_Grid_Crossing`](#off_grid_crossing)
+  - [Normative for milestone 5](#normative-for-milestone-5)
+    - [`Vertex`](#vertex)
+    - [`Vertex_Handle`](#vertex_handle)
+    - [`Vertex_Store`](#vertex_store)
+    - [`Create`](#create)
   - [Provisional geometric terms](#provisional-geometric-terms)
     - [`Grid_Quantum`](#grid_quantum)
     - [`Grid_Unit`](#grid_unit)
     - [`Length`](#length)
     - [Geometric predicate](#geometric-predicate)
   - [Provisional topological terms](#provisional-topological-terms)
-    - [`Vertex`](#vertex)
     - [`Edge`](#edge)
     - [`Loop`](#loop)
     - [`Face`](#face)
@@ -152,6 +156,24 @@ Twice the area enclosed by a closed sequence, by the shoelace formula: the exact
 
 The classification of a closed, valid sequence as counter-clockwise, clockwise or degenerate, by the sign of its signed area. The orientation is a property of the closed chain itself: it is invariant under rotation of the starting vertex, and mirrored by reversal of the traversal direction.
 
+## Normative for milestone 5
+
+### `Vertex`
+
+A topological entity with its own identity, referring to exactly one geometric point. A vertex is not a point: a point is a geometric value without identity, and two vertices may carry the same point and remain distinct. Identity is not position (DD-002): no operation merges vertices, and merging remains an open question.
+
+### `Vertex_Handle`
+
+The identity of one stored vertex: the only way to designate a vertex. A handle is valid only in the `Vertex_Store` it comes from, and valid in a store exactly when the store contains it. Handles are compared for equality only, never added or multiplied.
+
+### `Vertex_Store`
+
+A store of vertices with a declared capacity. Stored vertices are never removed, so the stored vertices are exactly the handles `1 .. Count`, and the invariant "every vertex references a valid point" is structural: the stored points are `Point_2D` values. The capacity is a discriminant without a default value: a store object occupies only its declared capacity, and the capacity is frozen for the whole object lifetime, so no assignment can invalidate handles. The type predicate guarantees `Count <= Capacity`.
+
+### `Create`
+
+Creates one vertex referring to a given point and returns its handle. Creation allocates the next handle and never merges with an existing vertex at the same point, so every previously stored vertex keeps its handle and its point: reference validity is preserved by construction.
+
 ## Provisional geometric terms
 
 ### `Grid_Quantum`
@@ -171,10 +193,6 @@ A non-negative physical magnitude. It is distinct from a coordinate and from an 
 A function that classifies a configuration without constructing a new geometric entity. A predicate used for topology must return an exact result or explicitly report that it cannot conclude.
 
 ## Provisional topological terms
-
-### `Vertex`
-
-A topological entity associated with a geometric point. A vertex has topological identity; a point is a geometric value.
 
 ### `Edge`
 

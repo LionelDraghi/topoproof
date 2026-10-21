@@ -20,6 +20,7 @@ with TopoProof.Geometry.Points;       use TopoProof.Geometry.Points;
 with TopoProof.Geometry.Translations; use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;              use TopoProof.Numerics;
+with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with Topodraw;                        use Topodraw;
 
 procedure TopoCLI is
@@ -860,6 +861,48 @@ procedure TopoCLI is
             end;
          end;
 
+      elsif Op = "vertex" then
+         declare
+            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+
+         begin
+            Require_End (R);
+            if Natural (Chain.Length) = 0 then
+               raise Usage_Error;
+
+            end if;
+            for C of Chain loop
+               Require_2D (C);
+            end loop;
+            --  One command builds one store, sized exactly for its
+            --  points: the capacity is known before any creation, so the
+            --  kernel precondition of Create holds structurally.
+            if Natural (Chain.Length) > Max_Vertices then
+               Emit ("error: too many vertices for one store");
+               Set_Exit_Status (Failure);
+               return;
+
+            end if;
+            declare
+               Store : Vertex_Store (Vertex_Count_Range (Natural (Chain.Length)));
+               H     : Vertex_Handle;
+               S     : Scene := New_Scene;
+
+            begin
+               for I in 1 .. Natural (Chain.Length) loop
+                  Create (Store, Point_Of (Chain (I)), H);
+                  if Length (Draw_Path) > 0 then
+                     Add_Point (S, "V" & Img (H), Chain (I).X, Chain (I).Y, 0);
+                  end if;
+                  Emit
+                    ("vertex " & Img (H) & " point "
+                     & Img (Point_Of (Store, H).X) & " "
+                     & Img (Point_Of (Store, H).Y));
+               end loop;
+               Draw (S, With_Chain);
+            end;
+         end;
+
       else
          raise Usage_Error;
 
@@ -927,6 +970,7 @@ begin
                & "contour_orientation");
          Emit ("             contour_self_intersects, contour_valid, "
                & "contour_no_flat_turns");
+         Emit ("             vertex");
          return;
 
       else

@@ -136,3 +136,7 @@ Use Ada/GNAT semantic navigation when available. Avoid generated files in versio
 
 ## Executable documentation
 SPARK proves contracts and absence of run-time errors. `bbt` executes the public Markdown documentation against the compiled command-line application. A user-visible operation is incomplete until its Markdown page contains an executable scenario for its canonical output.
+
+When the expected output is exactly known, state it entirely with `Then the
+output is` followed by a fenced code block, single-line or multi-line;
+`Then the output contains` is reserved for spotting one line among others.
