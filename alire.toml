@@ -20,11 +20,15 @@ generate_gpr = false
 # SPARK 16.x pairs with the GNAT 16 toolchain
 gnat = ">=16"
 
-[[depends-on]]
-# executable documentation: make test runs the Markdown pages through bbt
-# Needs 0.6 because of the use of --cleanup=full 
-bbt = ">=0.6.0" 
-
+# No bbt dependency: make test runs the Markdown pages through bbt 0.6
+# (needed for --cleanup=full, --index and --generate_badge), but 0.6 is
+# not published to the community index yet, and the published 0.5.0 does
+# not compile with GNAT 16. Until 0.6 lands in the index, bbt is an
+# external tool: the CI builds the latest bbt from its repository, and
+# local runs use the bbt on the PATH. Restore the dependency once 0.6 is
+# published:
+#   [[depends-on]]
+#   bbt = ">=0.6.0"
 
 [[depends-on]]
 # formal verification: make prove runs GNATprove

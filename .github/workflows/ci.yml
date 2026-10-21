@@ -31,6 +31,13 @@ jobs:
         if: runner.os == 'macOS'
         run: sudo ln -sfn MacOSX26.sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
+      # The Windows default Alire cache lives deep under %LOCALAPPDATA%:
+      # the dependency builds of the bbt clone exceed the 260-character
+      # path limit and Alire fails to sync them. A short cache path
+      # avoids the limit.
+      - name: Use a short Alire cache path (Windows)
+        if: runner.os == 'Windows'
+        run: alr settings --global --set cache.dir "D:\alire-cache"
       # bbt 0.6 is not released to the Alire index yet, and the released
       # version does not compile with GNAT 16: the CI builds the latest
       # bbt from its repository, until 0.6 lands in the index and alr
@@ -42,7 +49,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
           cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
-          echo "$RUNNER_TEMP/bbt/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
       # The recipes run under bash: the POSIX shell of the Linux and
       # macOS runners, and Git Bash on Windows.
       - name: Build and execute Markdown specifications
