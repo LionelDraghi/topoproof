@@ -1,0 +1,30 @@
+--  TopoScript feasibility prototype, expected-error path: the point
+--  starts on the corner of the grid and the translation would move it
+--  one unit beyond the largest representable position; the native
+--  callback rejects it and toposcript_lab reports the diagnostic on
+--  standard error with a failed process status.
+
+with HAT;
+
+procedure Translate_Beyond_Demo is
+
+   procedure Translate (X, Y, Z, DX, DY, DZ : in out Integer)
+      with Import => True;
+
+   X  : Integer := 1073741823;
+   Y  : Integer := 0;
+   Z  : Integer := 0;
+   DX : Integer := 1;
+   DY : Integer := 0;
+   DZ : Integer := 0;
+
+begin
+   Translate (X, Y, Z, DX, DY, DZ);
+   HAT.Put ("point ");
+   HAT.Put (X, 0);
+   HAT.Put (" ");
+   HAT.Put (Y, 0);
+   HAT.Put (" ");
+   HAT.Put (Z, 0);
+   HAT.New_Line;
+end Translate_Beyond_Demo;

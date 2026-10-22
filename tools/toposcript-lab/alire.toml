@@ -1,0 +1,32 @@
+name = "toposcript_lab"
+description = "TopoScript feasibility prototype: HAC embedded in a TopoProof client"
+version = "0.1.3-dev"
+
+authors = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]
+maintainers-logins = ["LionelDraghi"]
+licenses = "Apache-2.0"
+website = "https://github.com/LionelDraghi/topoproof"
+tags = ["spark", "formal-methods", "geometry", "cad", "proof"]
+
+executables = ["toposcript_lab"]
+project-files = ["toposcript_lab.gpr"]
+
+[configuration]
+generate_C = false
+generate_gpr = false
+
+[[depends-on]]
+# The lab evolves in lockstep with the kernel: the path pin below always
+# takes the local topoproof, whatever its version, like the topocli
+# client crate.
+topoproof = ">=0"
+
+[[depends-on]]
+# The embedded interpreter of the TopoScript prototype (development plan,
+# Milestone 6, Increment 1). Bounded below 0.46: a 0.x release of hac may
+# change its embedding API, and the prototype validates one subset of it.
+hac = "~0.45.0"
+
+[[pins]]
+topoproof = { path = "../.." }

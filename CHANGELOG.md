@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.3-dev] - 2026-??-??**
+  - [Added]   the TopoScript feasibility prototype: `tools/toposcript-lab`
+              embeds the HAC interpreter and runs a script source against
+              the proved `Translate` operation through a native callback;
+              the script's canonical result goes to standard output, the
+              compilation messages and the diagnostics to standard error,
+              and the process status carries the verdict; a smoke run of
+              the success and error paths joins `make test` (development
+              plan, Milestone 6, Increment 1)
   - [Added]   the TopoScript embedded scripting proposal: a lightweight Ada
               scripting form executed by HAC, entering the development plan
               as Milestone 6, with its design discussion, its task entry,

@@ -9,6 +9,7 @@ gnatprove/
 artifacts/
 src/Alire_config/
 tools/topocli/config/
+tools/toposcript-lab/config/
 *.ali
 *.o
 *.in

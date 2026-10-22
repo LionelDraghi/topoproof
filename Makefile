@@ -45,7 +45,7 @@ SARIF_SWITCHES := --sarif-file=$(SARIF_FILE) --sarif-base-uri=$(SARIF_BASE_URI)
 .SILENT:
 
 .DEFAULT_GOAL := all
-.PHONY: help all build release test prove prove+ proof-badge format check clean
+.PHONY: help all build release test prove prove+ proof-badge format check clean lab
 .PHONY: evidence-dirs proof-evidence evidence-checker check-proof-evidence
 
 help:
@@ -53,8 +53,9 @@ help:
 	echo ""
 	echo "Targets:"
 	echo "  all        : build, test and prove (default when no target given)"
-	echo "  build      : compile the kernel (topoproof.gpr) and the client"
-	echo "               (tools/topocli/topocli.gpr), dev profile"
+	echo "  build      : compile the kernel (topoproof.gpr), the client"
+	echo "               (tools/topocli/topocli.gpr) and the TopoScript"
+	echo "               prototype (tools/toposcript-lab), dev profile"
 	echo "  release    : build with the release profile (fast proved kernel)"
 	echo "  test       : build, then run the Markdown documentation in"
 	echo "               docs/features through bbt"
@@ -76,6 +77,36 @@ build:
 
 	$(ALR) build
 	cd tools/topocli && $(ALR) build
+	cd tools/toposcript-lab && $(ALR) build
+
+# Milestone 6, Increment 1: the TopoScript prototype has no
+# documentation scenario yet (Increment 3 embeds the scripts in the bbt
+# pages); the smoke run stands in for them. It exercises the embedded
+# HAC interpreter calling the proved Translate through the native
+# callback, on the success path and on the error path, and checks the
+# output contract: canonical result on standard output, diagnostics on
+# standard error, and the process status for the verdict.
+LAB_SCRIPTS := tools/toposcript-lab/scripts
+lab: build
+	set -e; \
+	out=$$(bin/toposcript_lab $(LAB_SCRIPTS)/translate_demo.topo 2>lab.err); \
+	[ "$$out" = "point 15 -13 21" ] || { \
+	  echo "smoke: unexpected output [$$out]"; cat lab.err; rm -f lab.err; \
+	  exit 1; }; \
+	[ ! -s lab.err ] || { echo "smoke: unexpected stderr"; cat lab.err; \
+	  rm -f lab.err; exit 1; }; \
+	rm -f lab.err; \
+	if bin/toposcript_lab $(LAB_SCRIPTS)/translate_beyond_demo.topo \
+	   >lab.out 2>lab.err; then \
+	  echo "smoke: unrepresentable translation did not fail"; \
+	  rm -f lab.out lab.err; exit 1; \
+	fi; \
+	grep -q "error: translation is not representable" lab.err || { \
+	  echo "smoke: missing diagnostic"; cat lab.err; \
+	  rm -f lab.out lab.err; exit 1; }; \
+	rm -f lab.out lab.err; \
+	echo "   TopoScript smoke: HAC runs the proved Translate," \
+	   "output and status checked"
 
 # Release build: run-time checks suppressed on the proved kernel (the
 # silver payoff), kept on the client.
@@ -91,7 +122,7 @@ release:
 # files created by the application in When steps are removed before the
 # run so that each run starts from a clean state. The complete output
 # is teed to $(BBT_ARTIFACTS)/results.log as reviewable evidence.
-test: build evidence-dirs
+test: build lab evidence-dirs
 	echo
 	echo === running the executable documentation
 
@@ -188,7 +219,8 @@ clean:
 	echo === cleaning
 
 	$(ALR) clean
-	rm -rf obj bin gnatprove tools/topocli/obj $(CHECK_EVIDENCE_DIR)/obj $(CHECK_EVIDENCE_DIR)/bin
+	rm -rf obj bin gnatprove tools/topocli/obj tools/toposcript-lab/obj \
+	  $(CHECK_EVIDENCE_DIR)/obj $(CHECK_EVIDENCE_DIR)/bin
 	find tests -name '*.in' -delete -o -name '*.out' -delete
 
 	echo OK
