@@ -1,4 +1,4 @@
-# Translation
+# Translation <!-- omit from toc -->
 
 `translate` applies an exact displacement to a point:
 `topocli translate P=(X, Y, Z) D=(DX, DY, DZ)`.
@@ -6,7 +6,7 @@ The canonical result is `point X Y Z`.
 
 ![Translation diagram](images/translation_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Scenario: translate command-line values](#scenario-translate-command-line-values)
 - [Scenario: reject an unrepresentable result](#scenario-reject-an-unrepresentable-result)

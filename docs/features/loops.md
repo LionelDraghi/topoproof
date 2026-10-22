@@ -1,4 +1,4 @@
-# Loops
+# Loops <!-- omit from toc -->
 
 `loop` builds a loop from a chain of named points:  
 `topocli loop A=(X, Y) B=(X, Y) ... A`.  
@@ -19,17 +19,15 @@ the same point is a valid edge, but no valid loop contains it.
 
 ![Loop diagram](images/loops_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [Loops](#loops)
-  - [Contents](#contents)
-  - [Scenario: a triangle loop](#scenario-a-triangle-loop)
-  - [Scenario: a triangle loop built by script](#scenario-a-triangle-loop-built-by-script)
-  - [Scenario: a clockwise square](#scenario-a-clockwise-square)
-  - [Scenario: a closed backtrack is a degenerate loop](#scenario-a-closed-backtrack-is-a-degenerate-loop)
-  - [Proved property](#proved-property)
-  - [Scenario: an open chain is rejected](#scenario-an-open-chain-is-rejected)
-  - [Scenario: a degenerate edge support is rejected](#scenario-a-degenerate-edge-support-is-rejected)
+- [Scenario: a triangle loop](#scenario-a-triangle-loop)
+- [Scenario: a triangle loop built by script](#scenario-a-triangle-loop-built-by-script)
+- [Scenario: a clockwise square](#scenario-a-clockwise-square)
+- [Scenario: a closed backtrack is a degenerate loop](#scenario-a-closed-backtrack-is-a-degenerate-loop)
+- [Proved property](#proved-property)
+- [Scenario: an open chain is rejected](#scenario-an-open-chain-is-rejected)
+- [Scenario: a degenerate edge support is rejected](#scenario-a-degenerate-edge-support-is-rejected)
 
 ## Scenario: a triangle loop
 

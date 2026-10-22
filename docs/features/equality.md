@@ -1,4 +1,4 @@
-# Point equality
+# Point equality <!-- omit from toc --> 
 
 `equal` compares two points exactly:
 `topocli equal A=(AX, AY, AZ) B=(BX, BY, BZ)`.
@@ -14,7 +14,7 @@ differ only on `Z`, so they are two distinct grid positions.
 
 ![Distinct points](images/equality_2.svg)
 
-## Contents
+## Contents <!-- omit from toc --> 
 
 - [Scenario: identical points are equal](#scenario-identical-points-are-equal)
 - [Scenario: different points are not equal](#scenario-different-points-are-not-equal)

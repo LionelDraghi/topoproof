@@ -1,4 +1,4 @@
-# Orientation
+# Orientation <!-- omit from toc -->
 
 `orientation` classifies exactly the path formed by three 2D points:
 `topocli orientation A=(AX, AY) B=(BX, BY) C=(CX, CY)`.
@@ -24,7 +24,7 @@ mirrors the orientation.
 
 ![Clockwise turn](images/orientation_2.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Scenario: a counter-clockwise path](#scenario-a-counter-clockwise-path)
 - [Scenario: a clockwise path](#scenario-a-clockwise-path)

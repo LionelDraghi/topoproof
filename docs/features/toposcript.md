@@ -1,4 +1,4 @@
-# TopoScript
+# TopoScript <!-- omit from toc -->
 
 > **Status: implemented (Milestone 6).** `topocli run FILE.topo` executes
 > a TopoScript through the embedded HAC interpreter. The scenario blocks
@@ -13,7 +13,7 @@ not turn TopoProof into an Ada equivalent of OpenSCAD. The HAC interpreter
 and its Ada subset are presented in
 [Ada and a mini-Ada interpreter, FOSDEM 2025](https://github.com/zertovitch/hac/blob/master/doc/ada_mini_ada_fosdem_2025.pdf).
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Source form](#source-form)
 - [Observable result and verdict](#observable-result-and-verdict)
@@ -21,10 +21,10 @@ and its Ada subset are presented in
 - [Scripting API](#scripting-api)
 - [Standalone scripts](#standalone-scripts)
 - [Scenarios](#scenarios)
-  - [Scenario: translate a point and a vector](#scenario-translate-a-point-and-a-vector)
-  - [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
-  - [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
-  - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
+- [Scenario: translate a point and a vector](#scenario-translate-a-point-and-a-vector)
+- [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
+- [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
+- [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
 - [Diagnostic drawing](#diagnostic-drawing)
 - [User macros and extensions](#user-macros-and-extensions)
 - [CLI direction](#cli-direction)
@@ -251,7 +251,9 @@ carries the result only.
   ```
 - When I successfully run `../bin/topocli run translate_draw.topo`
 - Then the output is `point 15 -13 21`
-- And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`
+- And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`  
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
+  actual result point, the target of the scenario, is drawn red.)
 
 ![Diagnostic image of the translation](images/toposcript_1.svg)
 

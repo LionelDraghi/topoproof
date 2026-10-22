@@ -1,4 +1,4 @@
-# Faces
+# Faces <!-- omit from toc -->
 
 `face` builds a planar face from a chain of named points:
 `topocli face A=(X, Y) B=(X, Y) ... A`.
@@ -17,15 +17,13 @@ which a valid boundary guarantees to be counter-clockwise or clockwise.
 
 ![Face diagram](images/faces_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [Faces](#faces)
-  - [Contents](#contents)
-  - [Scenario: a counter-clockwise face](#scenario-a-counter-clockwise-face)
-  - [Scenario: a counter-clockwise face built by script](#scenario-a-counter-clockwise-face-built-by-script)
-  - [Scenario: a clockwise face](#scenario-a-clockwise-face)
-  - [Proved property](#proved-property)
-  - [Scenario: a degenerate boundary is rejected](#scenario-a-degenerate-boundary-is-rejected)
+- [Scenario: a counter-clockwise face](#scenario-a-counter-clockwise-face)
+- [Scenario: a counter-clockwise face built by script](#scenario-a-counter-clockwise-face-built-by-script)
+- [Scenario: a clockwise face](#scenario-a-clockwise-face)
+- [Proved property](#proved-property)
+- [Scenario: a degenerate boundary is rejected](#scenario-a-degenerate-boundary-is-rejected)
 
 ## Scenario: a counter-clockwise face
 

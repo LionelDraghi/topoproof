@@ -350,6 +350,13 @@
    - OK : Then the output is  
    - [X] scenario   [a triangle loop](../features/loops.md) pass  
 
+   ### Scenario: [a triangle loop built by script](../features/loops.md): 
+   - OK : Given the file `triangle.topo`  
+   - OK : When I successfully run `../bin/topocli run triangle.topo`  
+   - OK : Then the output is `loop closed counter_clockwise`  
+   - OK : And the file `../docs/features/images/loops_1_script.svg` contains `(5, 5)`  
+   - [X] scenario   [a triangle loop built by script](../features/loops.md) pass  
+
    ### Scenario: [a clockwise square](../features/loops.md): 
    - OK : When I successfully run `../bin/topocli loop A=(0, 0) B=(0, 5) C=(5, 5) D=(5, 0) A --draw ../docs/features/images/loops_2.svg`  
    - OK : Then the output is  
@@ -379,6 +386,13 @@
    - OK : Then the output is  
    - [X] scenario   [a counter-clockwise face](../features/faces.md) pass  
 
+   ### Scenario: [a counter-clockwise face built by script](../features/faces.md): 
+   - OK : Given the file `face.topo`  
+   - OK : When I successfully run `../bin/topocli run face.topo`  
+   - OK : Then the output is `face counter_clockwise`  
+   - OK : And the file `../docs/features/images/faces_1_script.svg` contains `(5, 5)`  
+   - [X] scenario   [a counter-clockwise face built by script](../features/faces.md) pass  
+
    ### Scenario: [a clockwise face](../features/faces.md): 
    - OK : When I successfully run `../bin/topocli face A=(0, 0) B=(0, 5) C=(5, 5) D=(5, 0) A --draw ../docs/features/images/faces_2.svg`  
    - OK : Then the output is  
@@ -391,12 +405,41 @@
    - [X] scenario   [a degenerate boundary is rejected](../features/faces.md) pass  
 
 
-## Summary : **Success**, 70 scenarios OK
+# Document: [toposcript.md](../features/toposcript.md)  
+   ### Scenario: [translate a point and a vector](../features/toposcript.md): 
+   - OK : Given the file `translate.topo`  
+   - OK : When I successfully run `../bin/topocli run translate.topo`  
+   - OK : Then the output is `point 15 -13 21`  
+   - [X] scenario   [translate a point and a vector](../features/toposcript.md) pass  
+
+   ### Scenario: [reject an unrepresentable translation](../features/toposcript.md): 
+   - OK : Given the file `translate_beyond.topo`  
+   - OK : When I run `../bin/topocli run translate_beyond.topo`  
+   - OK : Then the error output is `error: translation is not representable`  
+   - OK : And there is an error  
+   - [X] scenario   [reject an unrepresentable translation](../features/toposcript.md) pass  
+
+   ### Scenario: [reject a declaration after the first statement](../features/toposcript.md): 
+   - OK : Given the file `late_declaration.topo`  
+   - OK : When I run `../bin/topocli run late_declaration.topo`  
+   - OK : Then the error output is  
+   - OK : And there is an error  
+   - [X] scenario   [reject a declaration after the first statement](../features/toposcript.md) pass  
+
+   ### Scenario: [draw the diagnostic image of the translation](../features/toposcript.md): 
+   - OK : Given the file `translate_draw.topo`  
+   - OK : When I successfully run `../bin/topocli run translate_draw.topo`  
+   - OK : Then the output is `point 15 -13 21`  
+   - OK : And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`    
+   - [X] scenario   [draw the diagnostic image of the translation](../features/toposcript.md) pass  
+
+
+## Summary : **Success**, 76 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 70    |
+| Successful | 76    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

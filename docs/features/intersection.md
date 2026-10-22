@@ -1,4 +1,4 @@
-# Intersection
+# Intersection <!-- omit from toc -->
 
 `intersect` classifies exactly the intersection of two 2D segments:
 `topocli intersect A=(AX, AY) B=(BX, BY) C=(CX, CY) D=(DX, DY)`,
@@ -27,7 +27,7 @@ position: the operation says so instead of approximating.
 
 ![Crossing off the grid](images/intersection_2.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Scenario: a proper crossing on a grid position](#scenario-a-proper-crossing-on-a-grid-position)
 - [Scenario: a proper crossing off the grid](#scenario-a-proper-crossing-off-the-grid)

@@ -1,4 +1,4 @@
-# Edges
+# Edges <!-- omit from toc -->
 
 `edge` creates topological edges between vertices:
 `topocli edge A=(X, Y) B=(X, Y) ...`.
@@ -18,16 +18,14 @@ support is judged at loop level.
 
 ![Edge diagram](images/edges_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [Edges](#edges)
-  - [Contents](#contents)
-  - [Scenario: create an edge between two vertices](#scenario-create-an-edge-between-two-vertices)
-  - [Scenario: edges share vertices](#scenario-edges-share-vertices)
-  - [Scenario: an edge between two vertices at the same point is valid](#scenario-an-edge-between-two-vertices-at-the-same-point-is-valid)
-  - [Proved property](#proved-property)
-  - [Scenario: an edge back to the same vertex is degenerate](#scenario-an-edge-back-to-the-same-vertex-is-degenerate)
-  - [Scenario: an odd number of points is not a chain of pairs](#scenario-an-odd-number-of-points-is-not-a-chain-of-pairs)
+- [Scenario: create an edge between two vertices](#scenario-create-an-edge-between-two-vertices)
+- [Scenario: edges share vertices](#scenario-edges-share-vertices)
+- [Scenario: an edge between two vertices at the same point is valid](#scenario-an-edge-between-two-vertices-at-the-same-point-is-valid)
+- [Proved property](#proved-property)
+- [Scenario: an edge back to the same vertex is degenerate](#scenario-an-edge-back-to-the-same-vertex-is-degenerate)
+- [Scenario: an odd number of points is not a chain of pairs](#scenario-an-odd-number-of-points-is-not-a-chain-of-pairs)
 
 ## Scenario: create an edge between two vertices
 
