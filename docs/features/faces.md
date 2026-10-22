@@ -22,6 +22,7 @@ which a valid boundary guarantees to be counter-clockwise or clockwise.
 - [Faces](#faces)
   - [Contents](#contents)
   - [Scenario: a counter-clockwise face](#scenario-a-counter-clockwise-face)
+  - [Scenario: a counter-clockwise face built by script](#scenario-a-counter-clockwise-face-built-by-script)
   - [Scenario: a clockwise face](#scenario-a-clockwise-face)
   - [Proved property](#proved-property)
   - [Scenario: a degenerate boundary is rejected](#scenario-a-degenerate-boundary-is-rejected)
@@ -39,6 +40,46 @@ which a valid boundary guarantees to be counter-clockwise or clockwise.
    edge 3 vertex 3 vertex 1
    face counter_clockwise
    ```
+
+## Scenario: a counter-clockwise face built by script
+
+The same face as the previous scenario, written as a TopoScript: the
+construction is the one of the loop script, and the classification is
+the same kernel one. The script draws its own diagram, the same
+geometry as the one above, for a side-by-side comparison.
+
+- Given the file `face.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (5, 5);
+  C    : constant Point_2D := (0, 5);
+  Kind : Face_Kind;
+  Name : VString := +"../docs/features/images/faces_1_script.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Green);
+  Draw_Edge (B, C, Green);
+  Draw_Edge (C, A, Green);
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (A);
+
+  Make_Face (Kind);
+
+  Put_Face (Kind);
+  End_Image;
+  ```
+- When I successfully run `../bin/topocli run face.topo`
+- Then the output is `face counter_clockwise`
+- And the file `../docs/features/images/faces_1_script.svg` contains `(5, 5)`
+
+![Counter-clockwise face drawn by the script](images/faces_1_script.svg)
 
 ## Scenario: a clockwise face
 

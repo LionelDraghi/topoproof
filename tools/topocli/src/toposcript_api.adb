@@ -5,6 +5,7 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
+with Ada.Containers.Indefinite_Vectors;
 with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
@@ -13,10 +14,15 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with HAC_Sys.Interfacing;             use HAC_Sys.Interfacing;
 
 with TopoProof.Geometry.Points;      use TopoProof.Geometry.Points;
+with TopoProof.Geometry.Segment_Sequences;
 with TopoProof.Geometry.Translations;
 use TopoProof.Geometry.Translations;
 with TopoProof.Geometry.Vectors;      use TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;              use TopoProof.Numerics;
+with TopoProof.Topology.Edges;
+with TopoProof.Topology.Faces;
+with TopoProof.Topology.Loops;
+with TopoProof.Topology.Vertices;
 
 with Topodraw;                        use Topodraw;
 
@@ -227,7 +233,11 @@ package body TopoScript_API is
          Record_Failure ("error: no open image");
          return;
       end if;
+      --  The same axes configuration as the client scenes: automatic
+      --  tick marks, and the dashed coordinate paths of every point.
       The_Scene.Draw_Axes := True;
+      The_Scene.Tick_Step := 0;
+      The_Scene.Anchors   := True;
    end Draw_Axes_Native;
 
    --  Native side of Draw_Point: the point colors the scene, and the
@@ -303,6 +313,74 @@ package body TopoScript_API is
       end;
    end Draw_Vector_Native;
 
+   --  Native side of Draw_Point_2D: the point colors the scene at
+   --  (X, Y, 0), the plane the 2D operations live in.
+   procedure Draw_Point_2D_Native (Data : in out HAC_Element_Array) is
+      PX, PY : Long_Long_Integer;
+   begin
+      if not Image_Open then
+         Record_Failure ("error: no open image");
+         return;
+      end if;
+      PX := To_Long (Data (1));
+      PY := To_Long (Data (2));
+      if not Grid_In_Range (PX) or else not Grid_In_Range (PY) then
+         Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+
+      Color_Point
+        (Integer (PX), Integer (PY), 0,
+         To_Unbounded_String (Hex_Of (To_Color (Data (3)))));
+   end Draw_Point_2D_Native;
+
+   --  Native side of Draw_Edge: the arrow runs from P to Q, labeled
+   --  with the displacement, like the segment diagrams of the client
+   --  operations; a degenerate edge draws nothing.
+   procedure Draw_Edge_Native (Data : in out HAC_Element_Array) is
+      PX, PY, QX, QY : Long_Long_Integer;
+   begin
+      if not Image_Open then
+         Record_Failure ("error: no open image");
+         return;
+      end if;
+      PX := To_Long (Data (1));
+      PY := To_Long (Data (2));
+      QX := To_Long (Data (3));
+      QY := To_Long (Data (4));
+      if not Grid_In_Range (PX)
+        or else not Grid_In_Range (PY)
+        or else not Grid_In_Range (QX)
+        or else not Grid_In_Range (QY)
+      then
+         Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+      if PX = QX and then PY = QY then
+         return;
+      end if;
+
+      declare
+         DX : constant Integer := Integer (QX - PX);
+         DY : constant Integer := Integer (QY - PY);
+      begin
+         The_Scene.Vectors.Append
+           (Vector_Rec'
+              (From_Name =>
+                 Anchor_Name (Integer (PX), Integer (PY), 0),
+               To_Name   =>
+                 Anchor_Name (Integer (QX), Integer (QY), 0),
+               Label     =>
+                 To_Unbounded_String
+                   ("(" & Ada.Strings.Fixed.Trim
+                        (DX'Image, Ada.Strings.Both)
+                    & ", " & Ada.Strings.Fixed.Trim
+                        (DY'Image, Ada.Strings.Both) & ")"),
+               Color     =>
+                 To_Unbounded_String (Hex_Of (To_Color (Data (5))))));
+      end;
+   end Draw_Edge_Native;
+
    procedure End_Image_Native (Data : in out HAC_Element_Array) is
       pragma Unreferenced (Data);
    begin
@@ -332,6 +410,324 @@ package body TopoScript_API is
       end;
    end End_Image_Native;
 
+   --  Loop and face building (development plan, Milestone 6, Increment
+   --  5): the script accumulates a chain of 2D points, then Make_Loop
+   --  and Make_Face run the exact kernel classification, the same one
+   --  as the loop and face client operations. In the script chain, a
+   --  vertex is identified by its position: a repeated position
+   --  closes on the same vertex.
+
+   type Chain_Point is record
+      X, Y : Grid_Coordinate;
+   end record;
+
+   package Chain_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Positive, Chain_Point);
+
+   Chain : Chain_Vectors.Vector;
+
+   package Handle_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Positive, TopoProof.Topology.Vertices.Vertex_Handle);
+
+   function Loop_To_HAC is new To_HAC_Any_Enum (Loop_Kind);
+
+   function Face_To_HAC is new To_HAC_Any_Enum (Face_Kind);
+
+   function To_Loop_Kind is new To_Native_Any_Enum (Loop_Kind);
+
+   function To_Face_Kind is new To_Native_Any_Enum (Face_Kind);
+
+   procedure Add_Point_Native (Data : in out HAC_Element_Array) is
+      PX, PY : Long_Long_Integer;
+   begin
+      PX := To_Long (Data (1));
+      PY := To_Long (Data (2));
+      if not Grid_In_Range (PX) or else not Grid_In_Range (PY) then
+         Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+      Chain.Append
+        (Chain_Point'(X => Grid_Coordinate (PX),
+                      Y => Grid_Coordinate (PY)));
+   end Add_Point_Native;
+
+   function Distinct_Count return Natural is
+      N : constant Natural := Natural (Chain.Length);
+      Count : Natural := 0;
+   begin
+      for I in 1 .. N loop
+         declare
+            P : constant Chain_Point := Chain (I);
+            New_One : Boolean := True;
+         begin
+            for J in 1 .. I - 1 loop
+               if Chain (J) = P then
+                  New_One := False;
+               end if;
+            end loop;
+            if New_One then
+               Count := Count + 1;
+            end if;
+         end;
+      end loop;
+      return Count;
+   end Distinct_Count;
+
+   --  Build the kernel stores from the accumulated chain: one vertex
+   --  per distinct position, one edge per consecutive pair. The
+   --  pre-checks of the client operations are made before any kernel
+   --  call; on rejection the failure is already recorded, and the
+   --  chain is reported as not buildable.
+   procedure Build_Chain
+     (Store   :    out TopoProof.Topology.Vertices.Vertex_Store;
+      Links   :    out TopoProof.Topology.Edges.Edge_Store;
+      Handles :    out TopoProof.Topology.Loops.Edge_Handle_Array;
+      OK      :    out Boolean)
+   is
+      N : constant Natural := Natural (Chain.Length);
+      Tokens : Handle_Vectors.Vector;
+   begin
+      OK := False;
+      for I in 1 .. N loop
+         declare
+            P : constant Chain_Point := Chain (I);
+            Reuse : Boolean := False;
+         begin
+            for J in 1 .. I - 1 loop
+               if Chain (J) = P then
+                  --  The handle is copied before the append: the
+                  --  indexing reference of Tokens (J) would still be
+                  --  live in this statement, and the container would
+                  --  reject the append.
+                  declare
+                     H : constant TopoProof.Topology.Vertices.
+                       Vertex_Handle := Tokens (J);
+                  begin
+                     Tokens.Append (H);
+                  end;
+                  Reuse := True;
+                  exit;
+               end if;
+            end loop;
+            if not Reuse then
+               declare
+                  H : TopoProof.Topology.Vertices.Vertex_Handle;
+               begin
+                  TopoProof.Topology.Vertices.Create
+                    (Store, (X => P.X, Y => P.Y), H);
+                  Tokens.Append (H);
+               end;
+            end if;
+         end;
+      end loop;
+      for I in 2 .. N loop
+         if Tokens (I - 1) = Tokens (I) then
+            Record_Failure ("error: degenerate edge");
+            return;
+         end if;
+         declare
+            E : TopoProof.Topology.Edges.Edge_Handle;
+         begin
+            TopoProof.Topology.Edges.Create
+              (Links, Store, Tokens (I - 1), Tokens (I), E);
+            Handles (I - 1) := E;
+         end;
+      end loop;
+      OK := True;
+   end Build_Chain;
+
+   --  Classify the built chain exactly, the same way as the loop
+   --  client operation: on a valid loop the loop value is returned,
+   --  otherwise the client diagnostic is recorded.
+   procedure Classify_Chain
+     (Links   :        TopoProof.Topology.Edges.Edge_Store;
+      Store   :        TopoProof.Topology.Vertices.Vertex_Store;
+      Handles :        TopoProof.Topology.Loops.Edge_Handle_Array;
+      L       :    out TopoProof.Topology.Loops.Loop_2D;
+      Valid   :    out Boolean)
+   is
+   begin
+      case TopoProof.Topology.Loops.Classify_Loop (Links, Store,
+                                                   Handles)
+      is
+         when TopoProof.Topology.Loops.Valid_Loop =>
+            L := TopoProof.Topology.Loops.Make_Loop (Links, Store,
+                                                    Handles);
+            Valid := True;
+         when TopoProof.Topology.Loops.Open_Chain =>
+            Record_Failure ("error: open loop");
+            Valid := False;
+         when TopoProof.Topology.Loops.Orphan_Edge =>
+            Record_Failure ("error: orphan edge");
+            Valid := False;
+         when TopoProof.Topology.Loops.Missing_Endpoint =>
+            Record_Failure ("error: missing endpoint");
+            Valid := False;
+         when TopoProof.Topology.Loops.Disconnected_Chain =>
+            Record_Failure ("error: disconnected chain");
+            Valid := False;
+         when TopoProof.Topology.Loops.Degenerate_Support =>
+            Record_Failure ("error: degenerate edge support");
+            Valid := False;
+      end case;
+   end Classify_Chain;
+
+   procedure Make_Loop_Native (Data : in out HAC_Element_Array) is
+      N : constant Natural := Natural (Chain.Length);
+      Kind : Loop_Kind := Open_Chain;
+   begin
+      if N < 2 then
+         Record_Failure ("error: open loop");
+         Data (1) := Loop_To_HAC (Kind);
+         return;
+      elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
+         Record_Failure ("error: too many edges for one loop");
+         Data (1) := Loop_To_HAC (Kind);
+         return;
+      end if;
+
+      declare
+         Store : TopoProof.Topology.Vertices.Vertex_Store
+           (TopoProof.Topology.Vertices.Vertex_Count_Range
+              (Distinct_Count));
+         Links : TopoProof.Topology.Edges.Edge_Store
+           (TopoProof.Topology.Edges.Edge_Count_Range (N - 1));
+         Handles : TopoProof.Topology.Loops.Edge_Handle_Array (1 .. N - 1);
+         OK : Boolean;
+         L : TopoProof.Topology.Loops.Loop_2D;
+      begin
+         Build_Chain (Store, Links, Handles, OK);
+         if not OK then
+            Data (1) := Loop_To_HAC (Degenerate_Support);
+            return;
+         end if;
+
+         Classify_Chain (Links, Store, Handles, L, OK);
+         if OK then
+            case TopoProof.Topology.Loops.Loop_Orientation
+                 (Links, Store, L)
+            is
+               when TopoProof.Geometry.Segment_Sequences.
+                 Counter_Clockwise
+               =>
+                  Kind := Counter_Clockwise;
+               when TopoProof.Geometry.Segment_Sequences.Clockwise =>
+                  Kind := Clockwise;
+               when TopoProof.Geometry.Segment_Sequences.Degenerate =>
+                  Kind := Degenerate;
+            end case;
+         end if;
+      end;
+      Data (1) := Loop_To_HAC (Kind);
+   end Make_Loop_Native;
+
+   procedure Make_Face_Native (Data : in out HAC_Element_Array) is
+      N : constant Natural := Natural (Chain.Length);
+      Kind : Face_Kind := Face_Invalid_Boundary;
+   begin
+      if N < 2 then
+         Record_Failure ("error: open loop");
+         Data (1) := Face_To_HAC (Kind);
+         return;
+      elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
+         Record_Failure ("error: too many edges for one loop");
+         Data (1) := Face_To_HAC (Kind);
+         return;
+      end if;
+
+      declare
+         Store : TopoProof.Topology.Vertices.Vertex_Store
+           (TopoProof.Topology.Vertices.Vertex_Count_Range
+              (Distinct_Count));
+         Links : TopoProof.Topology.Edges.Edge_Store
+           (TopoProof.Topology.Edges.Edge_Count_Range (N - 1));
+         Handles : TopoProof.Topology.Loops.Edge_Handle_Array (1 .. N - 1);
+         OK : Boolean;
+         L : TopoProof.Topology.Loops.Loop_2D;
+      begin
+         Build_Chain (Store, Links, Handles, OK);
+         if not OK then
+            Data (1) := Face_To_HAC (Face_Invalid_Boundary);
+            return;
+         end if;
+
+         Classify_Chain (Links, Store, Handles, L, OK);
+         if OK then
+            case TopoProof.Topology.Faces.Classify_Face (Links, Store,
+                                                        L)
+            is
+               when TopoProof.Topology.Faces.Valid_Face =>
+                  declare
+                     F : constant TopoProof.Topology.Faces.Face_2D :=
+                       TopoProof.Topology.Faces.Make_Face
+                         (Links, Store, L);
+                  begin
+                     case TopoProof.Topology.Faces.Face_Orientation
+                          (Links, Store, F)
+                     is
+                        when TopoProof.Geometry.Segment_Sequences.
+                          Counter_Clockwise
+                        =>
+                           Kind := Face_Counter_Clockwise;
+                        when TopoProof.Geometry.Segment_Sequences.
+                          Clockwise
+                        =>
+                           Kind := Face_Clockwise;
+                        when TopoProof.Geometry.Segment_Sequences.
+                          Degenerate
+                        =>
+                           --  A valid face orientation is never
+                           --  degenerate: kernel contract.
+                           Kind := Face_Degenerate_Boundary;
+                     end case;
+                  end;
+               when TopoProof.Topology.Faces.Invalid_Boundary =>
+                  Record_Failure ("error: invalid loop");
+               when TopoProof.Topology.Faces.Degenerate_Boundary =>
+                  Kind := Face_Degenerate_Boundary;
+                  Record_Failure ("error: degenerate face boundary");
+            end case;
+         end if;
+      end;
+      Data (1) := Face_To_HAC (Kind);
+   end Make_Face_Native;
+
+   procedure Put_Loop_Native (Data : in out HAC_Element_Array) is
+   begin
+      case To_Loop_Kind (Data (1)) is
+         when Counter_Clockwise =>
+            Put_Line ("loop closed counter_clockwise");
+         when Clockwise =>
+            Put_Line ("loop closed clockwise");
+         when Degenerate =>
+            Put_Line ("loop closed degenerate");
+         when Open_Chain =>
+            Record_Failure ("error: open loop");
+         when Orphan_Edge =>
+            Record_Failure ("error: orphan edge");
+         when Missing_Endpoint =>
+            Record_Failure ("error: missing endpoint");
+         when Disconnected_Chain =>
+            Record_Failure ("error: disconnected chain");
+         when Degenerate_Support =>
+            Record_Failure ("error: degenerate edge support");
+      end case;
+   end Put_Loop_Native;
+
+   procedure Put_Face_Native (Data : in out HAC_Element_Array) is
+   begin
+      case To_Face_Kind (Data (1)) is
+         when Face_Counter_Clockwise =>
+            Put_Line ("face counter_clockwise");
+         when Face_Clockwise =>
+            Put_Line ("face clockwise");
+         when Face_Degenerate_Boundary =>
+            Record_Failure ("error: degenerate face boundary");
+         when Face_Invalid_Boundary =>
+            Record_Failure ("error: invalid loop");
+      end case;
+   end Put_Face_Native;
+
    procedure Register_All (BD : HAC_Sys.Builder.Build_Data) is
    begin
       Register (BD, Translate_Native'Access, "Translate");
@@ -340,7 +736,14 @@ package body TopoScript_API is
       Register (BD, Draw_Axes_Native'Access, "Draw_Axes");
       Register (BD, Draw_Point_Native'Access, "Draw_Point");
       Register (BD, Draw_Vector_Native'Access, "Draw_Vector");
+      Register (BD, Draw_Point_2D_Native'Access, "Draw_Point_2D");
+      Register (BD, Draw_Edge_Native'Access, "Draw_Edge");
       Register (BD, End_Image_Native'Access, "End_Image");
+      Register (BD, Add_Point_Native'Access, "Add_Point");
+      Register (BD, Make_Loop_Native'Access, "Make_Loop");
+      Register (BD, Make_Face_Native'Access, "Make_Face");
+      Register (BD, Put_Loop_Native'Access, "Put_Loop");
+      Register (BD, Put_Face_Native'Access, "Put_Face");
    end Register_All;
 
    function Last_Failure return String is

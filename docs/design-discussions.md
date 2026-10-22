@@ -180,6 +180,12 @@ settles part of this discussion:
   by HAC 0.45), string parameters are `VString`s (an unconstrained `String`
   formal is rejected), and a `VString` actual is a variable, so the image name
   of the drawing API is a declared `VString`;
+- HAC accepts one operation name for one native callback (no overloading),
+  and does not overload enumeration literals either: the loop and face
+  operations are named `Make_Loop` and `Make_Face` (`loop` is a reserved
+  word), their canonical outputs are `Put`, `Put_Loop` and `Put_Face`, and
+  the face kind literals are prefixed. The script chain identifies vertices
+  by position, where the client identifies them by name;
 - HAC integers are 64-bit while grid coordinates are not: the callbacks read
   the script values on the widest native integer and check the grid domain
   before any kernel call, because a native exception raised inside the HAC

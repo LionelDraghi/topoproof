@@ -179,6 +179,10 @@ package body TopoScript_Wrapper is
       Append_Line ("      DX, DY, DZ : Integer;");
       Append_Line ("   end record;");
       Append_Line ("");
+      Append_Line ("   type Point_2D is record");
+      Append_Line ("      X, Y : Integer;");
+      Append_Line ("   end record;");
+      Append_Line ("");
       Append_Line ("   procedure Translate");
       Append_Line
         ("      (P : in Point_3D; V : in Vector_3D; Result : out Point_3D)");
@@ -204,7 +208,41 @@ package body TopoScript_Wrapper is
          "Value : in Vector_3D; Color : in Color_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line
+        ("   procedure Draw_Point_2D (P : in Point_2D; " &
+         "Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
+        ("   procedure Draw_Edge (P, Q : in Point_2D; " &
+         "Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   procedure End_Image");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   type Loop_Kind is");
+      Append_Line ("      (Counter_Clockwise, Clockwise, Degenerate,");
+      Append_Line ("       Open_Chain, Orphan_Edge, Missing_Endpoint,");
+      Append_Line ("       Disconnected_Chain, Degenerate_Support);");
+      Append_Line ("");
+      Append_Line ("   type Face_Kind is");
+      Append_Line ("      (Face_Counter_Clockwise, Face_Clockwise,");
+      Append_Line ("       Face_Degenerate_Boundary, Face_Invalid_Boundary);");
+      Append_Line ("");
+      Append_Line ("   procedure Add_Point (P : in Point_2D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Loop (K : out Loop_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Face (K : out Face_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Loop (K : in Loop_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Face (K : in Face_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");

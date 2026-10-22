@@ -231,7 +231,9 @@ Put (Result);
 In this example, `Expected` is used only to explain the scenario visually. It
 does not determine the test verdict; the expected textual result remains in
 the bbt `Then` step. The image name is a `VString` variable: HAC passes
-strings by reference, and the calls to the operations are positional.
+strings by reference, and the calls to the operations are positional. The
+2D chain scenarios draw through `Draw_Point_2D` and `Draw_Edge`, the
+labeled segment arrows of the client diagrams.
 
 ## User macros and extensions
 

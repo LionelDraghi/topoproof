@@ -19,6 +19,21 @@ package TopoScript_API is
    --  the same type in the script world, with the same positions.
    type Color_Kind is (Blue, Green, Red);
 
+   --  The classification kinds of the loop and face operations: the
+   --  wrapper injects the same types in the script world, with the
+   --  same positions. The valid kinds carry the canonical result, the
+   --  others mirror the kernel validity kinds and their client
+   --  diagnostics. HAC does not overload enumeration literals, so the
+   --  face literals are prefixed.
+   type Loop_Kind is
+     (Counter_Clockwise, Clockwise, Degenerate,
+      Open_Chain, Orphan_Edge, Missing_Endpoint,
+      Disconnected_Chain, Degenerate_Support);
+
+   type Face_Kind is
+     (Face_Counter_Clockwise, Face_Clockwise,
+      Face_Degenerate_Boundary, Face_Invalid_Boundary);
+
    --  Register every native operation on the build data.
    procedure Register_All (BD : HAC_Sys.Builder.Build_Data);
 

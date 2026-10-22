@@ -24,6 +24,7 @@ the same point is a valid edge, but no valid loop contains it.
 - [Loops](#loops)
   - [Contents](#contents)
   - [Scenario: a triangle loop](#scenario-a-triangle-loop)
+  - [Scenario: a triangle loop built by script](#scenario-a-triangle-loop-built-by-script)
   - [Scenario: a clockwise square](#scenario-a-clockwise-square)
   - [Scenario: a closed backtrack is a degenerate loop](#scenario-a-closed-backtrack-is-a-degenerate-loop)
   - [Proved property](#proved-property)
@@ -43,6 +44,47 @@ the same point is a valid edge, but no valid loop contains it.
    edge 3 vertex 3 vertex 1
    loop closed counter_clockwise
    ```
+
+## Scenario: a triangle loop built by script
+
+The same triangle as the previous scenario, written as a TopoScript:
+the chain accumulates the points, and the classification is the same
+kernel one. In the script chain, a repeated position closes on the
+same vertex. The script draws its own diagram, the same geometry as
+the one above, for a side-by-side comparison.
+
+- Given the file `triangle.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (5, 5);
+  C    : constant Point_2D := (0, 5);
+  Kind : Loop_Kind;
+  Name : VString := +"../docs/features/images/loops_1_script.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Green);
+  Draw_Edge (B, C, Green);
+  Draw_Edge (C, A, Green);
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (A);
+
+  Make_Loop (Kind);
+
+  Put_Loop (Kind);
+  End_Image;
+  ```
+- When I successfully run `../bin/topocli run triangle.topo`
+- Then the output is `loop closed counter_clockwise`
+- And the file `../docs/features/images/loops_1_script.svg` contains `(5, 5)`
+
+![Triangle loop drawn by the script](images/loops_1_script.svg)
 
 ## Scenario: a clockwise square
 
