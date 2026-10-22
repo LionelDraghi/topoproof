@@ -1,4 +1,4 @@
-# TopoProof
+# TopoProof <!-- omit from toc -->
 
 [![image](https://img.shields.io/badge/-inside-blue?logo=ada&logoColor=white&labelColor=grey&logoSize=auto)](https://ada-lang.io/)
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/topoproof.json)](https://alire.ada.dev/crates/topoproof.html)
@@ -19,14 +19,12 @@ TopoProof replaces the historical model of continuous geometry, approximate comp
 Why? Because of one too many of these:
 > Job 1, 'freecad&' terminated by signal SIGSEGV
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [TopoProof](#topoproof)
-  - [Contents](#contents)
-  - [Status](#status)
-  - [Documentation](#documentation)
-  - [Licence](#licence)
-  - [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
+- [Status](#status)
+- [Documentation](#documentation)
+- [Licence](#licence)
+- [Command-line application and executable documentation](#command-line-application-and-executable-documentation)
 
 ## Status
 

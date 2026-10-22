@@ -1,6 +1,6 @@
-# Numeric model
+# Numeric model <!-- omit from toc -->
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Status](#status)
 - [Geometric quantum](#geometric-quantum)

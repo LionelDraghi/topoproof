@@ -1,4 +1,4 @@
-# Displacement
+# Displacement <!-- omit from toc -->
 
 `displacement` computes the exact vector between two points:
 `topocli displacement A=(AX, AY, AZ) B=(BX, BY, BZ)`.
@@ -6,7 +6,7 @@ The canonical result is `vector DX DY DZ`.
 
 ![Displacement diagram](images/displacement_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Scenario: compute command-line values](#scenario-compute-command-line-values)
 - [Scenario: inject parameters from an input file](#scenario-inject-parameters-from-an-input-file)

@@ -1,4 +1,19 @@
-# TopoProof design discussions
+# TopoProof design discussions <!-- omit from toc -->
+
+- [DD-001: validity of segment sequences and future B-Rep boundaries](#dd-001-validity-of-segment-sequences-and-future-b-rep-boundaries)
+  - [Former situation](#former-situation)
+  - [Decision](#decision)
+  - [Rationale](#rationale)
+  - [Remaining questions, deferred to milestone 5](#remaining-questions-deferred-to-milestone-5)
+- [DD-002: geometry and topology separation, and the vertex store](#dd-002-geometry-and-topology-separation-and-the-vertex-store)
+  - [Problem](#problem)
+  - [Proposed decisions](#proposed-decisions)
+  - [Vertical increments](#vertical-increments)
+  - [Open questions](#open-questions)
+- [DD-003: TopoScript source form and bbt integration](#dd-003-toposcript-source-form-and-bbt-integration)
+  - [Current situation](#current-situation)
+  - [Security and API exposure](#security-and-api-exposure)
+  - [Questions to arbitrate](#questions-to-arbitrate)
 
 This document records design topics. A discussion is not a normative rule
 until its status becomes **decided** and the decision is reflected in the

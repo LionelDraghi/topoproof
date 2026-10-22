@@ -1,4 +1,4 @@
-# TopoProof task and decision list
+# TopoProof task and decision list <!-- omit from toc -->
 
 This file records unfinished work that must remain visible in the repository.
 Entries use one of the following categories:

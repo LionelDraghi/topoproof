@@ -1,17 +1,15 @@
-# Development guide
+# Development guide <!-- omit from toc -->
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [Development guide](#development-guide)
-  - [Contents](#contents)
-  - [Repository responsibilities](#repository-responsibilities)
-  - [Workflow](#workflow)
-  - [Commands](#commands)
-  - [Build profiles](#build-profiles)
-  - [Change acceptance](#change-acceptance)
-    - [Integration gate](#integration-gate)
-  - [Repository hygiene](#repository-hygiene)
-  - [Executable documentation](#executable-documentation)
+- [Repository responsibilities](#repository-responsibilities)
+- [Workflow](#workflow)
+- [Commands](#commands)
+- [Build profiles](#build-profiles)
+- [Change acceptance](#change-acceptance)
+  - [Integration gate](#integration-gate)
+- [Repository hygiene](#repository-hygiene)
+- [Executable documentation](#executable-documentation)
 
 ## Repository responsibilities
 

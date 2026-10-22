@@ -1,11 +1,11 @@
-# Contours and Loops in 2D
+# Contours and Loops in 2D <!-- omit from toc -->
 
 This feature introduces oriented sequences of 2D segments to form **contours**
 and **loops**, with exact verification of topological properties on the
 discrete grid. The operations classify and validate geometric configurations
 without approximation, tolerance, or floating-point arithmetic.
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Types and Definitions](#types-and-definitions)
   - [`Segment_Sequence_2D`](#segment_sequence_2d)
@@ -45,9 +45,9 @@ without approximation, tolerance, or floating-point arithmetic.
   - [Scenario: orientation of extreme loop](#scenario-orientation-of-extreme-loop)
 - [Proved Properties](#proved-properties)
   - [Closure](#closure)
-  - [Contour Orientation](#contour-orientation-2)
+  - [Contour Orientation](#contour-orientation-1)
   - [Numeric Safety](#numeric-safety)
-  - [Self-Intersection](#self-intersection-2)
+  - [Self-Intersection](#self-intersection-1)
   - [Validity](#validity)
   - [Invariance of the Signed Area](#invariance-of-the-signed-area)
 - [Design Notes](#design-notes)

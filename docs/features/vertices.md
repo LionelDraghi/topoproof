@@ -1,4 +1,4 @@
-# Vertices
+# Vertices <!-- omit from toc -->
 
 `vertex` creates topological vertices from 2D points:
 `topocli vertex A=(X, Y) B=(X, Y) ...`.
@@ -12,15 +12,13 @@ remain distinct: identity is not position (design decision DD-002).
 
 ![Vertex diagram](images/vertices_1.svg)
 
-## Contents
+## Contents <!-- omit from toc -->
 
-- [Vertices](#vertices)
-  - [Contents](#contents)
-  - [Scenario: create a vertex from a point](#scenario-create-a-vertex-from-a-point)
-  - [Scenario: two vertices at the same point are distinct](#scenario-two-vertices-at-the-same-point-are-distinct)
-  - [Scenario: vertices are numbered in creation order](#scenario-vertices-are-numbered-in-creation-order)
-  - [Proved property](#proved-property)
-  - [Scenario: a planar vertex needs a 2D point](#scenario-a-planar-vertex-needs-a-2d-point)
+- [Scenario: create a vertex from a point](#scenario-create-a-vertex-from-a-point)
+- [Scenario: two vertices at the same point are distinct](#scenario-two-vertices-at-the-same-point-are-distinct)
+- [Scenario: vertices are numbered in creation order](#scenario-vertices-are-numbered-in-creation-order)
+- [Proved property](#proved-property)
+- [Scenario: a planar vertex needs a 2D point](#scenario-a-planar-vertex-needs-a-2d-point)
 
 ## Scenario: create a vertex from a point
 

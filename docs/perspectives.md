@@ -1,8 +1,8 @@
-# TopoProof perspectives
+# TopoProof perspectives <!-- omit from toc -->
 
 > **Status: research document.** This document is non-normative and does not define requirements for the current TopoProof core.
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [Certified geometry and intervals](#certified-geometry-and-intervals)
 - [Progressive refinement](#progressive-refinement)

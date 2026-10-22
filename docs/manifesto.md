@@ -1,6 +1,6 @@
-# TopoProof manifesto
+# TopoProof manifesto <!-- omit from toc -->
 
-## Contents
+## Contents <!-- omit from toc -->
 
 - [A provable 3D CAD kernel](#a-provable-3d-cad-kernel)
 - [The paradigm](#the-paradigm)
