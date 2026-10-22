@@ -144,13 +144,51 @@ bbt scenarios invoke `topocli` with increasingly long command lines. As operatio
 become richer, those command lines become difficult to write, read, review, and
 maintain. Milestone 6 of the development plan proposes TopoScript: a lightweight
 Ada scripting form where the user writes only declarations and statements, and
-`topocli` generates the hidden Ada compilation-unit wrapper before passing the
+the tool generates the hidden Ada compilation-unit wrapper before passing the
 complete source to HAC.
+
+The feasibility prototype (`tools/toposcript-lab`) validates the direction and
+settles part of this discussion:
+
+- HAC imports native **procedures** only, not functions: an operation returns
+  its result through an `out` parameter (`Translate (P, D, Result)`), and the
+  canonical representation of a value (`Put (Result)`) is a native operation,
+  guaranteeing the same output as the topocli client. The procedure-based API
+  covers the need; importing native **functions** (the `Import` aspect of HAC
+  0.45 emits a procedure call, without a return value) would later allow the
+  `Result := Translate (P, D)` form — a candidate **contribution to the HAC
+  project** upstream, kept here as an option for when the scripting API
+  stabilises;
+- HAC compiles the wrapped source from an **in-memory stream** derived from
+  `Ada.Streams.Root_Stream_Type`, without any temporary file: the wrapper
+  source never reaches the file system;
+- the HAC error pipe receives a structured diagnostic kit, so the tool maps
+  every compilation diagnostic back to the fragment: the path, the line and
+  the column refer to the `.topo` source, in both the declaration region and
+  the statement region;
+- the initial subset is **object declarations followed by statements**: a
+  declaration after the first executable statement, and the declaration forms
+  outside the subset (`type`, `procedure`, `use`, ...), are rejected before
+  any compilation with the fragment location;
+- the scenario wording is settled by `docs/features/toposcript.md`, now
+  registered in the `make test` scenario list: the embedded fragment is
+  written by `` Given the file `x.topo` `` followed by a fenced code block,
+  an existing bbt step; the verdict steps are the same ones as every other
+  feature page;
+- the HAC subset bounds the scripting API shape: calls to imported operations
+  accept positional associations only (a named association is not implemented
+  by HAC 0.45), string parameters are `VString`s (an unconstrained `String`
+  formal is rejected), and a `VString` actual is a variable, so the image name
+  of the drawing API is a declared `VString`;
+- HAC integers are 64-bit while grid coordinates are not: the callbacks read
+  the script values on the widest native integer and check the grid domain
+  before any kernel call, because a native exception raised inside the HAC
+  virtual machine does not propagate to the tool.
 
 The source form preserves ordinary Ada notation: `:=` for assignment, `=>` for
 named associations, `;` as the statement terminator, `--` for comments, explicit
-types and constants. Names may remain qualified where qualification improves
-clarity or removes ambiguity, for example `STEP_Files.Export (P, "piece.step");`.
+types and constants. Qualified names (`STEP_Files.Export (P, "piece.step");`)
+are a later concern: the wrapper currently owns the whole context.
 
 A script may draw one coherent diagnostic image (axes, input geometry, expected
 result, actual result in a single scene, actual result in red on failure), and a
@@ -175,15 +213,11 @@ trusted TopoProof test suite.
 
 ### Questions to arbitrate
 
-1. Which exact existing bbt `Given` step should hold the embedded source block?
-2. Can HAC consume the wrapped source directly from memory, or should the first
-   integration use a temporary file?
-3. Which subset of Ada declarations and statements will TopoScript initially
-   support?
-4. How should generated-wrapper line numbers be mapped back to lines in the
-   Markdown scenario?
-5. What canonical `Put` representations are required for TopoProof public types?
-6. Which drawing primitives are needed for the first migrated scenarios?
-7. How should script and scripting-API compatibility be versioned?
-8. Which capabilities must be restricted before standalone user extensions are
+1. Which control structures and composite declarations enter the subset after
+   the initial one (object declarations followed by statements)?
+2. What canonical `Put` representations are required for the public types
+   beyond points (vectors, intersections, contours, topological entities)?
+3. Which drawing primitives are needed for the first migrated scenarios?
+4. How should script and scripting-API compatibility be versioned?
+5. Which capabilities must be restricted before standalone user extensions are
    considered safe?

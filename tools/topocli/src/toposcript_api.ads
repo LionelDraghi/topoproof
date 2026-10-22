@@ -7,13 +7,17 @@
 
 --  Native side of the TopoScript scripting API (development plan,
 --  Milestone 6): the callbacks run the proved kernel operations and
---  exchange values with the script through HAC elements. The operations
---  are registered before the build, so the script sees them under their
---  TopoScript names.
+--  exchange values with the script through HAC elements. The
+--  operations are registered before the build, so the script sees them
+--  under their TopoScript names.
 
 with HAC_Sys.Builder;
 
 package TopoScript_API is
+
+   --  The drawing colors of the diagnostic images: the wrapper injects
+   --  the same type in the script world, with the same positions.
+   type Color_Kind is (Blue, Green, Red);
 
    --  Register every native operation on the build data.
    procedure Register_All (BD : HAC_Sys.Builder.Build_Data);

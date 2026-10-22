@@ -16,6 +16,10 @@ package Topodraw is
    type Point_Rec is record
       Name : Ada.Strings.Unbounded.Unbounded_String;
       X, Y, Z : Integer;
+      --  SVG fill color of the point: empty keeps the default blue of
+      --  the rendered diagrams.
+      Color : Ada.Strings.Unbounded.Unbounded_String :=
+        Ada.Strings.Unbounded.Null_Unbounded_String;
    end record;
 
    package Scene_Point_Vectors is new Ada.Containers.Indefinite_Vectors
@@ -25,6 +29,10 @@ package Topodraw is
       From_Name : Ada.Strings.Unbounded.Unbounded_String;
       To_Name   : Ada.Strings.Unbounded.Unbounded_String;
       Label     : Ada.Strings.Unbounded.Unbounded_String;
+      --  SVG stroke color of the vector: empty keeps the default green
+      --  of the rendered diagrams, arrow head included.
+      Color : Ada.Strings.Unbounded.Unbounded_String :=
+        Ada.Strings.Unbounded.Null_Unbounded_String;
    end record;
 
    package Scene_Vector_Vectors is new Ada.Containers.Indefinite_Vectors

@@ -1,3 +1,4 @@
+with "hac";
 with "../../topoproof.gpr";
 
 --  The client of the proved kernel: command-line parsing, input validation

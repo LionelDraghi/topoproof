@@ -170,7 +170,8 @@ package body Topodraw is
                        (Point_Rec'(Name     => Name,
                          X         => Integer'Value (To_String (Cx)),
                          Y         => Integer'Value (To_String (Cy)),
-                         Z         => Integer'Value (To_String (Cz))));
+                         Z         => Integer'Value (To_String (Cz)),
+                         others    => <>));
                   exception
                      when Constraint_Error =>
                         raise Scene_Error
@@ -187,7 +188,8 @@ package body Topodraw is
                      Head (To_String (To_Name), To_Name, Rest_Label);
                      S.Vectors.Append (Vector_Rec'(From_Name => From_Name,
                                     To_Name   => To_Name,
-                                    Label     => Rest_Label));
+                                    Label     => Rest_Label,
+                                    others    => <>));
                   end;
 
                else
@@ -535,10 +537,15 @@ package body Topodraw is
                      end if;
                   end loop;
                   if Dup = 0 then
-                     Circle (Pos, 5.0, Pt_Fill, "#ffffff", 1.5);
+                     Circle (Pos, 5.0,
+                             (if Pt.Color = "" then Pt_Fill
+                              else To_String (Pt.Color)),
+                             "#ffffff", 1.5);
                   else
                      Circle (Pos, Long_Float (5 + 4 * Dup), "none",
-                             Pt_Fill, 1.5, "3 2");
+                             (if Pt.Color = "" then Pt_Fill
+                              else To_String (Pt.Color)),
+                             1.5, "3 2");
                   end if;
                   declare
                      Label : constant String :=
@@ -553,33 +560,95 @@ package body Topodraw is
                end;
             end loop;
 
-            Append (Buffer, "<defs><marker id=""arrow"" markerWidth=""10"" "
-                    & "markerHeight=""10"" refX=""8"" refY=""3"" "
-                    & "orient=""auto""><path d=""M0,0 L8,3 L0,6 z"" fill="""
-                    & Vec_Col & """/></marker></defs>" & ASCII.LF);
-            for V of S.Vectors loop
-               declare
-                  From : constant Point_Rec :=
-                    Find_Point (S, To_String (V.From_Name));
-                  To   : constant Point_Rec :=
-                    Find_Point (S, To_String (V.To_Name));
-                  A : constant Screen2 := To_Screen ((From.X, From.Y, From.Z));
-                  B : constant Screen2 := To_Screen ((To.X, To.Y, To.Z));
-               begin
+            declare
+               --  One arrow marker per distinct vector color: the
+               --  default color keeps the plain arrow marker, so the
+               --  CLI scenes render exactly as before.
+               Max_Colors : constant := 8;
+               Colors : array (1 .. Max_Colors) of Unbounded_String;
+               Count  : Natural := 0;
 
-                  if Same_Position (From, To) then
-                     raise Scene_Error
-                       with "vector " & To_String (V.From_Name) & " -> "
-                            & To_String (V.To_Name)
-                            & ": coincident points";
+               procedure Register_Color (Color : Unbounded_String) is
+                  Found : Boolean := False;
+               begin
+                  if Color /= "" then
+                     for K in 1 .. Count loop
+                        if Colors (K) = Color then
+                           Found := True;
+                        end if;
+                     end loop;
+                     if not Found then
+                        if Count = Max_Colors then
+                           raise Scene_Error with "too many vector colors";
+                        end if;
+                        Count := Count + 1;
+                        Colors (Count) := Color;
+                     end if;
                   end if;
-                  Line (A, B, Vec_Col, 2.0, "", "url(#arrow)");
-                  if To_String (V.Label) /= "" then
-                     Text_At ((A.X + B.X) / 2.0, (A.Y + B.Y) / 2.0 - 8.0,
-                              To_String (V.Label), Vec_Col);
+               end Register_Color;
+
+               function Id_Of (Color : Unbounded_String) return String is
+               begin
+                  if Color = "" then
+                     return "arrow";
                   end if;
-               end;
-            end loop;
+                  for K in 1 .. Count loop
+                     if Colors (K) = Color then
+                        return "arrow" & Trim (K'Image, Both);
+                     end if;
+                  end loop;
+                  return "arrow";
+               end Id_Of;
+
+            begin
+               for V of S.Vectors loop
+                  Register_Color (V.Color);
+               end loop;
+
+               Append (Buffer, "<defs><marker id=""arrow"" markerWidth=""10"" "
+                       & "markerHeight=""10"" refX=""8"" refY=""3"" "
+                       & "orient=""auto""><path d=""M0,0 L8,3 L0,6 z"" fill="""
+                       & Vec_Col & """/></marker>");
+               for K in 1 .. Count loop
+                  Append (Buffer, "<marker id=""arrow" & Trim (K'Image, Both)
+                          & """ markerWidth=""10"" "
+                          & "markerHeight=""10"" refX=""8"" refY=""3"" "
+                          & "orient=""auto""><path d=""M0,0 L8,3 L0,6 z"""
+                          & " fill=""" & To_String (Colors (K))
+                          & """/></marker>");
+               end loop;
+               Append (Buffer, "</defs>" & ASCII.LF);
+
+               for V of S.Vectors loop
+                  declare
+                     From : constant Point_Rec :=
+                       Find_Point (S, To_String (V.From_Name));
+                     To   : constant Point_Rec :=
+                       Find_Point (S, To_String (V.To_Name));
+                     A : constant Screen2 :=
+                       To_Screen ((From.X, From.Y, From.Z));
+                     B : constant Screen2 := To_Screen ((To.X, To.Y, To.Z));
+                     Line_Color : constant String :=
+                       (if V.Color = "" then Vec_Col
+                        else To_String (V.Color));
+                  begin
+
+                     if Same_Position (From, To) then
+                        raise Scene_Error
+                          with "vector " & To_String (V.From_Name) & " -> "
+                               & To_String (V.To_Name)
+                               & ": coincident points";
+                     end if;
+                     Line (A, B, Line_Color, 2.0, "",
+                           "url(#" & Id_Of (V.Color) & ")");
+                     if To_String (V.Label) /= "" then
+                        Text_At ((A.X + B.X) / 2.0,
+                                 (A.Y + B.Y) / 2.0 - 8.0,
+                                 To_String (V.Label), Line_Color);
+                     end if;
+                  end;
+               end loop;
+            end;
 
             Append (Buffer, "</svg>");
          end;

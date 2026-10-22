@@ -1,40 +1,43 @@
 # TopoScript
 
-> **Status: proposed (Milestone 6).** TopoScript is not implemented yet.
-> This page is not registered in the `make test` scenario list, and its
-> scenario blocks describe the intended structure without authorising a
-> change to the bbt language. The step wording is arbitrated in
-> `DD-003`.
+> **Status: implemented (Milestone 6).** `topocli run FILE.topo` executes
+> a TopoScript through the embedded HAC interpreter. The scenario blocks
+> of this page are run by `make test`, like every feature page under
+> `docs/features/`. The arbitration record lives in `DD-003`.
 
 TopoScript is a lightweight Ada-based scripting facility, implemented with
 HAC, for two complementary uses: readable executable inputs for bbt
-scenarios, and the future language for user macros, modules, and extensions.
-TopoScript complements the graphical user interface; it does not turn
-TopoProof into an Ada equivalent of OpenSCAD. The HAC interpreter and its
-Ada subset are presented in
+scenarios, and the future language for user macros, modules, and
+extensions. TopoScript complements the graphical user interface; it does
+not turn TopoProof into an Ada equivalent of OpenSCAD. The HAC interpreter
+and its Ada subset are presented in
 [Ada and a mini-Ada interpreter, FOSDEM 2025](https://github.com/zertovitch/hac/blob/master/doc/ada_mini_ada_fosdem_2025.pdf).
 
 ## Contents
 
 - [Source form](#source-form)
-- [Use in bbt scenarios](#use-in-bbt-scenarios)
 - [Observable result and verdict](#observable-result-and-verdict)
 - [Output contract](#output-contract)
+- [Scenarios](#scenarios)
+  - [Scenario: translate a point and a vector](#scenario-translate-a-point-and-a-vector)
+  - [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
+  - [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
+  - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
 - [Diagnostic drawing](#diagnostic-drawing)
 - [User macros and extensions](#user-macros-and-extensions)
 - [CLI direction](#cli-direction)
 
 ## Source form
 
-A TopoScript contains Ada declarations followed by Ada statements, without
-compilation-unit boilerplate:
+A TopoScript contains object declarations followed by executable
+statements, without compilation-unit boilerplate:
 
 ```ada
-P      : constant Point_3D := Point (10, -20, 30);
-D      : constant Vector_3D := Vector (5, 7, -9);
+P      : constant Point_3D := (10, -20, 30);
+D      : constant Vector_3D := (5, 7, -9);
 Result : Point_3D;
 
-Result := Translate (P, D);
+Translate (P, D, Result);
 
 Put (Result);
 ```
@@ -51,55 +54,26 @@ begin
 end ...;
 ```
 
-`topocli` generates that wrapper before passing the complete source to HAC.
-Names may remain qualified where qualification improves clarity or removes
-ambiguity:
-
-```ada
-STEP_Files.Export (P, "piece.step");
-```
+`topocli` generates that wrapper before passing the complete source to
+HAC. The scripting API (`Point_3D`, `Vector_3D`, the operations) is
+injected before the user declarations: HAC imports native procedures
+only, so each operation returns its result through an `out` parameter,
+and `Put` writes the canonical representation of its value natively,
+the same one as the other topocli operations.
 
 TopoScript preserves ordinary Ada notation, including:
 
 - `:=` for assignment;
-- `=>` for named associations;
+- `=>` for named associations, in aggregates; the calls to the
+  scripting operations are positional, like every native operation;
 - `;` as the statement terminator;
 - `--` for comments;
 - explicit types and constants;
 - the control structures supported by the selected HAC subset.
 
 Declarations must precede executable statements: a declaration appearing
-after the first executable statement is rejected.
-
-## Use in bbt scenarios
-
-The TopoScript source is embedded directly in a `Given` step, because the
-scenario must remain self-contained. The temporary, scenario-local `.topo`
-file is an execution artefact produced from the embedded block; it is not a
-separately maintained test source.
-
-The intended scenario structure is:
-
-````markdown
-## Scenario: translate command-line values
-
-- Given the file `translation.topo` contains:
-  ```ada
-  P      : constant Point_3D := Point (10, -20, 30);
-  D      : constant Vector_3D := Vector (5, 7, -9);
-  Result : Point_3D;
-
-  Result := Translate (P, D);
-
-  Put (Result);
-  ```
-
-- When I successfully run `../bin/topocli run translation.topo`
-- Then the output is `point 15 -13 21`
-````
-
-The exact wording of the `Given` and execution steps must be selected from
-syntax already supported by bbt (see `DD-003`).
+after the first executable statement is rejected before any compilation,
+and so are the declaration forms the initial subset does not cover.
 
 ## Observable result and verdict
 
@@ -110,13 +84,7 @@ representation:
 Put (Result);
 ```
 
-The scenario retains the expected value:
-
-```markdown
-- Then the output is `point 15 -13 21`
-```
-
-This separation is mandatory:
+The scenario retains the expected value. This separation is mandatory:
 
 - TopoScript defines the input and performs the operation;
 - `Put` exposes the actual observable result;
@@ -132,43 +100,138 @@ Script execution preserves a stable separation between outputs:
 
 - standard output contains the canonical value inspected by bbt;
 - standard error contains diagnostics and execution errors;
-- generated files contain optional visual or model artefacts;
 - the process status reports successful or failed execution.
 
-Diagnostic messages must not pollute the canonical value written to standard
-output. Known TopoProof failures remain observable through the same textual
-and process-status conventions used by existing bbt scenarios.
+Diagnostic messages must not pollute the canonical value written to
+standard output. Compilation diagnostics refer to the fragment: the
+path, the line and the column are the ones of the `.topo` source, not
+of the generated wrapper.
+
+## Scenarios
+
+The scenario embeds the TopoScript in a `Given` step: the temporary
+`.topo` file is an execution artefact produced by bbt, not a separately
+maintained test source.
+
+## Scenario: translate a point and a vector
+
+- Given the file `translate.topo`
+  ```ada
+  P      : constant Point_3D := (10, -20, 30);
+  D      : constant Vector_3D := (5, 7, -9);
+  Result : Point_3D;
+
+  Translate (P, D, Result);
+
+  Put (Result);
+  ```
+- When I successfully run `../bin/topocli run translate.topo`
+- Then the output is `point 15 -13 21`
+
+## Scenario: reject an unrepresentable translation
+
+The point starts on the corner of the grid; the translation would move
+it one unit beyond the largest representable position.
+
+- Given the file `translate_beyond.topo`
+  ```ada
+  P      : constant Point_3D := (1073741823, 0, 0);
+  D      : constant Vector_3D := (1, 0, 0);
+  Result : Point_3D;
+
+  Translate (P, D, Result);
+
+  Put (Result);
+  ```
+- When I run `../bin/topocli run translate_beyond.topo`
+- Then the error output is `error: translation is not representable`
+- And there is an error
+
+## Scenario: reject a declaration after the first statement
+
+The wrapper rejects the fragment before any compilation: declarations
+must precede the executable statements.
+
+- Given the file `late_declaration.topo`
+  ```ada
+  P : constant Point_3D := (10, -20, 30);
+
+  Put (P);
+
+  Q : Point_3D;
+  ```
+- When I run `../bin/topocli run late_declaration.topo`
+- Then the error output is
+  ```text
+  error: late_declaration.topo:5: declaration after the first executable statement
+  ```
+- And there is an error
+
+## Scenario: draw the diagnostic image of the translation
+
+The script draws one image containing the axes, the input geometry
+(`P`, blue), the expected result (`Expected`, green) and the actual
+result (`Result`, red on the same position): a failure is immediately
+visible. The image is a generated file: the canonical standard output
+carries the result only.
+
+- Given the file `translate_draw.topo`
+  ```ada
+  P        : constant Point_3D := (10, -20, 30);
+  D        : constant Vector_3D := (5, 7, -9);
+  Expected : constant Point_3D := (15, -13, 21);
+  Result   : Point_3D;
+  Name     : VString := +"../docs/features/images/toposcript_1.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point (P, Blue);
+  Draw_Vector (P, D, Blue);
+  Draw_Point (Expected, Green);
+
+  Translate (P, D, Result);
+
+  Draw_Point (Result, Red);
+  End_Image;
+
+  Put (Result);
+  ```
+- When I successfully run `../bin/topocli run translate_draw.topo`
+- Then the output is `point 15 -13 21`
+- And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`
+
+![Diagnostic image of the translation](images/toposcript_1.svg)
 
 ## Diagnostic drawing
 
-A TopoScript may generate a single diagnostic image containing all useful
-elements of the scenario:
+A script generates one diagnostic image through the drawing API,
+rendered by the topodraw renderer:
 
 ```ada
-P        : constant Point_3D := Point (10, -20, 30);
-D        : constant Vector_3D := Vector (5, 7, -9);
-Expected : constant Point_3D := Point (15, -13, 21);
+P        : constant Point_3D := (10, -20, 30);
+D        : constant Vector_3D := (5, 7, -9);
+Expected : constant Point_3D := (15, -13, 21);
 Result   : Point_3D;
+Name     : VString := +"translation.svg";
 
-Drawing.Begin_Image ("translation.svg");
-Drawing.Draw_Axes;
-Drawing.Draw_Point (P, Color => Blue);
-Drawing.Draw_Vector (Origin => P, Value => D, Color => Blue);
-Drawing.Draw_Point (Expected, Color => Green);
+Begin_Image (Name);
+Draw_Axes;
+Draw_Point (P, Blue);
+Draw_Vector (P, D, Blue);
+Draw_Point (Expected, Green);
 
-Result := Translate (P, D);
+Translate (P, D, Result);
 
-Drawing.Draw_Point (Result, Color => Red);
-Drawing.End_Image;
+Draw_Point (Result, Red);
+End_Image;
 
 Put (Result);
 ```
 
 In this example, `Expected` is used only to explain the scenario visually. It
 does not determine the test verdict; the expected textual result remains in
-the bbt `Then` step. This replaces multiple disconnected image-generation
-commands with one script-controlled scene and makes failures easier to
-diagnose.
+the bbt `Then` step. The image name is a `VString` variable: HAC passes
+strings by reference, and the calls to the operations are positional.
 
 ## User macros and extensions
 
@@ -190,18 +253,17 @@ and the scripting API are stable.
 
 ## CLI direction
 
-The intended command form is:
+The command form is:
 
 ```text
 topocli run FILE.topo
 ```
 
-For bbt, `FILE.topo` is created by an existing `Given` step from the source
-embedded in the scenario. Useful diagnostic options may later include:
+Useful diagnostic options may later include:
 
 ```text
 topocli run FILE.topo --show-generated-source
 topocli check FILE.topo
 ```
 
-These options are suggestions, not requirements for the first increment.
+These options are suggestions, not requirements for the next increments.
