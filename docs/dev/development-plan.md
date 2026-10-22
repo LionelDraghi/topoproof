@@ -26,23 +26,32 @@
   - [Delivery Increments](#delivery-increments)
   - [Out of Scope](#out-of-scope)
   - [Completion Criteria](#completion-criteria-1)
-- [Milestone 7 - Transition to 3D](#milestone-7---transition-to-3d)
+- [TopoScript consolidation](#toposcript-consolidation)
   - [Goal](#goal-2)
   - [Deliverables](#deliverables-2)
   - [Capabilities](#capabilities-2)
   - [Invariants](#invariants-2)
-  - [Proof Objectives](#proof-objectives-2)
   - [Executable Scenarios](#executable-scenarios-2)
+  - [Delivery Increments](#delivery-increments-1)
+  - [Out of Scope](#out-of-scope-1)
   - [Completion Criteria](#completion-criteria-2)
-- [Milestone 8 - Minimal B-Rep](#milestone-8---minimal-b-rep)
+- [Milestone 7 - Transition to 3D](#milestone-7---transition-to-3d)
   - [Goal](#goal-3)
   - [Deliverables](#deliverables-3)
   - [Capabilities](#capabilities-3)
   - [Invariants](#invariants-3)
-  - [Proof Objectives](#proof-objectives-3)
+  - [Proof Objectives](#proof-objectives-2)
   - [Executable Scenarios](#executable-scenarios-3)
-  - [Out of Scope](#out-of-scope-1)
   - [Completion Criteria](#completion-criteria-3)
+- [Milestone 8 - Minimal B-Rep](#milestone-8---minimal-b-rep)
+  - [Goal](#goal-4)
+  - [Deliverables](#deliverables-4)
+  - [Capabilities](#capabilities-4)
+  - [Invariants](#invariants-4)
+  - [Proof Objectives](#proof-objectives-3)
+  - [Executable Scenarios](#executable-scenarios-4)
+  - [Out of Scope](#out-of-scope-2)
+  - [Completion Criteria](#completion-criteria-4)
 - [Completion rule](#completion-rule)
 
 ## Strategy
@@ -265,6 +274,142 @@ bbt scenario
 - Compilation and runtime errors refer clearly to the scenario and relevant
   source line.
 - Existing CLI-specific tests continue to exercise the real CLI syntax.
+
+
+## TopoScript consolidation
+
+> **Status: planned for 0.1.4-dev.** This subject is deliberately
+> inserted between milestones: the implementation review of
+> Milestone 6 validates the architecture and asks for maintainability
+> work before the 3D types arrive. The full review content lives in
+> this section and in the `TDL` entries it references; the review file
+> itself is not archived in the repository.
+
+### Goal
+
+Preserve the validated Milestone 6 architecture while stopping the
+growth of the integration layer: make the execution state explicit,
+split the native scripting API by responsibility, share the HAC
+conversions and the canonical textual representations, and fix the
+wrapper source-buffer ownership, before planes, shells, solids, file
+import/export, or GUI commands make the scripting layer difficult to
+maintain.
+
+### Deliverables
+
+- `Script_Session`, an explicit limited private execution session owning
+  the failure, the image state, the drawing scene, the anchor counter
+  and the topology chain, with a reliable `Reset`;
+- `TopoScript_API` split by domain, the root package coordinating the
+  callback registration only: `.Conversions`, `.Geometry`, `.Topology`,
+  `.Drawing`, `.Output`, `.Session`;
+- conversion helpers between the HAC element arrays and the TopoProof
+  types (`Read_Point_2D`, `Read_Point_3D`, `Read_Vector_3D`,
+  `Write_Point_3D`), replacing the per-callback decoding duplication;
+- one implementation of each canonical textual representation
+  (`Image (Point_3D)`, `Image (Loop_Kind)`, `Image (Face_Kind)`),
+  shared by the `topocli` commands, the `Put` callbacks and the
+  diagnostics;
+- the wrapper source-buffer ownership fixed: the previous allocation
+  is reclaimed, or the source lives in the stream object;
+- bbt scenarios covering the wrapper and session edge cases that are
+  observable through `topocli run`.
+
+### Capabilities
+
+- A session owns the whole mutable execution state: two consecutive
+  script executions start from a clean state, with no stale failure,
+  chain, or image, without relying on process restart;
+- a native callback focuses on its operation: the reading, domain
+  checking and writing of the HAC values go through the shared helpers;
+- the CLI commands, the scripts and the diagnostics write the same
+  canonical representations from one implementation.
+
+### Invariants
+
+- No kernel unit is added or modified: the consolidation stays in the
+  tools crate, and the scripting API keeps calling the proved
+  operations instead of re-implementing them;
+- bbt remains the only test harness while one process runs one script:
+  the expected results stay in the `Then` steps, and no parallel
+  assertion framework is introduced;
+- the first rejected operation owns the diagnostic;
+- the output contract is unchanged: canonical standard output,
+  diagnostics on standard error, generated files, process status;
+- an Ada unit-test harness is deferred: it becomes useful only when a
+  persistent host makes the session re-entrancy observable from inside
+  one process.
+
+### Executable Scenarios
+
+- An empty fragment executes and produces no output.
+- A fragment of declarations without statements executes and produces
+  no output.
+- A CRLF fragment and a fragment whose last line has no final newline
+  execute, and diagnostics point at the right fragment lines.
+- A declaration split across several lines is rejected with a clean
+  diagnostic at the right line, instead of a confusing HAC message.
+- A declaration form outside the initial subset (`type`, `procedure`,
+  `use`, ...) is rejected before any compilation, with the fragment
+  location.
+- Two consecutive image sessions in one script produce two images.
+- `End_Image` without `Begin_Image` records the rejection diagnostic.
+- A chain continues after a rejected operation, and the first failure
+  is retained.
+- The four representative Milestone 6 scenarios (nominal execution,
+  expected kernel rejection, mapped diagnostic, composite drawing)
+  stay and stay green.
+
+### Delivery Increments
+
+1. Script session: introduce `Script_Session` and `Reset`, move
+   `Failure`, `Image_Open`, `Image_Name`, `The_Scene`, `Anchor_Count`
+   and `Chain` into it.
+2. API split: move the callbacks into the domain child packages, keep
+   `Register_All` in the root, no scenario change.
+3. Conversions and canonical output: introduce the `Read_*` /
+   `Write_*` helpers and the `Image` formatters, and route the CLI
+   commands and the callbacks through them.
+4. Buffer ownership: reclaim the previous wrapper source allocation, or
+   store the source in the stream object.
+5. Edge-case scenarios: add the bbt scenarios listed above.
+6. Later, external prelude: load the fixed scripting-API prelude from
+   one Ada source file through the GNAT `External_Initialization`
+   aspect (an experimental GNAT extension already exercised by bbt),
+   validate it on the current toolchain first, compile the loaded
+   prelude through HAC in a test, derive the source-mapping offsets
+   from the loaded content, and make the build track the file.
+7. Later, single API description: derive the generated declarations
+   and the callback registrations from one internal description, and
+   verify the documented scripting API against it.
+8. Later, scanner strengthening: track comments, string literals,
+   parenthesis depth and semicolon-terminated constructs, keeping the
+   declarations-before-statements rule.
+9. Later, semantic drawing identifiers: topodraw writes stable
+   identifiers (such as `actual-result`) so the drawing scenarios
+   check the intended object rather than the mere presence of a
+   colour.
+
+### Out of Scope
+
+- A persistent GUI host executing several macros: the session prepares
+  it, it is not delivered here;
+- an Ada unit-test harness, deferred until re-entrancy is observable;
+- changing or simplifying the bbt language;
+- moving expected values or verdict logic into TopoScript;
+- the scripting API compatibility versioning and the sandboxing
+  restrictions, which stay with `DD-003` / `TDL-DESIGN-004`.
+
+### Completion Criteria
+
+- Two consecutive executions in one process produce no residual state;
+  `Reset` is proven by the session edge-case scenarios;
+- the root `TopoScript_API` coordinates the registration only;
+- each canonical representation has exactly one implementation, and
+  the CLI and script outputs agree;
+- repeated script executions do not leak the previous source buffers;
+- the edge-case scenarios of this section are executable and green;
+- `docs/features/toposcript.md` stays consistent with the behaviour.
 
 
 ## Milestone 7 - Transition to 3D

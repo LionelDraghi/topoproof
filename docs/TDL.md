@@ -30,6 +30,130 @@ design decision.
 - **Acceptance:** each question of `DD-003` is either decided and recorded,
   or explicitly rejected with its reason.
 
+### TDL-IMPROVE-002: introduce an explicit TopoScript execution session
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the scripting API keeps the failure, the image state, the
+  drawing scene, the anchor counter and the topology chain as
+  library-level variables of `toposcript_api.adb`. Acceptable while one
+  `topocli` process runs one script, unreliable for repeated execution
+  in a persistent host (development plan, TopoScript consolidation,
+  Increment 1).
+- **Acceptance:** a limited private `Script_Session` owns the whole
+  mutable execution state, `Reset` restores a clean state, and no
+  library-level mutable state remains.
+
+### TDL-IMPROVE-003: split the native scripting API by domain
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** `toposcript_api.adb` (754 lines) mixes conversion,
+  geometry, topology, drawing, output, registration and execution state.
+  The 3D types of the next milestones will make the single package
+  difficult to maintain (development plan, TopoScript consolidation,
+  Increment 2).
+- **Acceptance:** the root `TopoScript_API` coordinates the callback
+  registration only, the domains live in child packages (conversions,
+  geometry, topology, drawing, output, session), and the bbt scenarios
+  stay unchanged and green.
+
+### TDL-IMPROVE-004: centralise HAC conversions and canonical output
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** every callback repeats the widest-integer decoding and
+  the grid-domain checks, and the canonical textual representations are
+  duplicated between the `topocli` commands and the `Put` callbacks
+  (`point X Y Z`, `loop closed ...`, `face ...`). The canonical
+  representation is part of the observable interface and must have one
+  implementation (development plan, TopoScript consolidation,
+  Increment 3).
+- **Acceptance:** conversion helpers between the HAC element arrays and
+  the TopoProof types exist and are used by every callback, and the
+  `Image` formatters are shared by the CLI commands, the callbacks and
+  the diagnostics, with no duplicated textual representation left.
+
+### TDL-IMPROVE-005: fix the wrapper source-buffer ownership
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** `TopoScript_Wrapper.Set_Source` replaces its allocated
+  text buffer without reclaiming the previous allocation, negligible
+  for a short-lived CLI process, unsuitable for repeated execution
+  (development plan, TopoScript consolidation, Increment 4).
+- **Acceptance:** the previous allocation is reclaimed (or the source
+  lives in the stream object), and repeated script executions do not
+  leak.
+
+### TDL-IMPROVE-006: add the TopoScript edge-case bbt scenarios
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the wrapper and session edge cases observable through
+  `topocli run` are not covered yet: empty fragment, declarations
+  without statements, CRLF input, final line without a newline,
+  declaration split across lines, declaration forms outside the
+  subset, two consecutive images, `End_Image` without `Begin_Image`,
+  chain continuing after a rejection
+  (development plan, TopoScript consolidation, Increment 5).
+- **Acceptance:** every scenario of the consolidation section is
+  executable, green, and documented in `docs/features/toposcript.md`.
+
+### TDL-IMPROVE-007: load the wrapper prelude from an external source file
+
+- **Category:** IMPROVE
+- **Status:** open, later
+- **Context:** the fixed scripting-API prelude is emitted through many
+  `Append_Line` calls, unreadable as Ada and hard to review. The GNAT
+  `External_Initialization` aspect, an experimental GNAT extension
+  already exercised by bbt, can initialise a text constant from a file
+  at build time; the toolchain support must be validated before
+  adoption (development plan, TopoScript consolidation,
+  Increment 6).
+- **Acceptance:** the prelude lives as one Ada source fragment outside
+  the wrapper body, the source-mapping offsets are derived from the
+  loaded content, a test compiles the loaded prelude through HAC, and
+  the build tracks the file as an input.
+
+### TDL-IMPROVE-008: describe the scripting API once
+
+- **Category:** IMPROVE
+- **Status:** open, later
+- **Context:** the same API is represented in the generated
+  declarations, the callback registration, the callbacks and the
+  feature documentation, with a divergence risk (development plan,
+  TopoScript consolidation, Increment 7).
+- **Acceptance:** the generated declarations and the registrations
+  derive from one internal description, and the documented scripting
+  API is verified against it.
+
+### TDL-IMPROVE-009: strengthen the fragment scanner incrementally
+
+- **Category:** IMPROVE
+- **Status:** open, later
+- **Context:** the line-based classifier of `TopoScript_Wrapper` is
+  appropriate for the documented subset but fragile for multiline
+  declarations and richer Ada syntax (development plan, TopoScript
+  consolidation, Increment 8).
+- **Acceptance:** the scanner tracks comments, string literals,
+  parenthesis depth and semicolon-terminated constructs, the
+  declarations-before-statements rule is kept, and a multiline
+  declaration is rejected with a clean diagnostic at the right line.
+
+### TDL-IMPROVE-010: give the drawing output semantic identifiers
+
+- **Category:** IMPROVE
+- **Status:** open, later
+- **Context:** the drawing scenarios check the mere presence of a hex
+  colour in the SVG, which proves too little; stable semantic
+  identifiers in the topodraw output would let a scenario verify the
+  intended object (development plan, TopoScript consolidation,
+  Increment 9).
+- **Acceptance:** topodraw writes stable identifiers for the drawn
+  objects, and the drawing scenarios check the intended object rather
+  than a colour.
+
 ## Completed
 
 The former entries were completed or decided:
