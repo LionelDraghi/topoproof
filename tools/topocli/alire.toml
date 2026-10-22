@@ -17,7 +17,11 @@ generate_C = false
 generate_gpr = false
 
 [[depends-on]]
-topoproof = "0.1.2-dev"
+# The client crate evolves in lockstep with the kernel: the path pin below
+# always takes the local topoproof, whatever its version. The permissive
+# constraint keeps the client resolution valid across the root crate's
+# version bumps.
+topoproof = ">=0"
 
 [[pins]]
 topoproof = { path = "../.." }
