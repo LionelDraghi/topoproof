@@ -131,8 +131,9 @@ d) Face: valid loop, orientation consistency
 
 ## DD-003: TopoScript source form and bbt integration
 
-- **Status:** not decided
-- **Related task:** `TDL-DESIGN-003`
+- **Status:** partly decided; the source form, the bbt wording and the
+  initial scripting API are settled, the follow-up questions below stay open
+- **Related task:** `TDL-DESIGN-004`
 - **Scope:** TopoScript source form, bbt scenario embedding, HAC execution, scripting API security
 - **Reference:** [Ada and a mini-Ada interpreter, FOSDEM 2025](https://github.com/zertovitch/hac/blob/master/doc/ada_mini_ada_fosdem_2025.pdf),
   the HAC author's presentation of the interpreter, its Ada subset, and

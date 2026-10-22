@@ -16,20 +16,19 @@ design decision.
 
 ## Open
 
-### TDL-DESIGN-003: implement TopoScript embedded scripting
+### TDL-DESIGN-004: arbitrate the remaining TopoScript API questions
 
 - **Category:** DESIGN
 - **Status:** open
-- **Context:** bbt scenarios invoke `topocli` with increasingly long command lines.
-  Milestone 6 of the development plan introduces TopoScript, a lightweight Ada
-  scripting form executed by HAC, for readable scenario inputs and the future
-  language for user macros and extensions.
-- **Decision required:** the arbitration questions of `DD-003` (bbt step wording,
-  HAC input mode, supported language subset, line-number mapping, canonical `Put`
-  representations, drawing primitives, versioning, restricted capabilities).
-- **Acceptance:** the completion criteria of Milestone 6 hold, and
-  `docs/features/toposcript.md` is registered in the `make test` scenario list once
-  its scenarios are executable.
+- **Context:** Milestone 6 delivers the initial TopoScript facility through
+  `topocli run` and the injected scripting API. The follow-up questions
+  (control structures and composite declarations in the subset, canonical
+  `Put` representations beyond points and chain kinds, extra drawing
+  primitives, API versioning, restricted capabilities before untrusted
+  extensions) stay listed in `DD-003`.
+- **Decision required:** the arbitration questions of `DD-003`.
+- **Acceptance:** each question of `DD-003` is either decided and recorded,
+  or explicitly rejected with its reason.
 
 ## Completed
 
@@ -39,6 +38,9 @@ The former entries were completed or decided:
   `docs/design-discussions.md`;
 - TDL-DESIGN-002 (split the kernel crate from tools): completed with the
   `topocli` client crate pinning the root library crate;
+- TDL-DESIGN-003 (implement TopoScript embedded scripting): completed with
+  the `topocli run` facility of Milestone 6, Increments 1 to 6; the
+  follow-up questions are tracked by TDL-DESIGN-004 and `DD-003`;
 - TDL-PROOF-001 (retain auditable GNATprove evidence): completed with the
   `check-evidence` gate and the CI artefact uploads;
 - TDL-TOOLING-001 (simplify GPR projects): completed with one minimal project

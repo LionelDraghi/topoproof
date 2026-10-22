@@ -18,6 +18,8 @@ and its Ada subset are presented in
 - [Source form](#source-form)
 - [Observable result and verdict](#observable-result-and-verdict)
 - [Output contract](#output-contract)
+- [Scripting API](#scripting-api)
+- [Standalone scripts](#standalone-scripts)
 - [Scenarios](#scenarios)
   - [Scenario: translate a point and a vector](#scenario-translate-a-point-and-a-vector)
   - [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
@@ -106,6 +108,57 @@ Diagnostic messages must not pollute the canonical value written to
 standard output. Compilation diagnostics refer to the fragment: the
 path, the line and the column are the ones of the `.topo` source, not
 of the generated wrapper.
+
+## Scripting API
+
+The wrapper injects the following declarations ahead of every
+fragment. They are the initial stable scripting API of the milestone;
+the compatibility-versioning question stays open in `DD-003`.
+
+Types:
+
+| type | values |
+|------|--------|
+| `Point_3D`, `Vector_3D`, `Point_2D` | grid values, built from integer aggregates |
+| `Color_Kind` | `Blue`, `Green`, `Red` |
+| `Loop_Kind` | `Counter_Clockwise`, `Clockwise`, `Degenerate`, or the kernel rejection kinds |
+| `Face_Kind` | `Face_Counter_Clockwise`, `Face_Clockwise`, `Face_Degenerate_Boundary`, `Face_Invalid_Boundary` |
+
+Operations:
+
+| operation | effect |
+|-----------|--------|
+| `Translate (P, V, Result)` | runs the proved `Translate` on the point `P` and the vector `V` |
+| `Put (P)` | writes `point X Y Z` on standard output |
+| `Add_Point (P)` | appends a 2D point to the chain |
+| `Make_Loop (K)` | classifies the accumulated chain as a loop, the kernel classification |
+| `Make_Face (K)` | classifies the same chain as a face boundary |
+| `Put_Loop (K)` | writes `loop closed ...`, or records the rejection diagnostic |
+| `Put_Face (K)` | writes `face ...`, or records the rejection diagnostic |
+| `Begin_Image (Name)` | opens one image under the `VString` name |
+| `Draw_Axes` | axes with automatic ticks and dashed coordinate paths |
+| `Draw_Point (P, Color)` | colors a 3D point of the image |
+| `Draw_Vector (Origin, Value, Color)` | draws the labeled arrow of the vector |
+| `Draw_Point_2D (P, Color)` | colors a 2D point of the image |
+| `Draw_Edge (P, Q, Color)` | draws the labeled segment arrow from `P` to `Q` |
+| `End_Image` | renders the image through the topodraw renderer |
+
+The rejected operations record the same diagnostics as the client
+operations, on standard error, and the process status carries the
+verdict.
+
+## Standalone scripts
+
+The scenarios of this page are one use of TopoScript; any `.topo`
+fragment runs the same way outside the test suite:
+
+```text
+topocli run FILE.topo
+```
+
+The output contract holds identically: the canonical values go to
+standard output, the diagnostics to standard error with the fragment
+path, line and column, and the process status carries the verdict.
 
 ## Scenarios
 

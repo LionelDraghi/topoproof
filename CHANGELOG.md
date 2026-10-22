@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.3-dev] - 2026-??-??**
-  - [Added]   TopoScript, an embedded Ada scripting facility executed
-              by HAC (development plan, Milestone 6, in progress)
+  - [Added]   TopoScript, the embedded Ada scripting facility executed
+              by HAC: `topocli run FILE.topo` runs fragments against
+              the proved kernel operations (development plan,
+              Milestone 6)
 
 - **[0.1.2] - 2026-10-22**
   - [Added]   the topological operations `vertex`, `edge`, `loop` and
