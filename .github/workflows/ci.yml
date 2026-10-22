@@ -91,7 +91,7 @@ jobs:
       # index must match the fresh run of this job.
       - name: Check the committed tests evidence
         if: matrix.os == 'ubuntu-latest'
-        run: git diff --exit-code docs/tests/
+        run: git diff --exit-code docs/tests_results/
         shell: bash
       - name: Upload bbt evidence
         if: always()

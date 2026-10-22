@@ -4,7 +4,7 @@
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/topoproof.json)](https://alire.ada.dev/crates/topoproof.html)
 [![Version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Falire.toml&query=%24.version&label=latest&style=flat-square)](https://github.com/LionelDraghi/topoproof/blob/main/alire.toml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
-[![SPARK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fproof-status.json)](docs/dev/development.md)
+[![SPARK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fproof-status.json)](docs/dev/development_workflow.md)
 
 **A provable 3D CAD kernel based on discrete geometry, exact arithmetic, and formal proof.**
 
@@ -29,7 +29,7 @@ Why? Because of one too many of these:
 ## Status
 
 [![CI](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml/badge.svg)](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml)
-[![Tests](docs/tests/badge.svg)](docs/tests/results.md)
+[![Tests](docs/tests_results/badge.svg)](docs/tests_results/results.md)
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
 the exact 2D predicates and contour foundations required before introducing 3D
@@ -41,7 +41,7 @@ topology and B-Rep structures.
 - [Terminology](docs/terminology.md): project vocabulary and conceptual invariants.
 - [Numeric model](docs/numeric-model.md): units, numeric domains, representability, and overflow policy.
 - [Development plan](docs/dev/development-plan.md): milestones and completion criteria.
-- [Development guide](docs/dev/development.md): repository workflow and verification commands.
+- [Development guide](docs/dev/development_workflow.md): repository workflow and verification commands.
 - [Release procedure](docs/dev/release_procedure.md): versioning, tagging, GitHub and Alire publication.
 - [Perspectives](docs/perspectives.md): non-normative research directions.
 

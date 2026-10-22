@@ -2,17 +2,7 @@
 
 TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer arithmetic, and formal proofs in Ada/SPARK.
 
-## Read first
-
-1. `README.md`
-2. `docs/manifesto.md`
-3. `docs/terminology.md`
-4. `docs/numeric-model.md`
-5. `docs/dev/development-plan.md`
-6. `docs/dev/development.md`
-7. `docs/TDL.md`
-8. `docs/design-discussions.md`
-9. `docs/perspectives.md`
+The shared rules for Lionel's Ada projects live in the [reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.template.md) and apply here in full: non-negotiable git rules, procedure choice, task triage, reference policy, skills, and the definition of done. This file keeps only what is specific to TopoProof. The owner reviews files in the source control tool; a file validated there is approved.
 
 ## Mandatory rules
 
@@ -26,7 +16,6 @@ TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer 
 - Distinguish `Point` from `Vertex`.
 - Distinguish `Grid_Coordinate` from `Vector_Component`.
 - Do not implement research perspectives before they enter the development plan.
-- Never commit without the owner's review. The owner reviews files in the source control tool; a file validated there is approved. An explicit "go" for commit or push approves all remaining modified files as well.
 
 ## Development discipline
 
@@ -44,6 +33,32 @@ make check
 ```
 
 Do not add a public operation without a contract. Keep each change within the current milestone. Justify all numeric bounds. Prefer Ada/GNAT semantic tools over textual search when inspecting declarations and references.
+
+## Build pointers
+
+The shared build pointers apply ([reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.template.md)); `make help` is the documentation of record. TopoProof specifics:
+
+- `make test`: build, then run the Markdown documentation in `docs/features` through bbt; the results log and badge evidence go to `artifacts/`.
+- `make prove`: run GNATprove on every kernel unit (`-U`, level 2) and validate the proof evidence; `make prove+` escalates to level 4 with counterexamples.
+- `make check`: build, test, prove and validate the evidence — the complete verification chain; `make all` is the same target (deviation: `all` covers no doc, since TopoProof executes its documentation instead of generating it).
+- `make release`: build with the release profile (run-time checks suppressed on the proved kernel, kept on the client).
+- `make format`: reformat the Ada sources with GNATformat.
+- No `doc` and no `install` target: TopoProof is a library, its documentation is executed by `test`.
+
+## Conditional readings
+
+Read a document only when the task requires it; do not open them all up front.
+
+- To plan any change, place work in a milestone, or check what comes next: `docs/dev/development-plan.md`
+- To choose the next task or find already-tracked work: `docs/TDL.md`
+- To follow the development workflow: `docs/dev/development_workflow.md`
+- To prepare or run a release: the [common release procedure on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/release_procedure.md), with the TopoProof parameters and additions in `docs/dev/release_procedure.md`
+- To write, convert or debug bbt scenarios: the bbt skill, installed from GitHub (`npx skills add LionelDraghi/bbt --skill bbt-skill`)
+- To make, review or challenge a design decision: `docs/dev/design_discussions.md`
+- To understand the project's goals and philosophy: `docs/manifesto.md`, `README.md`
+- To write or review any text using the project's terms (`Point`, `Vertex`, `Grid_Coordinate`, `Vector_Component`, ...): `docs/terminology.md`
+- To touch arithmetic, coordinates, bounds, or any numeric reasoning: `docs/numeric-model.md`
+- To check whether a research idea is committed work: `docs/perspectives.md` — non-normative; never implement it before it enters the development plan.
 
 ## Executable documentation
 

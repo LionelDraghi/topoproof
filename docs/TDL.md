@@ -11,7 +11,7 @@ Entries use one of the following categories:
 - **TOOLING**: build, packaging, CI, or developer-experience work.
 
 Each entry has a stable identifier, a status, and an acceptance criterion. Completed
-entries are removed from this file and recorded in `CHANGELOG.md` or the relevant
+entries are removed from this file and recorded in `docs/changelog.md` or the relevant
 design decision.
 
 ## Open
@@ -159,7 +159,7 @@ design decision.
 The former entries were completed or decided:
 
 - TDL-DESIGN-001 (validity of segment sequences): decided as DD-001, see
-  `docs/design-discussions.md`;
+  `docs/dev/design_discussions.md`;
 - TDL-DESIGN-002 (split the kernel crate from tools): completed with the
   `topocli` client crate pinning the root library crate;
 - TDL-DESIGN-003 (implement TopoScript embedded scripting): completed with

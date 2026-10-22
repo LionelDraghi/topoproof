@@ -130,7 +130,7 @@ The integration gate is closed only when all of the following hold:
 
 ## Repository hygiene
 
-Use Ada/GNAT semantic navigation when available. Avoid generated files in version control unless explicitly required. Keep commits focused and update `CHANGELOG.md` once releases begin.
+Use Ada/GNAT semantic navigation when available. Avoid generated files in version control unless explicitly required. Keep commits focused and update `docs/changelog.md` once releases begin.
 
 ## Executable documentation
 SPARK proves contracts and absence of run-time errors. `bbt` executes the public Markdown documentation against the compiled command-line application. A user-visible operation is incomplete until its Markdown page contains an executable scenario for its canonical output.

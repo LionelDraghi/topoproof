@@ -2,7 +2,7 @@
 #
 # The complete verification chain is: build -> test -> prove.
 # Run `make` or `make check` before considering any change complete.
-# See README.md, AGENTS.md and docs/development.md for the workflow.
+# See README.md, AGENTS.md and docs/dev/development_workflow.md for the workflow.
 
 ALR ?= alr
 # The recipes use pipefail, which requires a POSIX-shell feature set that
@@ -67,7 +67,7 @@ help:
 	echo "  format     : reformat the Ada sources with GNATformat"
 	echo "  clean      : remove the build and test artifacts"
 	echo ""
-	echo "Refer to AGENTS.md and docs/development.md for more details."
+	echo "Refer to AGENTS.md and docs/dev/development_workflow.md for more details."
 
 all: check
 
@@ -96,19 +96,19 @@ test: build evidence-dirs
 	echo
 	echo === running the executable documentation
 
-	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
+	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests_results/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
 	# The bbt run stores the scenario paths as given on the command
 	# line, relative to tests/: reanchored to the index location, the
-	# links resolve from docs/tests/results.md. The reanchoring goes
+	# links resolve from docs/tests_results/results.md. The reanchoring goes
 	# through a temporary file and a move: sed -i has no portable
 	# syntax across its BSD and GNU implementations.
-	sed 's|](\.\./docs/features/|](\.\./features/|g' docs/tests/results.md > docs/tests/results.tmp
-	mv docs/tests/results.tmp docs/tests/results.md
+	sed 's|](\.\./docs/features/|](\.\./features/|g' docs/tests_results/results.md > docs/tests_results/results.tmp
+	mv docs/tests_results/results.tmp docs/tests_results/results.md
 	# The tests badge of the README: the bbt run writes the shields.io
 	# URL of the badge, and the badge is fetched from it, published with
-	# the repository through docs/tests/badge.svg. Like every evidence,
+	# the repository through docs/tests_results/badge.svg. Like every evidence,
 	# the committed file must match the fresh run.
-	curl -s -o docs/tests/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)" 
+	curl -s -o docs/tests_results/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)" 
 
 evidence-dirs:
 	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS)

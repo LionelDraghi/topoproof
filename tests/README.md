@@ -8,4 +8,4 @@ The `*.in` and `*.out` files created by the scenarios and by the
 application during a run are ephemeral artifacts: they are removed before
 each run and are not version-controlled.
 
-See `docs/dev/development.md` for the complete verification workflow.
+See `docs/dev/development_workflow.md` for the complete verification workflow.
