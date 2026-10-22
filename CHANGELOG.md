@@ -5,6 +5,8 @@ All notable changes **from a user perspective** to this project will be document
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), (guidelines at the bottom of the page).  
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+- **[0.1.3-dev] - 2026-??-??**
+
 - **[0.1.2] - 2026-10-22**
   - [Added]   the topological operations `vertex`, `edge`, `loop` and
               `face`, closing milestone 5: vertices are a proved store
