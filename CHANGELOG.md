@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.3-dev] - 2026-??-??**
+  - [Added]   the TopoScript embedded scripting proposal: a lightweight Ada
+              scripting form executed by HAC, entering the development plan
+              as Milestone 6, with its design discussion, its task entry,
+              and its proposed feature page under `docs/features/`
 
 - **[0.1.2] - 2026-10-22**
   - [Added]   the topological operations `vertex`, `edge`, `loop` and

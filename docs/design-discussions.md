@@ -126,5 +126,64 @@ d) Face: valid loop, orientation consistency
 ### Open questions
 
 - half-edge versus simple edge representation (minimal milestone 5
-  proposes simple oriented edges; half-edge is a milestone 7 concern);
+  proposes simple oriented edges; half-edge is a milestone 8 concern);
 - final names among `Loop`, `Wire`, `Contour`, `Ring`.
+
+## DD-003: TopoScript source form and bbt integration
+
+- **Status:** not decided
+- **Related task:** `TDL-DESIGN-003`
+- **Scope:** TopoScript source form, bbt scenario embedding, HAC execution, scripting API security
+- **Reference:** [Ada and a mini-Ada interpreter, FOSDEM 2025](https://github.com/zertovitch/hac/blob/master/doc/ada_mini_ada_fosdem_2025.pdf),
+  the HAC author's presentation of the interpreter, its Ada subset, and
+  embedding a scripting facility in an Ada application
+
+### Current situation
+
+bbt scenarios invoke `topocli` with increasingly long command lines. As operations
+become richer, those command lines become difficult to write, read, review, and
+maintain. Milestone 6 of the development plan proposes TopoScript: a lightweight
+Ada scripting form where the user writes only declarations and statements, and
+`topocli` generates the hidden Ada compilation-unit wrapper before passing the
+complete source to HAC.
+
+The source form preserves ordinary Ada notation: `:=` for assignment, `=>` for
+named associations, `;` as the statement terminator, `--` for comments, explicit
+types and constants. Names may remain qualified where qualification improves
+clarity or removes ambiguity, for example `STEP_Files.Export (P, "piece.step");`.
+
+A script may draw one coherent diagnostic image (axes, input geometry, expected
+result, actual result in a single scene, actual result in red on failure), and a
+script may declare the expected geometry for visual explanation only: the
+expected textual result and the verdict remain in the bbt `Then` step.
+
+The feature must use existing bbt syntax and existing generic file and
+command-execution steps: the embedded block is materialised as a scenario-local
+`.topo` execution artefact, and the exact `Given` and execution step wording
+must be selected from syntax already supported by bbt. Introducing shorter or
+TopoScript-specific bbt wording is out of scope.
+
+### Security and API exposure
+
+The restriction of APIs available to user scripts is intentionally deferred. The
+architecture must nevertheless make it possible to expose a dedicated scripting
+API rather than the complete internal implementation. Sandboxing, resource
+limits, filesystem access, extension trust, and failure isolation require
+separate design decisions before untrusted extensions are enabled. These
+questions must not block an initial test-oriented prototype executed from the
+trusted TopoProof test suite.
+
+### Questions to arbitrate
+
+1. Which exact existing bbt `Given` step should hold the embedded source block?
+2. Can HAC consume the wrapped source directly from memory, or should the first
+   integration use a temporary file?
+3. Which subset of Ada declarations and statements will TopoScript initially
+   support?
+4. How should generated-wrapper line numbers be mapped back to lines in the
+   Markdown scenario?
+5. What canonical `Put` representations are required for TopoProof public types?
+6. Which drawing primitives are needed for the first migrated scenarios?
+7. How should script and scripting-API compatibility be versioned?
+8. Which capabilities must be restricted before standalone user extensions are
+   considered safe?

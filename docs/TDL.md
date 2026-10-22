@@ -16,7 +16,24 @@ design decision.
 
 ## Open
 
-There is currently no open entry. The former entries were completed or decided:
+### TDL-DESIGN-003: implement TopoScript embedded scripting
+
+- **Category:** DESIGN
+- **Status:** open
+- **Context:** bbt scenarios invoke `topocli` with increasingly long command lines.
+  Milestone 6 of the development plan introduces TopoScript, a lightweight Ada
+  scripting form executed by HAC, for readable scenario inputs and the future
+  language for user macros and extensions.
+- **Decision required:** the arbitration questions of `DD-003` (bbt step wording,
+  HAC input mode, supported language subset, line-number mapping, canonical `Put`
+  representations, drawing primitives, versioning, restricted capabilities).
+- **Acceptance:** the completion criteria of Milestone 6 hold, and
+  `docs/features/toposcript.md` is registered in the `make test` scenario list once
+  its scenarios are executable.
+
+## Completed
+
+The former entries were completed or decided:
 
 - TDL-DESIGN-001 (validity of segment sequences): decided as DD-001, see
   `docs/design-discussions.md`;
