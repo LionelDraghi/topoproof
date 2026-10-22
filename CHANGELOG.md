@@ -5,6 +5,8 @@ All notable changes **from a user perspective** to this project will be document
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), (guidelines at the bottom of the page).  
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+- **[0.1.4-dev] - 2026-??-??**
+
 - **[0.1.3] - 2026-10-22**
   - [Added]   TopoScript, the embedded Ada scripting facility executed
               by HAC: `topocli run FILE.topo` runs fragments against

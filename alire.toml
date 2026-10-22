@@ -1,6 +1,6 @@
 name = "topoproof"
 description = "Provable geometry command-line application"
-version = "0.1.3"
+version = "0.1.4-dev"
 
 authors = ["Lionel Draghi"]
 maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]
