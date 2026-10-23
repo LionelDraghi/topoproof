@@ -81,13 +81,15 @@ build:
 	cd tools/topocli && $(ALR) build
 
 # Release build: run-time checks suppressed on the proved kernel (the
-# silver payoff), kept on the client.
+# silver payoff), kept on the client. Each crate builds in its own
+# Alire environment: the client imports HAC, which the root crate
+# environment does not know.
 release:
 	echo
 	echo === building topoproof and topocli, release profile
 
 	$(ALR) exec -- gprbuild -P topoproof.gpr -XTopoproof_Build_Profile=release
-	$(ALR) exec -- gprbuild -P tools/topocli/topocli.gpr -XTopoproof_Build_Profile=release
+	cd tools/topocli && $(ALR) exec -- gprbuild -P topocli.gpr -XTopoproof_Build_Profile=release
 
 # bbt runs from tests/, where the documentation scenarios create their
 # files; --cleanup removes the files created by Given steps, and the
@@ -199,7 +201,7 @@ format:
 	echo === reformatting the sources
 
 	$(ALR) exec -- gnatformat -P topoproof.gpr
-	$(ALR) exec -- gnatformat -P tools/topocli/topocli.gpr
+	cd tools/topocli && $(ALR) exec -- gnatformat -P topocli.gpr
 	$(ALR) exec -- gnatformat -P $(CHECK_EVIDENCE_DIR)/check_evidence.gpr
 
 check: build test proof-badge
