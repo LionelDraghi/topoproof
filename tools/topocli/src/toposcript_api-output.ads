@@ -13,6 +13,8 @@
 
 with HAC_Sys.Interfacing;
 with TopoProof.Geometry.Points;
+with TopoProof.Geometry.Vectors;
+with TopoScript_API.Geometry;
 with TopoScript_API.Topology;
 
 package TopoScript_API.Output is
@@ -20,6 +22,10 @@ package TopoScript_API.Output is
    --  The canonical image of a 3D point: `point X Y Z`, the exact text
    --  of the topocli commands.
    function Image (P : TopoProof.Geometry.Points.Point_3D) return String;
+
+   --  The canonical image of a 3D vector: `vector DX DY DZ`.
+   function Image
+     (V : TopoProof.Geometry.Vectors.Vector_3D) return String;
 
    --  The valid results of the loop and face classifications.
    subtype Loop_Result is Topology.Loop_Kind
@@ -33,6 +39,10 @@ package TopoScript_API.Output is
 
    --  The canonical image of a face result: `face ...`.
    function Image (K : Face_Result) return String;
+
+   --  The canonical image of an equality result: `equal true` or
+   --  `equal false`.
+   function Image (K : Geometry.Equal_Kind) return String;
 
    --  The run-owned output destination: the Put operations write
    --  through it, standard output by default.
@@ -51,6 +61,16 @@ package TopoScript_API.Output is
    --  Native side of Put: writes the canonical image of the point,
    --  the same one as the topocli client.
    procedure Put_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Vector: writes the canonical image of the
+   --  vector.
+   procedure Put_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Equal: writes the canonical image of the
+   --  equality result.
+   procedure Put_Equal_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Loop: writes `loop closed ...`, or records

@@ -1,31 +1,64 @@
 # Displacement <!-- omit from toc -->
 
-`displacement` computes the exact vector between two points:
-`topocli displacement A=(AX, AY, AZ) B=(BX, BY, BZ)`.
-The canonical result is `vector DX DY DZ`.
+`Displacement` computes the exact vector between two points, the proved
+`Displacement` of the kernel. The canonical result is `vector DX DY DZ`,
+written by the explicit `Put_Vector`.
 
 ![Displacement diagram](images/displacement_1.svg)
 
 ## Contents <!-- omit from toc -->
 
-- [Scenario: compute command-line values](#scenario-compute-command-line-values)
-- [Scenario: inject parameters from an input file](#scenario-inject-parameters-from-an-input-file)
-- [Scenario: read and write files](#scenario-read-and-write-files)
+- [Scenario: compute the displacement between two points](#scenario-compute-the-displacement-between-two-points)
+- [Scenario: the result of a script run goes to the output file](#scenario-the-result-of-a-script-run-goes-to-the-output-file)
 
-## Scenario: compute command-line values
+## Scenario: compute the displacement between two points
+
+The script draws the two points and the displacement vector, then
+writes the canonical result. The vector is the actual result of the
+operation, drawn in red.
+
+- Given the file `displacement.topo`
+  ```ada
+  A    : constant Point_3D := (-1, 2, -3);
+  B    : constant Point_3D := (4, -5, 6);
+  D    : Vector_3D;
+  Name : VString := +"../docs/features/images/displacement_1.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point (A, Blue);
+  Draw_Point (B, Green);
+
+  Displacement (A, B, D);
+
+  Draw_Vector (A, D, Red);
+  End_Image;
+
+  Put_Vector (D);
+  ```
+- When I successfully run `../bin/topocli run displacement.topo`
+- Then the output is `vector 5 -7 9`
+- And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`
 
 ![Displacement diagram](images/displacement_1.svg)
 
-- When I successfully run `../bin/topocli displacement A=(-1, 2, -3) B=(4, -5, 6) --draw ../docs/features/images/displacement_1.svg`
-- Then the output is `vector 5 -7 9`
+## Scenario: the result of a script run goes to the output file
 
-## Scenario: inject parameters from an input file
-- Given the new file `displacement.in` containing `displacement A=(10, 20, 30) B=(13, 18, 37)`
-- When I successfully run `../bin/topocli --input displacement.in`
-- Then the output is `vector 3 -2 7`
+With `--output FILE`, the canonical result of the run goes to the file,
+and the standard output stays empty.
 
-## Scenario: read and write files
-- Given the new file `displacement-file.in` containing `displacement A=(0, 0, 0) B=(-4, 5, -6)`
-- And there is no file `displacement-file.out`
-- When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`
-- Then the `displacement-file.out` file contains `vector -4 5 -6`
+- Given the file `displacement_output.topo`
+  ```ada
+  A : constant Point_3D := (0, 0, 0);
+  B : constant Point_3D := (-4, 5, -6);
+  D : Vector_3D;
+
+  Displacement (A, B, D);
+
+  Put_Vector (D);
+  ```
+- When I successfully run `../bin/topocli run displacement_output.topo --output displacement-file.out`
+- Then the output is
+  ```text
+  ```
+- And the file `displacement-file.out` is `vector -4 5 -6`

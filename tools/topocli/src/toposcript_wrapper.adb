@@ -221,6 +221,26 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put (P : in Point_3D)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Equal_Kind is (Equal_True, Equal_False);");
+      Append_Line ("");
+      Append_Line ("   procedure Displacement");
+      Append_Line
+        ("      (A : in Point_3D; B : in Point_3D; " &
+         "Result : out Vector_3D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Equal");
+      Append_Line
+        ("      (A : in Point_3D; B : in Point_3D; " &
+         "Result : out Equal_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Vector (D : in Vector_3D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Equal (K : in Equal_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   type Color_Kind is (Blue, Green, Red);");
       Append_Line ("");
       Append_Line ("   procedure Begin_Image (Name : in VString)");

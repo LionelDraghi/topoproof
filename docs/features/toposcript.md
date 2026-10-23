@@ -134,6 +134,7 @@ Types:
 |------|--------|
 | `Point_3D`, `Vector_3D`, `Point_2D` | grid values, built from integer aggregates |
 | `Color_Kind` | `Blue`, `Green`, `Red` |
+| `Equal_Kind` | `Equal_True`, `Equal_False` |
 | `Loop_Kind` | `Counter_Clockwise`, `Clockwise`, `Degenerate`, or the kernel rejection kinds |
 | `Face_Kind` | `Face_Counter_Clockwise`, `Face_Clockwise`, `Face_Degenerate_Boundary`, `Face_Invalid_Boundary` |
 
@@ -142,7 +143,11 @@ Operations:
 | operation | effect |
 |-----------|--------|
 | `Translate (P, V, Result)` | runs the proved `Translate` on the point `P` and the vector `V` |
+| `Displacement (A, B, Result)` | computes the exact vector from `A` to `B` |
+| `Equal (A, B, Result)` | compares two points exactly, through `Equal_True` / `Equal_False` |
 | `Put (P)` | writes `point X Y Z` on standard output |
+| `Put_Vector (D)` | writes `vector DX DY DZ` on standard output |
+| `Put_Equal (K)` | writes `equal true` or `equal false` on standard output |
 | `Add_Point (P)` | appends a 2D point to the chain |
 | `Make_Loop (K)` | classifies the accumulated chain as a loop, the kernel classification |
 | `Make_Face (K)` | classifies the same chain as a face boundary |

@@ -30,8 +30,8 @@
 <line x1="315.7" y1="96.2" x2="324.3" y2="101.2" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="315.7" y1="45.5" x2="324.3" y2="50.5" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="276.1" cy="174.7" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="286.1" y="164.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (1, 2, 3)</text>
-<circle cx="276.1" cy="124.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="286.1" y="114.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (1, 2, 4)</text>
+<text x="286.1" y="164.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (1, 2, 3)</text>
+<circle cx="276.1" cy="124.0" r="5.0" fill="#1a7f37" stroke="#ffffff" stroke-width="1.5"/>
+<text x="286.1" y="114.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (1, 2, 4)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
 </svg>

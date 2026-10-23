@@ -25,8 +25,18 @@ package body TopoScript_API.Output is
    function Img (C : TopoProof.Numerics.Grid_Coordinate) return String is
      (Ada.Strings.Fixed.Trim (C'Image, Ada.Strings.Both));
 
+   --  The trimmed decimal image of one component difference: the
+   --  canonical form of every vector component in a result line.
+   function Img (C : TopoProof.Numerics.Vector_Component) return String is
+     (Ada.Strings.Fixed.Trim (C'Image, Ada.Strings.Both));
+
    function Image (P : TopoProof.Geometry.Points.Point_3D) return String is
      ("point " & Img (P.X) & " " & Img (P.Y) & " " & Img (P.Z));
+
+   function Image
+     (V : TopoProof.Geometry.Vectors.Vector_3D) return String
+   is
+     ("vector " & Img (V.DX) & " " & Img (V.DY) & " " & Img (V.DZ));
 
    function Image (K : Loop_Result) return String is
      (case K is
@@ -38,6 +48,11 @@ package body TopoScript_API.Output is
      (case K is
          when Topology.Face_Counter_Clockwise => "face counter_clockwise",
          when Topology.Face_Clockwise         => "face clockwise");
+
+   function Image (K : Geometry.Equal_Kind) return String is
+     (case K is
+         when Geometry.Equal_True  => "equal true",
+         when Geometry.Equal_False => "equal false");
 
    procedure Set_Output_Path (Path : String) is
    begin
@@ -83,6 +98,31 @@ package body TopoScript_API.Output is
 
       Put_Line (Image (P));
    end Put_Native;
+
+   procedure Put_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      V : TopoProof.Geometry.Vectors.Vector_3D;
+
+   begin
+      if not Conversions.Read_Vector_Result_3D (Data, 1, V) then
+         Session.Record_Failure
+           ("error: vector component outside the component domain");
+         return;
+      end if;
+
+      Put_Line (Image (V));
+   end Put_Vector_Native;
+
+   procedure Put_Equal_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant Geometry.Equal_Kind :=
+        Geometry.To_Equal_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Equal_Native;
 
    procedure Put_Loop_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

@@ -11,6 +11,19 @@
    - OK : Then the file `vertices.out` is  
    - [X] scenario   [--output receives the whole multi-line result](../features/command-line.md) pass  
 
+   ### Scenario: [inject parameters from an input file](../features/command-line.md): 
+   - OK : Given the new file `displacement.in` containing `displacement A=(10, 20, 30) B=(13, 18, 37)`  
+   - OK : When I successfully run `../bin/topocli --input displacement.in`  
+   - OK : Then the output is `vector 3 -2 7`  
+   - [X] scenario   [inject parameters from an input file](../features/command-line.md) pass  
+
+   ### Scenario: [read and write files](../features/command-line.md): 
+   - OK : Given the new file `displacement-file.in` containing `displacement A=(0, 0, 0) B=(-4, 5, -6)`  
+   - OK : And there is no file `displacement-file.out`  
+   - OK : When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`  
+   - OK : Then the `displacement-file.out` file contains `vector -4 5 -6`  
+   - [X] scenario   [read and write files](../features/command-line.md) pass  
+
 
 # Document: [translation.md](../features/translation.md)  
    ### Scenario: [translate command-line values](../features/translation.md): 
@@ -39,39 +52,41 @@
 
 
 # Document: [displacement.md](../features/displacement.md)  
-   ### Scenario: [compute command-line values](../features/displacement.md): 
-   - OK : When I successfully run `../bin/topocli displacement A=(-1, 2, -3) B=(4, -5, 6) --draw ../docs/features/images/displacement_1.svg`  
+   ### Scenario: [compute the displacement between two points](../features/displacement.md): 
+   - OK : Given the file `displacement.topo`  
+   - OK : When I successfully run `../bin/topocli run displacement.topo`  
    - OK : Then the output is `vector 5 -7 9`  
-   - [X] scenario   [compute command-line values](../features/displacement.md) pass  
+   - OK : And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`  
+   - [X] scenario   [compute the displacement between two points](../features/displacement.md) pass  
 
-   ### Scenario: [inject parameters from an input file](../features/displacement.md): 
-   - OK : Given the new file `displacement.in` containing `displacement A=(10, 20, 30) B=(13, 18, 37)`  
-   - OK : When I successfully run `../bin/topocli --input displacement.in`  
-   - OK : Then the output is `vector 3 -2 7`  
-   - [X] scenario   [inject parameters from an input file](../features/displacement.md) pass  
-
-   ### Scenario: [read and write files](../features/displacement.md): 
-   - OK : Given the new file `displacement-file.in` containing `displacement A=(0, 0, 0) B=(-4, 5, -6)`  
-   - OK : And there is no file `displacement-file.out`  
-   - OK : When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`  
-   - OK : Then the `displacement-file.out` file contains `vector -4 5 -6`  
-   - [X] scenario   [read and write files](../features/displacement.md) pass  
+   ### Scenario: [the result of a script run goes to the output file](../features/displacement.md): 
+   - OK : Given the file `displacement_output.topo`  
+   - OK : When I successfully run `../bin/topocli run displacement_output.topo --output displacement-file.out`  
+   - OK : Then the output is  
+   - OK : And the file `displacement-file.out` is `vector -4 5 -6`  
+   - [X] scenario   [the result of a script run goes to the output file](../features/displacement.md) pass  
 
 
 # Document: [equality.md](../features/equality.md)  
    ### Scenario: [identical points are equal](../features/equality.md): 
-   - OK : When I successfully run `../bin/topocli equal A=(1, 2, 3) B=(1, 2, 3) --draw ../docs/features/images/equality_1.svg`  
+   - OK : Given the file `equal_true.topo`  
+   - OK : When I successfully run `../bin/topocli run equal_true.topo`  
    - OK : Then the output is `equal true`  
+   - OK : And the file `../docs/features/images/equality_1.svg` contains `#1a7f37`  
    - [X] scenario   [identical points are equal](../features/equality.md) pass  
 
    ### Scenario: [different points are not equal](../features/equality.md): 
-   - OK : When I successfully run `../bin/topocli equal A=(1, 2, 3) B=(1, 2, 4) --draw ../docs/features/images/equality_2.svg`  
+   - OK : Given the file `equal_false.topo`  
+   - OK : When I successfully run `../bin/topocli run equal_false.topo`  
    - OK : Then the output is `equal false`  
+   - OK : And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`  
    - [X] scenario   [different points are not equal](../features/equality.md) pass  
 
    ### Scenario: [opposite points are not equal](../features/equality.md): 
-   - OK : When I successfully run `../bin/topocli equal A=(-1, 2, -3) B=(1, -2, 3) --draw ../docs/features/images/equality_3.svg`  
+   - OK : Given the file `equal_opposite.topo`  
+   - OK : When I successfully run `../bin/topocli run equal_opposite.topo`  
    - OK : Then the output is `equal false`  
+   - OK : And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`  
    - [X] scenario   [opposite points are not equal](../features/equality.md) pass  
 
 
@@ -501,12 +516,12 @@
    - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 86 scenarios OK
+## Summary : **Success**, 87 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 86    |
+| Successful | 87    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

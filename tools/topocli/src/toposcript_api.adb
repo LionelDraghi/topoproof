@@ -18,7 +18,11 @@ package body TopoScript_API is
    procedure Register_All (BD : HAC_Sys.Builder.Build_Data) is
    begin
       Register (BD, Geometry.Translate_Native'Access, "Translate");
+      Register (BD, Geometry.Displacement_Native'Access, "Displacement");
+      Register (BD, Geometry.Equal_Native'Access, "Equal");
       Register (BD, Output.Put_Native'Access, "Put");
+      Register (BD, Output.Put_Vector_Native'Access, "Put_Vector");
+      Register (BD, Output.Put_Equal_Native'Access, "Put_Equal");
       Register (BD, Drawing.Begin_Image_Native'Access, "Begin_Image");
       Register (BD, Drawing.Draw_Axes_Native'Access, "Draw_Axes");
       Register (BD, Drawing.Draw_Point_Native'Access, "Draw_Point");

@@ -31,6 +31,9 @@ package TopoScript_API.Conversions is
    function Grid_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
      (TopoProof.Numerics.Grid_Coordinate);
 
+   function Vector_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
+     (TopoProof.Numerics.Vector_Component);
+
    --  The script value is one position of one grid axis.
    function Grid_In_Range (Value : Long_Long_Integer) return Boolean;
 
@@ -62,10 +65,28 @@ package TopoScript_API.Conversions is
       From : Positive;
       V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean;
 
+   --  Read one result vector from the HAC elements at From: the
+   --  components are checked against the full Vector_Component
+   --  domain, the domain of the exact displacement results, which
+   --  is wider than the grid domain of the input contract above.
+   --  False means at least one component is outside the domain: V is
+   --  then left unassigned, and the caller records its own
+   --  diagnostic.
+   function Read_Vector_Result_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean;
+
    --  Write one point into the HAC elements at From.
    procedure Write_Point_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
       From :        Positive;
       P    :        TopoProof.Geometry.Points.Point_3D);
+
+   --  Write one vector into the HAC elements at From.
+   procedure Write_Vector_3D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      V    :        TopoProof.Geometry.Vectors.Vector_3D);
 
 end TopoScript_API.Conversions;

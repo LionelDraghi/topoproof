@@ -78,6 +78,32 @@ package body TopoScript_API.Conversions is
       return True;
    end Read_Vector_3D;
 
+   function Read_Vector_Result_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean
+   is
+      DX, DY, DZ : Long_Long_Integer;
+
+   begin
+      DX := To_Long (Data (From));
+      DY := To_Long (Data (From + 1));
+      DZ := To_Long (Data (From + 2));
+      if DX < Long_Long_Integer (Vector_Component'First)
+        or else DX > Long_Long_Integer (Vector_Component'Last)
+        or else DY < Long_Long_Integer (Vector_Component'First)
+        or else DY > Long_Long_Integer (Vector_Component'Last)
+        or else DZ < Long_Long_Integer (Vector_Component'First)
+        or else DZ > Long_Long_Integer (Vector_Component'Last)
+      then
+         return False;
+      end if;
+      V := (DX => Vector_Component (DX),
+            DY => Vector_Component (DY),
+            DZ => Vector_Component (DZ));
+      return True;
+   end Read_Vector_Result_3D;
+
    procedure Write_Point_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
       From :        Positive;
@@ -88,5 +114,16 @@ package body TopoScript_API.Conversions is
       Data (From + 1) := Grid_To_HAC (P.Y);
       Data (From + 2) := Grid_To_HAC (P.Z);
    end Write_Point_3D;
+
+   procedure Write_Vector_3D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      V    :        TopoProof.Geometry.Vectors.Vector_3D)
+   is
+   begin
+      Data (From)     := Vector_To_HAC (V.DX);
+      Data (From + 1) := Vector_To_HAC (V.DY);
+      Data (From + 2) := Vector_To_HAC (V.DZ);
+   end Write_Vector_3D;
 
 end TopoScript_API.Conversions;

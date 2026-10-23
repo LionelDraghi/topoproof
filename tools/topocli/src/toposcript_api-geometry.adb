@@ -43,4 +43,39 @@ package body TopoScript_API.Geometry is
       end if;
    end Translate_Native;
 
+   procedure Displacement_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, Result at 7..9.
+      A, B : TopoProof.Geometry.Points.Point_3D;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, A)
+        or else not Conversions.Read_Point_3D (Data, 4, B)
+      then
+         Session.Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+
+      Conversions.Write_Vector_3D (Data, 7, Displacement (A, B));
+   end Displacement_Native;
+
+   procedure Equal_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, Result at 7.
+      A, B : TopoProof.Geometry.Points.Point_3D;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, A)
+        or else not Conversions.Read_Point_3D (Data, 4, B)
+      then
+         Session.Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+
+      Data (7) := Equal_To_HAC
+        ((if A = B then Equal_True else Equal_False));
+   end Equal_Native;
+
 end TopoScript_API.Geometry;
