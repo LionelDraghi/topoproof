@@ -5,6 +5,29 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.4-dev] - 2026-??-??**
+  - [Added]   TopoScript parity for every proved operation: displacement,
+              equality, translation, orientation, intersection, the six
+              contour predicates and the vertex and edge creations all run
+              as scripts, with the explicit `Put` operations writing the
+              canonical results and `Make_Loop_From_Edges` classifying
+              loops over created edges
+  - [Added]   the `run_code` inline entry: `topocli run_code FRAGMENT`
+              executes a short script given on the command line, split
+              into lines at every semicolon, so the same command line runs
+              on every platform
+  - [Changed] `--output FILE` receives the whole multi-line result of one
+              run, in order, instead of the last line only
+  - [Changed] every feature page runs scripts only, and its diagrams are
+              written by the tested scripts through `Begin_Image` and
+              `End_Image`, no longer synthesized from command data
+  - [Removed] the command form of the operations (`translate`,
+              `displacement`, `equal`, `orientation`, `intersect`, the six
+              `contour_*` commands, `vertex`, `edge`, `loop`, `face`) and
+              its `--input`, `--draw`, `--draw-with` and
+              `--draw-short-labels` options: TopoScript is the single
+              front-end, `topocli` runs scripts only (DD-004)
+  - [Fixed]   `topocli run` on a missing file reports `error: file not
+              found` instead of crashing with an access-check failure
 
 - **[0.1.3] - 2026-10-22**
   - [Added]   TopoScript, the embedded Ada scripting facility executed

@@ -286,7 +286,7 @@ bbt scenario
 
 ## TopoScript consolidation
 
-> **Status: planned for 0.1.4-dev.** This subject is deliberately
+> **Status: delivered in 0.1.4-dev.** This subject is deliberately
 > inserted between milestones: the implementation review of
 > Milestone 6 validates the architecture and asks for maintainability
 > work before the 3D types arrive. The full review content lives in
@@ -430,7 +430,7 @@ maintain.
 
 ## TopoScript as the single front-end
 
-> **Status: planned for 0.1.4-dev.** This subject follows the TopoScript
+> **Status: delivered in 0.1.4-dev.** This subject follows the TopoScript
 > consolidation and records the pivot decided by DD-004 (2026-10-23):
 > TopoScript becomes the single front-end, and the command-line
 > operations are retired by waves, after the scripting API reaches
