@@ -1,59 +1,51 @@
-# Command-line interface
+# Command-line interface <!-- omit from toc -->
 
-TopoProof exposes proved operations through a stable black-box interface. Parameters may be passed directly or in a file containing one command. Results go to standard output by default, or to `--output FILE`, which receives every result line of the run, in order.
+`topocli` is the runner of the executable documentation: every proved
+operation is a script operation, run from a file or inline. The command
+form of the operations is retired (DD-004): the runner has two entries
+only, and the output file of the canonical results is their single
+option.
+
+```text
+topocli run FILE.topo [--output FILE]
+topocli run_code FRAGMENT [--output FILE]
+```
+
+`run` executes a TopoScript source file; `run_code` executes an inline
+fragment, split into lines at every semicolon, so the same command line
+runs on every platform. `--output FILE` receives every canonical result
+line of the run, in order; without it, the results go to the standard
+output. The scenarios of each operation page and of
+[toposcript.md](toposcript.md) exercise the two entries; this page owns
+the runner contract itself.
+
+## Contents <!-- omit from toc -->
+
+- [Scenario: display help](#scenario-display-help)
+- [Scenario: a command-line operation is rejected](#scenario-a-command-line-operation-is-rejected)
+- [Scenario: an entry without its operand is rejected](#scenario-an-entry-without-its-operand-is-rejected)
+- [Scenario: a script file that does not exist is rejected](#scenario-a-script-file-that-does-not-exist-is-rejected)
 
 ## Scenario: display help
+
 - When I successfully run `../bin/topocli --help`
-- Then the output contains `usage: topocli`
-- And the output contains `operations: translate, displacement, equal, orientation, intersect`
+- Then the output contains `usage: topocli run FILE.topo`
+- And the output contains `topocli run_code FRAGMENT`
 
-## Scenario: --output receives the whole multi-line result
+## Scenario: a command-line operation is rejected
 
-The file is created once per run and accumulates the canonical output:
-a multi-line result is complete, not reduced to its last line.
+The retired command form no longer exists: an operation name on the
+command line is a usage error, with the help hint on the standard error.
 
-- When I successfully run `../bin/topocli vertex A=(0, 0) B=(1, 1) C=(2, 3) --output vertices.out`
-- Then the file `vertices.out` is
-   ```text
-   vertex 1 point 0 0
-   vertex 2 point 1 1
-   vertex 3 point 2 3
-   ```
-
-## Scenario: inject parameters from an input file
-
-The command form reads one command from a file passed with `--input`.
-
-- Given the new file `displacement.in` containing `displacement A=(10, 20, 30) B=(13, 18, 37)`
-- When I successfully run `../bin/topocli --input displacement.in`
-- Then the output is `vector 3 -2 7`
-
-## Scenario: read and write files
-
-The command form reads its command from `--input` and writes the
-canonical result to `--output`.
-
-- Given the new file `displacement-file.in` containing `displacement A=(0, 0, 0) B=(-4, 5, -6)`
-- And there is no file `displacement-file.out`
-- When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`
-- Then the `displacement-file.out` file contains `vector -4 5 -6`
-
-## Scenario: a planar vertex needs a 2D point
-
-The command parser rejects a 3D position where a planar point is
-expected. The command form is retired by the single front-end pivot; the
-script form enforces the same discipline at compile time, a `Point_2D`
-having two components.
-
-- When I run `../bin/topocli vertex A=(1, 2, 3)`
+- When I run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9)`
 - Then there is an error
 
-## Scenario: an odd number of points is not a chain of pairs
+## Scenario: an entry without its operand is rejected
 
-The `edge` command takes its points in pairs; an odd count is a command
-parsing error. The command form is retired by the single front-end pivot;
-the script form has no such failure mode, each edge being an explicit
-`Create_Edge` call.
+- When I run `../bin/topocli run`
+- Then there is an error
 
-- When I run `../bin/topocli edge A=(1, 2)`
+## Scenario: a script file that does not exist is rejected
+
+- When I run `../bin/topocli run no_such_file.topo`
 - Then there is an error

@@ -2,37 +2,24 @@
 # Document: [command-line.md](../features/command-line.md)  
    ### Scenario: [display help](../features/command-line.md): 
    - OK : When I successfully run `../bin/topocli --help`  
-   - OK : Then the output contains `usage: topocli`  
-   - OK : And the output contains `operations: translate, displacement, equal, orientation, intersect`  
+   - OK : Then the output contains `usage: topocli run FILE.topo`  
+   - OK : And the output contains `topocli run_code FRAGMENT`  
    - [X] scenario   [display help](../features/command-line.md) pass  
 
-   ### Scenario: [--output receives the whole multi-line result](../features/command-line.md): 
-   - OK : When I successfully run `../bin/topocli vertex A=(0, 0) B=(1, 1) C=(2, 3) --output vertices.out`  
-   - OK : Then the file `vertices.out` is  
-   - [X] scenario   [--output receives the whole multi-line result](../features/command-line.md) pass  
-
-   ### Scenario: [inject parameters from an input file](../features/command-line.md): 
-   - OK : Given the new file `displacement.in` containing `displacement A=(10, 20, 30) B=(13, 18, 37)`  
-   - OK : When I successfully run `../bin/topocli --input displacement.in`  
-   - OK : Then the output is `vector 3 -2 7`  
-   - [X] scenario   [inject parameters from an input file](../features/command-line.md) pass  
-
-   ### Scenario: [read and write files](../features/command-line.md): 
-   - OK : Given the new file `displacement-file.in` containing `displacement A=(0, 0, 0) B=(-4, 5, -6)`  
-   - OK : And there is no file `displacement-file.out`  
-   - OK : When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`  
-   - OK : Then the `displacement-file.out` file contains `vector -4 5 -6`  
-   - [X] scenario   [read and write files](../features/command-line.md) pass  
-
-   ### Scenario: [a planar vertex needs a 2D point](../features/command-line.md): 
-   - OK : When I run `../bin/topocli vertex A=(1, 2, 3)`  
+   ### Scenario: [a command-line operation is rejected](../features/command-line.md): 
+   - OK : When I run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9)`  
    - OK : Then there is an error  
-   - [X] scenario   [a planar vertex needs a 2D point](../features/command-line.md) pass  
+   - [X] scenario   [a command-line operation is rejected](../features/command-line.md) pass  
 
-   ### Scenario: [an odd number of points is not a chain of pairs](../features/command-line.md): 
-   - OK : When I run `../bin/topocli edge A=(1, 2)`  
+   ### Scenario: [an entry without its operand is rejected](../features/command-line.md): 
+   - OK : When I run `../bin/topocli run`  
    - OK : Then there is an error  
-   - [X] scenario   [an odd number of points is not a chain of pairs](../features/command-line.md) pass  
+   - [X] scenario   [an entry without its operand is rejected](../features/command-line.md) pass  
+
+   ### Scenario: [a script file that does not exist is rejected](../features/command-line.md): 
+   - OK : When I run `../bin/topocli run no_such_file.topo`  
+   - OK : Then there is an error  
+   - [X] scenario   [a script file that does not exist is rejected](../features/command-line.md) pass  
 
 
 # Document: [translation.md](../features/translation.md)  
@@ -598,12 +585,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 88 scenarios OK
+## Summary : **Success**, 86 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 88    |
+| Successful | 86    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

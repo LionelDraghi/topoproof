@@ -73,7 +73,7 @@ HAC. The scripting API (`Point_3D`, `Vector_3D`, the operations) is
 injected before the user declarations: HAC imports native procedures
 only, so each operation returns its result through an `out` parameter,
 and `Put` writes the canonical representation of its value natively,
-the same one as the other topocli operations.
+the same one as every other script operation.
 
 TopoScript preserves ordinary Ada notation, including:
 
