@@ -34,9 +34,8 @@ the same vertex.
   VA   : Vertex_Handle;
   VB   : Vertex_Handle;
   E    : Edge_Handle;
-  Name : VString := +"../docs/features/images/edges_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/edges_1.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -79,9 +78,8 @@ meet at one vertex, and both edge traces report `vertex 2`.
   VC   : Vertex_Handle;
   E1   : Edge_Handle;
   E2   : Edge_Handle;
-  Name : VString := +"../docs/features/images/edges_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/edges_2.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);

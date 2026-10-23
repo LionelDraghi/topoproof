@@ -42,9 +42,8 @@ it.
   B    : constant Point_2D := (5, 5);
   C    : constant Point_2D := (0, 5);
   K    : Loop_Kind;
-  Name : VString := +"../docs/features/images/loops_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/loops_1.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -83,9 +82,8 @@ is on the right.
   C    : constant Point_2D := (5, 5);
   D    : constant Point_2D := (5, 0);
   K    : Loop_Kind;
-  Name : VString := +"../docs/features/images/loops_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/loops_2.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);

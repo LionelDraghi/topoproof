@@ -42,9 +42,8 @@ mirrors the orientation.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (1, 1);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_1.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Green);
@@ -75,9 +74,8 @@ The path turns right at `(1, 0)`.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (1, -1);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_3.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_3.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Green);
@@ -105,9 +103,8 @@ The path stays on the diagonal line: no turn at all.
   B    : constant Point_2D := (2, 2);
   C    : constant Point_2D := (4, 4);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_4.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_4.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Green);
@@ -136,9 +133,8 @@ reaching `C`.
   B    : constant Point_2D := (5, 7);
   C    : constant Point_2D := (9, -3);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_5.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_5.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (C, Red);
@@ -165,9 +161,8 @@ coordinates is computed exactly in the `Determinant` domain.
   B    : constant Point_2D := (0, 1073741823);
   C    : constant Point_2D := (-1073741823, -1073741823);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_6.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_6.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Green);
@@ -235,9 +230,8 @@ The exchanged path of the first scenario.
   B    : constant Point_2D := (1, 1);
   C    : constant Point_2D := (1, 0);
   K    : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_2.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Green);
@@ -273,9 +267,8 @@ translated one in red.
   F : constant Point_2D := (4, 2);
   G : constant Point_2D := (4, 3);
   K : Orientation_Kind;
-  Name : VString := +"../docs/features/images/orientation_7.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/orientation_7.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);

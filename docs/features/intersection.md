@@ -51,9 +51,8 @@ position: the operation says so instead of approximating.
   C    : constant Point_2D := (2, 0);
   D    : constant Point_2D := (0, 2);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_1.svg");
   Draw_Axes;
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);
@@ -78,9 +77,8 @@ position: the operation says so instead of approximating.
   C    : constant Point_2D := (0, 1);
   D    : constant Point_2D := (1, 0);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_2.svg");
   Draw_Axes;
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);
@@ -107,9 +105,8 @@ The two segments lie on the X axis and share the part from `(2, 0)` to
   C    : constant Point_2D := (2, 0);
   D    : constant Point_2D := (6, 0);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_3.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_3.svg");
   Draw_Axes;
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
@@ -136,9 +133,8 @@ of both.
   C    : constant Point_2D := (2, 0);
   D    : constant Point_2D := (4, 0);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_4.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_4.svg");
   Draw_Axes;
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
@@ -165,9 +161,8 @@ The two segments lie on the same line with a gap between `(1, 0)` and
   C    : constant Point_2D := (2, 0);
   D    : constant Point_2D := (3, 0);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_5.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_5.svg");
   Draw_Axes;
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
@@ -194,9 +189,8 @@ segment: a junction on the edge.
   C    : constant Point_2D := (1, 0);
   D    : constant Point_2D := (1, 1);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_6.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_6.svg");
   Draw_Axes;
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
@@ -224,9 +218,8 @@ segment appears on the diagram.
   C    : constant Point_2D := (0, 0);
   D    : constant Point_2D := (4, 2);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_7.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_7.svg");
   Draw_Axes;
   Draw_Edge (C, D, Green);
   Draw_Point_2D (A, Blue);
@@ -285,9 +278,8 @@ at the origin.
   C    : constant Point_2D := (-1073741823, 0);
   D    : constant Point_2D := (1073741823, 0);
   R    : Intersection_Result;
-  Name : VString := +"../docs/features/images/intersection_8.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/intersection_8.svg");
   Draw_Axes;
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);

@@ -22,9 +22,8 @@ operation, drawn in red.
   A    : constant Point_3D := (-1, 2, -3);
   B    : constant Point_3D := (4, -5, 6);
   D    : Vector_3D;
-  Name : VString := +"../docs/features/images/displacement_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/displacement_1.svg");
   Draw_Axes;
   Draw_Point (A, Blue);
   Draw_Point (B, Green);

@@ -33,9 +33,8 @@ it as a face boundary.
   B    : constant Point_2D := (5, 5);
   C    : constant Point_2D := (0, 5);
   K    : Face_Kind;
-  Name : VString := +"../docs/features/images/faces_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/faces_1.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -72,9 +71,8 @@ it as a face boundary.
   C    : constant Point_2D := (5, 5);
   D    : constant Point_2D := (5, 0);
   K    : Face_Kind;
-  Name : VString := +"../docs/features/images/faces_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/faces_2.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);

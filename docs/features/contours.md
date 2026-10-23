@@ -236,9 +236,8 @@ The endpoint of the first segment equals the start point of the second.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (1, 1);
   K    : Continuity_Kind;
-  Name : VString := +"../docs/features/images/contour_4.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_4.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -277,9 +276,8 @@ The endpoint `(1, 0)` of the first segment differs from the start point
   C    : constant Point_2D := (2, 1);
   D    : constant Point_2D := (2, 2);
   K    : Continuity_Kind;
-  Name : VString := +"../docs/features/images/contour_5.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_5.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -349,9 +347,8 @@ The last point equals the first: the square of the orientation definition.
   C    : constant Point_2D := (2, 2);
   D    : constant Point_2D := (0, 2);
   K    : Closure_Kind;
-  Name : VString := +"../docs/features/images/contour_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_1.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -393,9 +390,8 @@ the start point.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (1, 1);
   K    : Closure_Kind;
-  Name : VString := +"../docs/features/images/contour_6.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_6.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -480,9 +476,8 @@ on the right.
   C    : constant Point_2D := (2, 2);
   D    : constant Point_2D := (2, 0);
   O    : Contour_Orientation_Kind;
-  Name : VString := +"../docs/features/images/contour_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_2.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -525,9 +520,8 @@ same area and opposite orientations, so the shoelace sums to zero.
   C    : constant Point_2D := (2, 0);
   D    : constant Point_2D := (0, 2);
   O    : Contour_Orientation_Kind;
-  Name : VString := +"../docs/features/images/contour_3.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_3.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -567,9 +561,8 @@ same area and opposite orientations, so the shoelace sums to zero.
   B    : constant Point_2D := (2, 0);
   C    : constant Point_2D := (1, 2);
   O    : Contour_Orientation_Kind;
-  Name : VString := +"../docs/features/images/contour_7.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_7.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -611,9 +604,8 @@ traversed counter-clockwise.
   D    : constant Point_2D := (2, 2);
   E    : constant Point_2D := (0, 2);
   O    : Contour_Orientation_Kind;
-  Name : VString := +"../docs/features/images/contour_13.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_13.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -722,9 +714,8 @@ non-consecutive segments, so it is a valid junction.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (1, 1);
   S    : Bool_Kind;
-  Name : VString := +"../docs/features/images/contour_8.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_8.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -811,9 +802,8 @@ end.
   A    : constant Point_2D := (0, 0);
   B    : constant Point_2D := (1, 0);
   V    : Bool_Kind;
-  Name : VString := +"../docs/features/images/contour_9.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_9.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -854,9 +844,8 @@ not canonical.
   B    : constant Point_2D := (1, 0);
   C    : constant Point_2D := (2, 0);
   V    : Bool_Kind;
-  Name : VString := +"../docs/features/images/contour_10.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_10.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -927,9 +916,8 @@ extreme positions on both axes.
   A    : constant Point_2D := (1073741823, 1073741823);
   B    : constant Point_2D := (-1073741823, -1073741823);
   K    : Continuity_Kind;
-  Name : VString := +"../docs/features/images/contour_11.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_11.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
@@ -970,9 +958,8 @@ clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
   C    : constant Point_2D := (-1073741823, -1073741823);
   D    : constant Point_2D := (-1073741823, 1073741823);
   O    : Contour_Orientation_Kind;
-  Name : VString := +"../docs/features/images/contour_12.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/contour_12.svg");
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);

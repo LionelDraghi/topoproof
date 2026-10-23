@@ -310,17 +310,15 @@ compilation with a confusing message.
 
 - Given the file `two_images.topo`
   ```ada
-  N1 : VString := +"../docs/features/images/toposcript_2.svg";
-  N2 : VString := +"../docs/features/images/toposcript_3.svg";
   A  : constant Point_3D := (1, 2, 3);
   B  : constant Point_3D := (4, 5, 6);
 
-  Begin_Image (N1);
+  Begin_Image (+"../docs/features/images/toposcript_2.svg");
   Draw_Axes;
   Draw_Point (A, Blue);
   End_Image;
 
-  Begin_Image (N2);
+  Begin_Image (+"../docs/features/images/toposcript_3.svg");
   Draw_Axes;
   Draw_Point (B, Green);
   End_Image;
@@ -435,9 +433,8 @@ carries the result only.
   D        : constant Vector_3D := (5, 7, -9);
   Expected : constant Point_3D := (15, -13, 21);
   Result   : Point_3D;
-  Name     : VString := +"../docs/features/images/toposcript_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/toposcript_1.svg");
   Draw_Axes;
   Draw_Point (P, Blue);
   Draw_Vector (P, D, Blue);
@@ -518,9 +515,8 @@ P        : constant Point_3D := (10, -20, 30);
 D        : constant Vector_3D := (5, 7, -9);
 Expected : constant Point_3D := (15, -13, 21);
 Result   : Point_3D;
-Name     : VString := +"translation.svg";
 
-Begin_Image (Name);
+Begin_Image (+"translation.svg");
 Draw_Axes;
 Draw_Point (P, Blue);
 Draw_Vector (P, D, Blue);
@@ -536,10 +532,11 @@ Put (Result);
 
 In this example, `Expected` is used only to explain the scenario visually. It
 does not determine the test verdict; the expected textual result remains in
-the bbt `Then` step. The image name is a `VString` variable: HAC passes
-strings by reference, and the calls to the operations are positional. The
-2D chain scenarios draw through `Draw_Point_2D` and `Draw_Edge`, the
-labeled segment arrows of the client diagrams.
+the bbt `Then` step. The image name is a `VString`: the `+` operator of HAT
+turns the literal into the `VString` of the call, and the calls to the
+operations are positional. The 2D chain scenarios draw through
+`Draw_Point_2D` and `Draw_Edge`, the labeled segment arrows of the client
+diagrams.
 
 ## User macros and extensions
 

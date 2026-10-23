@@ -28,9 +28,8 @@ positions.
   A    : constant Point_3D := (1, 2, 3);
   B    : constant Point_3D := (1, 2, 3);
   K    : Equal_Kind;
-  Name : VString := +"../docs/features/images/equality_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/equality_1.svg");
   Draw_Axes;
   Draw_Point (A, Blue);
   Draw_Point (B, Green);
@@ -59,9 +58,8 @@ vertical axis.
   A    : constant Point_3D := (1, 2, 3);
   B    : constant Point_3D := (1, 2, 4);
   K    : Equal_Kind;
-  Name : VString := +"../docs/features/images/equality_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/equality_2.svg");
   Draw_Axes;
   Draw_Point (A, Blue);
   Draw_Point (B, Green);
@@ -89,9 +87,8 @@ origin.
   A    : constant Point_3D := (-1, 2, -3);
   B    : constant Point_3D := (1, -2, 3);
   K    : Equal_Kind;
-  Name : VString := +"../docs/features/images/equality_3.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/equality_3.svg");
   Draw_Axes;
   Draw_Point (A, Blue);
   Draw_Point (B, Green);

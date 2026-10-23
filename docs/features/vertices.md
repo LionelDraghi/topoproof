@@ -27,9 +27,8 @@ same vertex for the whole run.
   ```ada
   P    : constant Point_2D := (10, -20);
   V    : Vertex_Handle;
-  Name : VString := +"../docs/features/images/vertices_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/vertices_1.svg");
   Draw_Axes;
   Draw_Point_2D (P, Blue);
   End_Image;

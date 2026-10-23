@@ -25,9 +25,8 @@ the operation, is drawn in red.
   P      : constant Point_3D := (10, -20, 30);
   D      : constant Vector_3D := (5, 7, -9);
   Result : Point_3D;
-  Name   : VString := +"../docs/features/images/translation_1.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/translation_1.svg");
   Draw_Axes;
   Draw_Point (P, Blue);
   Draw_Vector (P, D, Blue);
@@ -60,9 +59,8 @@ representable grid and nothing else.
   P      : constant Point_3D := (1073741823, 0, 0);
   D      : constant Vector_3D := (1, 0, 0);
   Result : Point_3D;
-  Name   : VString := +"../docs/features/images/translation_2.svg";
 
-  Begin_Image (Name);
+  Begin_Image (+"../docs/features/images/translation_2.svg");
   Draw_Axes;
   Draw_Point (P, Blue);
   End_Image;
