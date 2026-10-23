@@ -437,6 +437,103 @@ package body TopoScript_API.Topology is
       end if;
    end Classify_Chain;
 
+   --  The script loop kind of the orientation of one valid loop: the
+   --  kernel contour orientation mapped onto the script kinds.
+   function Orientation_Kind_Of
+     (Links : TopoProof.Topology.Edges.Edge_Store;
+      Store : TopoProof.Topology.Vertices.Vertex_Store;
+      L     : TopoProof.Topology.Loops.Loop_2D) return Loop_Kind
+   is
+   begin
+      case TopoProof.Topology.Loops.Loop_Orientation (Links, Store, L) is
+         when TopoProof.Geometry.Segment_Sequences.Counter_Clockwise =>
+            return Counter_Clockwise;
+         when TopoProof.Geometry.Segment_Sequences.Clockwise =>
+            return Clockwise;
+         when TopoProof.Geometry.Segment_Sequences.Degenerate =>
+            return Degenerate;
+      end case;
+   end Orientation_Kind_Of;
+
+   --  The script loop kind of one rejection: the kernel validity kind
+   --  mapped onto the script kinds, so the kind returned to the script
+   --  carries the actual classification.
+   function Kind_Of
+     (Status : TopoProof.Topology.Loops.Loop_Validity) return Loop_Kind
+   is
+   begin
+      case Status is
+         when TopoProof.Topology.Loops.Valid_Loop =>
+            --  Never reached: a valid loop writes the orientation
+            --  kind; the mapping keeps the case total.
+            return Open_Chain;
+         when TopoProof.Topology.Loops.Orphan_Edge =>
+            return Orphan_Edge;
+         when TopoProof.Topology.Loops.Missing_Endpoint =>
+            return Missing_Endpoint;
+         when TopoProof.Topology.Loops.Open_Chain =>
+            return Open_Chain;
+         when TopoProof.Topology.Loops.Disconnected_Chain =>
+            return Disconnected_Chain;
+         when TopoProof.Topology.Loops.Degenerate_Support =>
+            return Degenerate_Support;
+      end case;
+   end Kind_Of;
+
+   procedure Make_Loop_From_Edges_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+      use type TopoProof.Topology.Loops.Loop_Validity;
+      N : constant Natural :=
+        TopoProof.Topology.Edges.Edge_Count
+          (Session.Current_Session.Links);
+
+   begin
+      if N > TopoProof.Topology.Loops.Max_Loop_Length then
+         Session.Record_Failure
+           ("error: too many edges for one loop");
+         Data (1) := Loop_To_HAC (Open_Chain);
+         return;
+      end if;
+
+      --  The created edges, in creation order: the handles carry the
+      --  vertex identity, so the kernel judges the support degeneracy
+      --  at loop level, not the edge degeneracy at build level.
+      declare
+         Handles : TopoProof.Topology.Loops.Edge_Handle_Array (1 .. N);
+         Status  : TopoProof.Topology.Loops.Loop_Validity;
+
+      begin
+         for I in 1 .. N loop
+            Handles (I) := TopoProof.Topology.Edges.Edge_Handle (I);
+         end loop;
+         Status :=
+           TopoProof.Topology.Loops.Classify_Loop
+             (Session.Current_Session.Links,
+              Session.Current_Session.Vertices, Handles);
+         if Status = TopoProof.Topology.Loops.Valid_Loop then
+            declare
+               L : constant TopoProof.Topology.Loops.Loop_2D :=
+                 TopoProof.Topology.Loops.Make_Loop
+                   (Session.Current_Session.Links,
+                    Session.Current_Session.Vertices, Handles);
+            begin
+               Data (1) :=
+                 Loop_To_HAC
+                   (Orientation_Kind_Of
+                      (Session.Current_Session.Links,
+                       Session.Current_Session.Vertices, L));
+            end;
+
+         else
+            Session.Record_Failure
+              (TopoDiagnostics.Loop_Diagnostic (Status));
+            Data (1) := Loop_To_HAC (Kind_Of (Status));
+         end if;
+      end;
+   end Make_Loop_From_Edges_Native;
+
    procedure Make_Loop_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
@@ -476,18 +573,7 @@ package body TopoScript_API.Topology is
 
          Classify_Chain (Links, Store, Handles, L, OK);
          if OK then
-            case TopoProof.Topology.Loops.Loop_Orientation
-                 (Links, Store, L)
-            is
-               when TopoProof.Geometry.Segment_Sequences.
-                 Counter_Clockwise
-               =>
-                  Kind := Counter_Clockwise;
-               when TopoProof.Geometry.Segment_Sequences.Clockwise =>
-                  Kind := Clockwise;
-               when TopoProof.Geometry.Segment_Sequences.Degenerate =>
-                  Kind := Degenerate;
-            end case;
+            Kind := Orientation_Kind_Of (Links, Store, L);
          end if;
       end;
       Data (1) := Loop_To_HAC (Kind);

@@ -401,6 +401,10 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Edge (E : in Edge_Handle)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   procedure Make_Loop_From_Edges");
+      Append_Line ("      (K : out Loop_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");
       Declaration_Skip := Count;
       Line_Count := 0;

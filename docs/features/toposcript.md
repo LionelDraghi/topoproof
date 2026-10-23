@@ -163,6 +163,7 @@ Operations:
 | `Add_Point (P)` | appends a 2D point to the chain |
 | `Make_Loop (K)` | classifies the accumulated chain as a loop, the kernel classification |
 | `Make_Face (K)` | classifies the same chain as a face boundary |
+| `Make_Loop_From_Edges (K)` | classifies the edges created by `Create_Edge`, in creation order, as a loop: the handles carry the vertex identity, so the support degeneracy is judged at loop level |
 | `Contour_Continuity (K)` | classifies the chain read as segment pairs: `Continuous` when the endpoint of each segment equals the start point of the next |
 | `Contour_Closure (K)` | classifies whether the chain is closed, the kernel `Is_Closed` |
 | `Contour_Orientation (K)` | classifies the closed, valid chain by the sign of its signed area, with the client pre-check diagnostics |

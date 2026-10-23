@@ -432,61 +432,60 @@
 
 # Document: [loops.md](../features/loops.md)  
    ### Scenario: [a triangle loop](../features/loops.md): 
-   - OK : When I successfully run `../bin/topocli loop A=(0, 0) B=(5, 5) C=(0, 5) A --draw ../docs/features/images/loops_1.svg`  
-   - OK : Then the output is  
-   - [X] scenario   [a triangle loop](../features/loops.md) pass  
-
-   ### Scenario: [a triangle loop built by script](../features/loops.md): 
    - OK : Given the file `triangle.topo`  
    - OK : When I successfully run `../bin/topocli run triangle.topo`  
    - OK : Then the output is `loop closed counter_clockwise`  
-   - OK : And the file `../docs/features/images/loops_1_script.svg` contains `(5, 5)`  
-   - [X] scenario   [a triangle loop built by script](../features/loops.md) pass  
+   - OK : And the file `../docs/features/images/loops_1.svg` contains `#1f6feb`    
+   - [X] scenario   [a triangle loop](../features/loops.md) pass  
 
    ### Scenario: [a clockwise square](../features/loops.md): 
-   - OK : When I successfully run `../bin/topocli loop A=(0, 0) B=(0, 5) C=(5, 5) D=(5, 0) A --draw ../docs/features/images/loops_2.svg`  
-   - OK : Then the output is  
+   - OK : Given the file `clockwise_square.topo`  
+   - OK : When I successfully run `../bin/topocli run clockwise_square.topo`  
+   - OK : Then the output is `loop closed clockwise`  
+   - OK : And the file `../docs/features/images/loops_2.svg` contains `#1f6feb`    
    - [X] scenario   [a clockwise square](../features/loops.md) pass  
 
    ### Scenario: [a closed backtrack is a degenerate loop](../features/loops.md): 
-   - OK : When I successfully run `../bin/topocli loop A=(0, 0) B=(5, 5) A`  
-   - OK : Then the output is  
+   - OK : Given the file `backtrack.topo`  
+   - OK : When I successfully run `../bin/topocli run backtrack.topo`  
+   - OK : Then the output is `loop closed degenerate`  
    - [X] scenario   [a closed backtrack is a degenerate loop](../features/loops.md) pass  
 
    ### Scenario: [an open chain is rejected](../features/loops.md): 
-   - OK : When I run `../bin/topocli loop A=(0, 0) B=(5, 5) C=(0, 5)`  
-   - OK : Then the output is  
+   - OK : Given the file `open_chain.topo`  
+   - OK : When I run `../bin/topocli run open_chain.topo`  
+   - OK : Then the error output is `error: open loop`  
    - OK : And there is an error  
    - [X] scenario   [an open chain is rejected](../features/loops.md) pass  
 
    ### Scenario: [a degenerate edge support is rejected](../features/loops.md): 
-   - OK : When I run `../bin/topocli loop A=(1, 2) B=(1, 2) A`  
+   - OK : Given the file `degenerate_support.topo`  
+   - OK : When I run `../bin/topocli run degenerate_support.topo`  
    - OK : Then the output is  
+   - OK : And the error output is `error: degenerate edge support`  
    - OK : And there is an error  
    - [X] scenario   [a degenerate edge support is rejected](../features/loops.md) pass  
 
 
 # Document: [faces.md](../features/faces.md)  
    ### Scenario: [a counter-clockwise face](../features/faces.md): 
-   - OK : When I successfully run `../bin/topocli face A=(0, 0) B=(5, 5) C=(0, 5) A --draw ../docs/features/images/faces_1.svg`  
-   - OK : Then the output is  
-   - [X] scenario   [a counter-clockwise face](../features/faces.md) pass  
-
-   ### Scenario: [a counter-clockwise face built by script](../features/faces.md): 
    - OK : Given the file `face.topo`  
    - OK : When I successfully run `../bin/topocli run face.topo`  
    - OK : Then the output is `face counter_clockwise`  
-   - OK : And the file `../docs/features/images/faces_1_script.svg` contains `(5, 5)`  
-   - [X] scenario   [a counter-clockwise face built by script](../features/faces.md) pass  
+   - OK : And the file `../docs/features/images/faces_1.svg` contains `#1f6feb`    
+   - [X] scenario   [a counter-clockwise face](../features/faces.md) pass  
 
    ### Scenario: [a clockwise face](../features/faces.md): 
-   - OK : When I successfully run `../bin/topocli face A=(0, 0) B=(0, 5) C=(5, 5) D=(5, 0) A --draw ../docs/features/images/faces_2.svg`  
-   - OK : Then the output is  
+   - OK : Given the file `clockwise_face.topo`  
+   - OK : When I successfully run `../bin/topocli run clockwise_face.topo`  
+   - OK : Then the output is `face clockwise`  
+   - OK : And the file `../docs/features/images/faces_2.svg` contains `#1f6feb`    
    - [X] scenario   [a clockwise face](../features/faces.md) pass  
 
    ### Scenario: [a degenerate boundary is rejected](../features/faces.md): 
-   - OK : When I run `../bin/topocli face A=(0, 0) B=(5, 5) A`  
-   - OK : Then the output is  
+   - OK : Given the file `degenerate_boundary.topo`  
+   - OK : When I run `../bin/topocli run degenerate_boundary.topo`  
+   - OK : Then the error output is `error: degenerate face boundary`  
    - OK : And there is an error  
    - [X] scenario   [a degenerate boundary is rejected](../features/faces.md) pass  
 
@@ -582,12 +581,12 @@
    - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 87 scenarios OK
+## Summary : **Success**, 85 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 87    |
+| Successful | 85    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

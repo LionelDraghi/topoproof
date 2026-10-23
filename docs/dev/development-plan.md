@@ -497,7 +497,12 @@ surface.
 6. construction wave: `vertex` and `edge` parity with the explicit trace
    operations, then the migration of `vertices.md` and `edges.md`;
 7. loop and face wave: the migration of `loops.md` and `faces.md` (the
-   operations already exist);
+   operations already exist), with the loop-level judgment of the
+   support degeneracy kept executable: the degenerate-support scenario
+   is built with the construction operations and classified by the new
+   `Make_Loop_From_Edges` over the created edges, since the
+   position-identified chain cannot express two distinct vertices at
+   one point (DD-002, decision 6);
 8. inline entry: the `run` inline fragment, its quoting tested on the
    three runners;
 9. retirement: `command-line.md` becomes the runner documentation, and

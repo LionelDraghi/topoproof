@@ -1,12 +1,10 @@
 # Faces <!-- omit from toc -->
 
-`face` builds a planar face from a chain of named points:
-`topocli face A=(X, Y) B=(X, Y) ... A`.
-The construction is the one of the loop command: one vertex per distinct
-name, one edge per consecutive pair, closure on the first name. The
-resulting loop is then classified again as a face boundary. The canonical
+`Make_Face` builds a planar face from the chain accumulated by
+`Add_Point`: the construction is the one of the loop classification, and
+the resulting loop is classified again as a face boundary. The canonical
 result of building the face `A=(0, 0) B=(5, 5) C=(0, 5) A` is
-`face counter_clockwise`.
+`face counter_clockwise`, written by the explicit `Put_Face`.
 
 A face is a region of the plane bounded by one loop (see
 `docs/terminology.md`). A valid face boundary is a valid loop whose
@@ -20,82 +18,90 @@ which a valid boundary guarantees to be counter-clockwise or clockwise.
 ## Contents <!-- omit from toc -->
 
 - [Scenario: a counter-clockwise face](#scenario-a-counter-clockwise-face)
-- [Scenario: a counter-clockwise face built by script](#scenario-a-counter-clockwise-face-built-by-script)
 - [Scenario: a clockwise face](#scenario-a-clockwise-face)
 - [Proved property](#proved-property)
 - [Scenario: a degenerate boundary is rejected](#scenario-a-degenerate-boundary-is-rejected)
 
 ## Scenario: a counter-clockwise face
 
-- When I successfully run `../bin/topocli face A=(0, 0) B=(5, 5) C=(0, 5) A --draw ../docs/features/images/faces_1.svg`
-- Then the output is
-   ```
-   vertex 1 point 0 0
-   vertex 2 point 5 5
-   vertex 3 point 0 5
-   edge 1 vertex 1 vertex 2
-   edge 2 vertex 2 vertex 3
-   edge 3 vertex 3 vertex 1
-   face counter_clockwise
-   ```
-
-## Scenario: a counter-clockwise face built by script
-
-The same face as the previous scenario, written as a TopoScript: the
-construction is the one of the loop script, and the classification is
-the same kernel one. The script draws its own diagram, the same
-geometry as the one above, for a side-by-side comparison.
+The script draws the triangle, accumulates the chain, and classifies
+it as a face boundary.
 
 - Given the file `face.topo`
   ```ada
   A    : constant Point_2D := (0, 0);
   B    : constant Point_2D := (5, 5);
   C    : constant Point_2D := (0, 5);
-  Kind : Face_Kind;
-  Name : VString := +"../docs/features/images/faces_1_script.svg";
+  K    : Face_Kind;
+  Name : VString := +"../docs/features/images/faces_1.svg";
 
   Begin_Image (Name);
   Draw_Axes;
   Draw_Point_2D (A, Blue);
   Draw_Point_2D (B, Blue);
   Draw_Point_2D (C, Blue);
-  Draw_Edge (A, B, Green);
-  Draw_Edge (B, C, Green);
-  Draw_Edge (C, A, Green);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, A, Blue);
+  End_Image;
 
   Add_Point (A);
   Add_Point (B);
   Add_Point (C);
   Add_Point (A);
 
-  Make_Face (Kind);
+  Make_Face (K);
 
-  Put_Face (Kind);
-  End_Image;
+  Put_Face (K);
   ```
 - When I successfully run `../bin/topocli run face.topo`
 - Then the output is `face counter_clockwise`
-- And the file `../docs/features/images/faces_1_script.svg` contains `(5, 5)`
-
-![Counter-clockwise face drawn by the script](images/faces_1_script.svg)
+- And the file `../docs/features/images/faces_1.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the three vertices and edges of the boundary are drawn, closed on
+  `A`.)
 
 ## Scenario: a clockwise face
 
 ![Clockwise square face](images/faces_2.svg)
 
-- When I successfully run `../bin/topocli face A=(0, 0) B=(0, 5) C=(5, 5) D=(5, 0) A --draw ../docs/features/images/faces_2.svg`
-- Then the output is
-   ```
-   vertex 1 point 0 0
-   vertex 2 point 0 5
-   vertex 3 point 5 5
-   vertex 4 point 5 0
-   edge 1 vertex 1 vertex 2
-   edge 2 vertex 2 vertex 3
-   edge 3 vertex 3 vertex 4
-   edge 4 vertex 4 vertex 1
-   face clockwise
-   ```
+- Given the file `clockwise_face.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (0, 5);
+  C    : constant Point_2D := (5, 5);
+  D    : constant Point_2D := (5, 0);
+  K    : Face_Kind;
+  Name : VString := +"../docs/features/images/faces_2.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, D, Blue);
+  Draw_Edge (D, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Make_Face (K);
+
+  Put_Face (K);
+  ```
+- When I successfully run `../bin/topocli run clockwise_face.topo`
+- Then the output is `face clockwise`
+- And the file `../docs/features/images/faces_2.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the four vertices and edges of the boundary are drawn, traversed
+  clockwise.)
 
 ## Proved property
 
@@ -112,15 +118,23 @@ unit is proved free of run-time errors.
 
 The chain closes, so the loop is valid, but the path goes to `B` and comes
 back along the same segment: the boundary orientation is degenerate, and a
-closed backtrack is never a valid face boundary.
+closed backtrack is never a valid face boundary. The classification owns
+no canonical line, only the rejection diagnostic.
 
-- When I run `../bin/topocli face A=(0, 0) B=(5, 5) A`
-- Then the output is
-   ```
-   vertex 1 point 0 0
-   vertex 2 point 5 5
-   edge 1 vertex 1 vertex 2
-   edge 2 vertex 2 vertex 1
-   error: degenerate face boundary
-   ```
+- Given the file `degenerate_boundary.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (5, 5);
+  K : Face_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (A);
+
+  Make_Face (K);
+
+  Put_Face (K);
+  ```
+- When I run `../bin/topocli run degenerate_boundary.topo`
+- Then the error output is `error: degenerate face boundary`
 - And there is an error

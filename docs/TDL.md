@@ -220,7 +220,12 @@ design decision.
   (development plan, TopoScript as the single front-end, Increment 7).
 - **Acceptance:** the `loops.md` and `faces.md` pages run scripts only,
   under the anti-tautology invariant, with their images regenerated in
-  the same change.
+  the same change. Amended during delivery: the loop page's
+  degenerate-support scenario, inexpressible by the position-identified
+  chain, is built with the construction operations and classified by
+  the new `Make_Loop_From_Edges` over the created edges, so the
+  loop-level judgment of DD-002, decision 6 keeps its executable
+  witness in the handle world.
 
 ### TDL-IMPROVE-016: run a script inline from the command line
 

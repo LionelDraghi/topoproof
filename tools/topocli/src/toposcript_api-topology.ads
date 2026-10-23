@@ -151,4 +151,14 @@ package TopoScript_API.Topology is
    procedure Create_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Make_Loop_From_Edges: classifies the edges
+   --  created in the construction stores of the designated session,
+   --  in creation order, as a loop. The handles make the vertex
+   --  identity explicit, so the degeneracy of the geometric support
+   --  is judged at loop level, exactly as the loop client operation:
+   --  an edge between two distinct vertices at the same point is a
+   --  valid edge that no valid loop contains (DD-002, decision 6).
+   procedure Make_Loop_From_Edges_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
 end TopoScript_API.Topology;
