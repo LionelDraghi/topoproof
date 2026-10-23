@@ -28,6 +28,7 @@ with TopoProof.Topology.Faces;        use TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;        use TopoProof.Topology.Loops;
 with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with TopoScript_API;
+with TopoScript_API.Session;
 with TopoScript_Diagnostics;
 with TopoScript_Wrapper;
 with TopoDiagnostics;                 use TopoDiagnostics;
@@ -1332,8 +1333,8 @@ procedure TopoCLI is
       --  the callbacks of the run operate on this session.
       Session : aliased TopoScript_API.Script_Session;
    begin
-      TopoScript_API.Reset (Session);
-      TopoScript_API.Designate (Session'Unchecked_Access);
+      TopoScript_API.Session.Reset (Session);
+      TopoScript_API.Session.Designate (Session'Unchecked_Access);
       declare
          Fragment : Unbounded_String;
          F        : File_Type;
@@ -1392,11 +1393,12 @@ procedure TopoCLI is
                              (Post_Mortem.Unhandled));
                         Set_Exit_Status (Failure);
 
-                     elsif TopoScript_API.Last_Failure (Session) /= ""
+                     elsif TopoScript_API.Session.Last_Failure (Session)
+                       /= ""
                      then
                         Put_Line
                           (Standard_Error,
-                           TopoScript_API.Last_Failure (Session));
+                           TopoScript_API.Session.Last_Failure (Session));
                         Set_Exit_Status (Failure);
 
                      else
