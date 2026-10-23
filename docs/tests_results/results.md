@@ -26,28 +26,32 @@
 
 
 # Document: [translation.md](../features/translation.md)  
-   ### Scenario: [translate command-line values](../features/translation.md): 
-   - OK : When I successfully run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9) --draw ../docs/features/images/translation_1.svg`  
+   ### Scenario: [translate a point by a vector](../features/translation.md): 
+   - OK : Given the file `translate.topo`  
+   - OK : When I successfully run `../bin/topocli run translate.topo`  
    - OK : Then the output is `point 15 -13 21`  
-   - [X] scenario   [translate command-line values](../features/translation.md) pass  
+   - OK : And the file `../docs/features/images/translation_1.svg` contains `#cf222e`    
+   - [X] scenario   [translate a point by a vector](../features/translation.md) pass  
 
    ### Scenario: [reject an unrepresentable result](../features/translation.md): 
-   - OK : When I run `../bin/topocli translate P=(1073741823, 0, 0) D=(1, 0, 0) --draw ../docs/features/images/translation_2.svg`  
-   - OK : Then the output is `error: translation is not representable`  
+   - OK : Given the file `translate_beyond.topo`  
+   - OK : When I run `../bin/topocli run translate_beyond.topo`  
+   - OK : Then the error output is `error: translation is not representable`  
    - OK : And there is an error  
+   - OK : And the file `../docs/features/images/translation_2.svg` contains `#1f6feb`    
    - [X] scenario   [reject an unrepresentable result](../features/translation.md) pass  
 
    ### Scenario: [write the result to a file](../features/translation.md): 
-   - OK : Given there is no file `translation.out`  
-   - OK : When I successfully run `../bin/topocli translate P=(1, 2, 3) D=(4, 5, 6) --output translation.out`  
-   - OK : Then the `translation.out` file contains `point 5 7 9`  
+   - OK : Given the file `translate_output.topo`  
+   - OK : When I successfully run `../bin/topocli run translate_output.topo --output translation.out`  
+   - OK : Then the output is  
+   - OK : And the file `translation.out` is `point 5 7 9`  
    - [X] scenario   [write the result to a file](../features/translation.md) pass  
 
    ### Scenario: [translation and displacement compose to the identity](../features/translation.md): 
-   - OK : When I successfully run `../bin/topocli displacement A=(10, -20, 30) B=(15, -13, 21)`  
-   - OK : Then the output is `vector 5 7 -9`  
-   - OK : When I successfully run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9) --draw ../docs/features/images/translation_1.svg`  
-   - OK : Then the output is `point 15 -13 21`  
+   - OK : Given the file `compose.topo`  
+   - OK : When I successfully run `../bin/topocli run compose.topo`  
+   - OK : Then the output is  
    - [X] scenario   [translation and displacement compose to the identity](../features/translation.md) pass  
 
 
