@@ -16,6 +16,8 @@ with TopoProof.Geometry.Intersections;
 with TopoProof.Geometry.Orientations;
 with TopoProof.Geometry.Points;
 with TopoProof.Geometry.Vectors;
+with TopoProof.Topology.Edges;
+with TopoProof.Topology.Vertices;
 with TopoScript_API.Geometry;
 with TopoScript_API.Topology;
 
@@ -61,6 +63,19 @@ package TopoScript_API.Output is
 
    --  The canonical image of a contour boolean: `true` or `false`.
    function Image (K : Topology.Bool_Kind) return String;
+
+   --  The canonical image of a vertex trace: `vertex H point X Y`,
+   --  the handle and the point of one created vertex.
+   function Image
+     (H : TopoProof.Topology.Vertices.Vertex_Handle;
+      P : TopoProof.Geometry.Points.Point_2D) return String;
+
+   --  The canonical image of an edge trace: `edge E vertex A vertex
+   --  B`, the handle and the two endpoint handles of one created edge.
+   function Image
+     (E     : TopoProof.Topology.Edges.Edge_Handle;
+      A, B  : TopoProof.Topology.Vertices.Vertex_Handle)
+      return String;
 
    --  The canonical image of an orientation result:
    --  `orientation counter_clockwise`, `orientation clockwise` or
@@ -124,6 +139,16 @@ package TopoScript_API.Output is
    --  Native side of Put_Bool: writes the canonical image of the
    --  contour boolean.
    procedure Put_Bool_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Vertex: writes the canonical vertex trace of
+   --  the handle, or records the diagnostic of an unknown handle.
+   procedure Put_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Edge: writes the canonical edge trace of the
+   --  handle, or records the diagnostic of an unknown handle.
+   procedure Put_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Orientation: writes the canonical image of

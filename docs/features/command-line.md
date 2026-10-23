@@ -37,3 +37,23 @@ canonical result to `--output`.
 - And there is no file `displacement-file.out`
 - When I successfully run `../bin/topocli --input displacement-file.in --output displacement-file.out`
 - Then the `displacement-file.out` file contains `vector -4 5 -6`
+
+## Scenario: a planar vertex needs a 2D point
+
+The command parser rejects a 3D position where a planar point is
+expected. The command form is retired by the single front-end pivot; the
+script form enforces the same discipline at compile time, a `Point_2D`
+having two components.
+
+- When I run `../bin/topocli vertex A=(1, 2, 3)`
+- Then there is an error
+
+## Scenario: an odd number of points is not a chain of pairs
+
+The `edge` command takes its points in pairs; an odd count is a command
+parsing error. The command form is retired by the single front-end pivot;
+the script form has no such failure mode, each edge being an explicit
+`Create_Edge` call.
+
+- When I run `../bin/topocli edge A=(1, 2)`
+- Then there is an error

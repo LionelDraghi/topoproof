@@ -8,6 +8,9 @@
 with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
+with TopoProof.Topology.Edges;
+with TopoProof.Topology.Vertices;
+
 package body TopoScript_API.Session is
 
    --  The designated session. The HAC callbacks receive only the
@@ -30,6 +33,18 @@ package body TopoScript_API.Session is
       end if;
       Session.Output_Path := Null_Unbounded_String;
       Session.Chain.Clear;
+      --  The construction stores restart empty: handles number the
+      --  creations of the run, so a fresh run numbers from 1 again.
+      Session.Vertices :=
+        (Capacity =>
+           TopoProof.Topology.Vertices.Vertex_Count_Range
+             (TopoProof.Topology.Vertices.Max_Vertices),
+         others => <>);
+      Session.Links :=
+        (Capacity =>
+           TopoProof.Topology.Edges.Edge_Count_Range
+             (TopoProof.Topology.Edges.Max_Edges),
+         others => <>);
    end Reset;
 
    procedure Designate (Session : Session_Access) is

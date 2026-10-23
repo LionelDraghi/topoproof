@@ -62,6 +62,11 @@ package body TopoScript_API is
       Register (BD, Output.Put_Contour_Orientation_Native'Access,
                 "Put_Contour_Orientation");
       Register (BD, Output.Put_Bool_Native'Access, "Put_Bool");
+      Register (BD, Topology.Create_Vertex_Native'Access,
+                "Create_Vertex");
+      Register (BD, Topology.Create_Edge_Native'Access, "Create_Edge");
+      Register (BD, Output.Put_Vertex_Native'Access, "Put_Vertex");
+      Register (BD, Output.Put_Edge_Native'Access, "Put_Edge");
    end Register_All;
 
 end TopoScript_API;

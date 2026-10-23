@@ -17,6 +17,8 @@ with HAC_Sys.Interfacing;
 with TopoProof.Geometry.Points;
 with TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;
+with TopoProof.Topology.Edges;
+with TopoProof.Topology.Vertices;
 
 package TopoScript_API.Conversions is
 
@@ -33,6 +35,14 @@ package TopoScript_API.Conversions is
 
    function Vector_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
      (TopoProof.Numerics.Vector_Component);
+
+   function Vertex_Handle_To_HAC is
+     new HAC_Sys.Interfacing.To_HAC_Any_Integer
+       (TopoProof.Topology.Vertices.Vertex_Handle);
+
+   function Edge_Handle_To_HAC is
+     new HAC_Sys.Interfacing.To_HAC_Any_Integer
+       (TopoProof.Topology.Edges.Edge_Handle);
 
    --  The script value is one position of one grid axis.
    function Grid_In_Range (Value : Long_Long_Integer) return Boolean;
@@ -88,5 +98,24 @@ package TopoScript_API.Conversions is
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
       From :        Positive;
       V    :        TopoProof.Geometry.Vectors.Vector_3D);
+
+   --  Read one script vertex handle from the HAC element at From: the
+   --  value is read on the widest native integer, then checked against
+   --  the handle domain. False means the value designates no vertex
+   --  handle at all; whether the handle designates a stored vertex is
+   --  a store check, left to the caller.
+   function Read_Vertex_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      H    : out TopoProof.Topology.Vertices.Vertex_Handle)
+      return Boolean;
+
+   --  Read one script edge handle from the HAC element at From, with
+   --  the same domain check.
+   function Read_Edge_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      E    : out TopoProof.Topology.Edges.Edge_Handle)
+      return Boolean;
 
 end TopoScript_API.Conversions;

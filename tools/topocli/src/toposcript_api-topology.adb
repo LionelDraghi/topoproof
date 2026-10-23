@@ -247,6 +247,77 @@ package body TopoScript_API.Topology is
       end;
    end Contour_No_Flat_Turns_Native;
 
+   procedure Create_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..2, H out at 3.
+      P : TopoProof.Geometry.Points.Point_2D;
+      H : TopoProof.Topology.Vertices.Vertex_Handle;
+
+   begin
+      if not Conversions.Read_Point_2D (Data, 1, P) then
+         Session.Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+      --  The store of the run is at the kernel maximum capacity, so
+      --  the kernel precondition of Create holds structurally; the
+      --  guard keeps the callback total for a pathological script.
+      if TopoProof.Topology.Vertices.Vertex_Count
+        (Session.Current_Session.Vertices)
+        = TopoProof.Topology.Vertices.Max_Vertices
+      then
+         Session.Record_Failure
+           ("error: too many vertices for one store");
+         return;
+      end if;
+      TopoProof.Topology.Vertices.Create
+        (Session.Current_Session.Vertices, P, H);
+      Data (3) := Conversions.Vertex_Handle_To_HAC (H);
+   end Create_Vertex_Native;
+
+   procedure Create_Edge_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1, B at 2, E out at 3.
+      A, B : TopoProof.Topology.Vertices.Vertex_Handle;
+      E    : TopoProof.Topology.Edges.Edge_Handle;
+
+   begin
+      if not Conversions.Read_Vertex_Handle (Data, 1, A)
+        or else not Conversions.Read_Vertex_Handle (Data, 2, B)
+      then
+         Session.Record_Failure ("error: invalid vertex handle");
+         return;
+      end if;
+      --  Both endpoints must exist in the vertex store of the run: a
+      --  handle is valid only in the store it comes from.
+      if not TopoProof.Topology.Vertices.Contains
+        (Session.Current_Session.Vertices, A)
+        or else not TopoProof.Topology.Vertices.Contains
+          (Session.Current_Session.Vertices, B)
+      then
+         Session.Record_Failure ("error: unknown vertex");
+         return;
+      end if;
+      --  The degeneracy precondition is checked before the call: the
+      --  kernel contract is never violated from a script, the same
+      --  way as the edge client operation.
+      if A = B then
+         Session.Record_Failure ("error: degenerate edge");
+         return;
+      end if;
+      if TopoProof.Topology.Edges.Edge_Count (Session.Current_Session.Links)
+        = TopoProof.Topology.Edges.Max_Edges
+      then
+         Session.Record_Failure ("error: too many edges for one store");
+         return;
+      end if;
+      TopoProof.Topology.Edges.Create
+        (Session.Current_Session.Links,
+         Session.Current_Session.Vertices, A, B, E);
+      Data (3) := Conversions.Edge_Handle_To_HAC (E);
+   end Create_Edge_Native;
+
    --  The number of distinct positions of the chain: a repeated
    --  position is one vertex.
    function Distinct_Count

@@ -24,6 +24,16 @@
    - OK : Then the `displacement-file.out` file contains `vector -4 5 -6`  
    - [X] scenario   [read and write files](../features/command-line.md) pass  
 
+   ### Scenario: [a planar vertex needs a 2D point](../features/command-line.md): 
+   - OK : When I run `../bin/topocli vertex A=(1, 2, 3)`  
+   - OK : Then there is an error  
+   - [X] scenario   [a planar vertex needs a 2D point](../features/command-line.md) pass  
+
+   ### Scenario: [an odd number of points is not a chain of pairs](../features/command-line.md): 
+   - OK : When I run `../bin/topocli edge A=(1, 2)`  
+   - OK : Then there is an error  
+   - [X] scenario   [an odd number of points is not a chain of pairs](../features/command-line.md) pass  
+
 
 # Document: [translation.md](../features/translation.md)  
    ### Scenario: [translate a point by a vector](../features/translation.md): 
@@ -371,52 +381,53 @@
 
 # Document: [vertices.md](../features/vertices.md)  
    ### Scenario: [create a vertex from a point](../features/vertices.md): 
-   - OK : When I successfully run `../bin/topocli vertex A=(10, -20) --draw ../docs/features/images/vertices_1.svg`  
+   - OK : Given the file `create_vertex.topo`  
+   - OK : When I successfully run `../bin/topocli run create_vertex.topo`  
    - OK : Then the output is `vertex 1 point 10 -20`  
+   - OK : And the file `../docs/features/images/vertices_1.svg` contains `#1f6feb`    
    - [X] scenario   [create a vertex from a point](../features/vertices.md) pass  
 
    ### Scenario: [two vertices at the same point are distinct](../features/vertices.md): 
-   - OK : When I successfully run `../bin/topocli vertex A=(1, 2) B=(1, 2)`  
+   - OK : Given the file `same_point_vertices.topo`  
+   - OK : When I successfully run `../bin/topocli run same_point_vertices.topo`  
    - OK : Then the output is  
    - [X] scenario   [two vertices at the same point are distinct](../features/vertices.md) pass  
 
    ### Scenario: [vertices are numbered in creation order](../features/vertices.md): 
-   - OK : When I successfully run `../bin/topocli vertex A=(0, 0) B=(5, 5) C=(-5, 3)`  
+   - OK : Given the file `creation_order.topo`  
+   - OK : When I successfully run `../bin/topocli run creation_order.topo`  
    - OK : Then the output is  
    - [X] scenario   [vertices are numbered in creation order](../features/vertices.md) pass  
-
-   ### Scenario: [a planar vertex needs a 2D point](../features/vertices.md): 
-   - OK : When I run `../bin/topocli vertex A=(1, 2, 3)`  
-   - OK : Then there is an error  
-   - [X] scenario   [a planar vertex needs a 2D point](../features/vertices.md) pass  
 
 
 # Document: [edges.md](../features/edges.md)  
    ### Scenario: [create an edge between two vertices](../features/edges.md): 
-   - OK : When I successfully run `../bin/topocli edge A=(0, 0) B=(5, 5) --draw ../docs/features/images/edges_1.svg`  
+   - OK : Given the file `create_edge.topo`  
+   - OK : When I successfully run `../bin/topocli run create_edge.topo`  
    - OK : Then the output is  
+   - OK : And the file `../docs/features/images/edges_1.svg` contains `#1f6feb`    
    - [X] scenario   [create an edge between two vertices](../features/edges.md) pass  
 
    ### Scenario: [edges share vertices](../features/edges.md): 
-   - OK : When I successfully run `../bin/topocli edge A=(0, 0) B=(5, 5) C=(0, 5) B --draw ../docs/features/images/edges_2.svg`  
+   - OK : Given the file `shared_vertex.topo`  
+   - OK : When I successfully run `../bin/topocli run shared_vertex.topo`  
    - OK : Then the output is  
+   - OK : And the file `../docs/features/images/edges_2.svg` contains `#1f6feb`    
    - [X] scenario   [edges share vertices](../features/edges.md) pass  
 
    ### Scenario: [an edge between two vertices at the same point is valid](../features/edges.md): 
-   - OK : When I successfully run `../bin/topocli edge A=(1, 2) B=(1, 2)`  
+   - OK : Given the file `same_point_edge.topo`  
+   - OK : When I successfully run `../bin/topocli run same_point_edge.topo`  
    - OK : Then the output is  
    - [X] scenario   [an edge between two vertices at the same point is valid](../features/edges.md) pass  
 
    ### Scenario: [an edge back to the same vertex is degenerate](../features/edges.md): 
-   - OK : When I run `../bin/topocli edge A=(1, 2) A`  
-   - OK : Then the output is  
+   - OK : Given the file `degenerate_edge.topo`  
+   - OK : When I run `../bin/topocli run degenerate_edge.topo`  
+   - OK : Then the output is `vertex 1 point 1 2`  
+   - OK : And the error output is `error: degenerate edge`  
    - OK : And there is an error  
    - [X] scenario   [an edge back to the same vertex is degenerate](../features/edges.md) pass  
-
-   ### Scenario: [an odd number of points is not a chain of pairs](../features/edges.md): 
-   - OK : When I run `../bin/topocli edge A=(1, 2)`  
-   - OK : Then there is an error  
-   - [X] scenario   [an odd number of points is not a chain of pairs](../features/edges.md) pass  
 
 
 # Document: [loops.md](../features/loops.md)  

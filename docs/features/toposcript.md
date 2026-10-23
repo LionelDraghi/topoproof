@@ -144,6 +144,7 @@ Types:
 | `Closure_Kind` | `Closed`, `Open` |
 | `Contour_Orientation_Kind` | `Contour_Counter_Clockwise`, `Contour_Clockwise`, `Contour_Degenerate` (prefixed: HAC does not overload enumeration literals) |
 | `Bool_Kind` | `Bool_True`, `Bool_False` |
+| `Vertex_Handle`, `Edge_Handle` | the observable handles of the created vertices and edges, valid for the whole run |
 
 Operations:
 
@@ -168,6 +169,10 @@ Operations:
 | `Contour_Self_Intersects (B)` | classifies whether the chain self-intersects, the kernel classification |
 | `Contour_Valid (B)` | classifies the geometric validity of the chain, the kernel `Is_Valid` |
 | `Contour_No_Flat_Turns (B)` | classifies the absence of flat turns, the kernel `Has_No_Flat_Turns` |
+| `Create_Vertex (P, H)` | creates one vertex referring to the point `P` in the store of the run, and returns its handle |
+| `Create_Edge (A, B, E)` | creates one oriented edge between the vertex handles `A` and `B`, and returns its handle |
+| `Put_Vertex (H)` | writes `vertex H point X Y`, the trace of the created vertex |
+| `Put_Edge (E)` | writes `edge E vertex A vertex B`, the trace of the created edge |
 | `Put_Loop (K)` | writes `loop closed ...`, or records the rejection diagnostic |
 | `Put_Face (K)` | writes `face ...`, or records the rejection diagnostic |
 | `Put_Continuity (K)` | writes `continuity continuous` or `continuity discontinuous` on standard output |

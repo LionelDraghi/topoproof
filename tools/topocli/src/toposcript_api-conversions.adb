@@ -126,4 +126,42 @@ package body TopoScript_API.Conversions is
       Data (From + 2) := Vector_To_HAC (V.DZ);
    end Write_Vector_3D;
 
+   function Read_Vertex_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      H    : out TopoProof.Topology.Vertices.Vertex_Handle)
+      return Boolean
+   is
+      V : constant Long_Long_Integer := To_Long (Data (From));
+
+   begin
+      if V < 1
+        or else V > Long_Long_Integer
+                   (TopoProof.Topology.Vertices.Max_Vertices)
+      then
+         return False;
+      end if;
+      H := TopoProof.Topology.Vertices.Vertex_Handle (V);
+      return True;
+   end Read_Vertex_Handle;
+
+   function Read_Edge_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      E    : out TopoProof.Topology.Edges.Edge_Handle)
+      return Boolean
+   is
+      V : constant Long_Long_Integer := To_Long (Data (From));
+
+   begin
+      if V < 1
+        or else V > Long_Long_Integer
+                   (TopoProof.Topology.Edges.Max_Edges)
+      then
+         return False;
+      end if;
+      E := TopoProof.Topology.Edges.Edge_Handle (V);
+      return True;
+   end Read_Edge_Handle;
+
 end TopoScript_API.Conversions;

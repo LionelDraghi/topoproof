@@ -134,4 +134,21 @@ package TopoScript_API.Topology is
    procedure Contour_No_Flat_Turns_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Create_Vertex: creates one vertex referring to
+   --  the 2D point in the vertex store of the designated session, and
+   --  writes the new handle into the out parameter: the handle is
+   --  observable, and a script holds it in a variable to build edges
+   --  and traces.
+   procedure Create_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Create_Edge: creates one oriented edge between
+   --  the two vertex handles in the edge store of the designated
+   --  session, and writes the new edge handle into the out parameter.
+   --  Both endpoints must be handles of vertices created in the same
+   --  run, and an edge back to the same vertex is rejected, the same
+   --  degeneracy diagnostic as the edge client operation.
+   procedure Create_Edge_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
 end TopoScript_API.Topology;

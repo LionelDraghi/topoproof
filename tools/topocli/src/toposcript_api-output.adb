@@ -78,6 +78,26 @@ package body TopoScript_API.Output is
          when Topology.Bool_True  => "true",
          when Topology.Bool_False => "false");
 
+   --  The trimmed decimal image of one topology handle: the canonical
+   --  form of a vertex or edge handle in a construction trace. Both
+   --  handle types are subtypes of Positive, so one implementation
+   --  covers them.
+   function Img (H : Positive) return String
+   is (Ada.Strings.Fixed.Trim (H'Image, Ada.Strings.Both));
+
+   function Image
+     (H : TopoProof.Topology.Vertices.Vertex_Handle;
+      P : TopoProof.Geometry.Points.Point_2D) return String
+   is
+     ("vertex " & Img (H) & " point " & Img (P.X) & " " & Img (P.Y));
+
+   function Image
+     (E     : TopoProof.Topology.Edges.Edge_Handle;
+      A, B  : TopoProof.Topology.Vertices.Vertex_Handle)
+      return String
+   is
+     ("edge " & Img (E) & " vertex " & Img (A) & " vertex " & Img (B));
+
    function Image
      (K : TopoProof.Geometry.Orientations.Orientation_Kind) return String
    is
@@ -217,6 +237,55 @@ package body TopoScript_API.Output is
    begin
       Put_Line (Image (B));
    end Put_Bool_Native;
+
+   procedure Put_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: H at 1.
+      H : TopoProof.Topology.Vertices.Vertex_Handle;
+
+   begin
+      --  A handle designates a stored vertex of the run, or none: the
+      --  trace exists only for a created vertex.
+      if not Conversions.Read_Vertex_Handle (Data, 1, H)
+        or else not TopoProof.Topology.Vertices.Contains
+          (Session.Current_Session.Vertices, H)
+      then
+         Session.Record_Failure ("error: unknown vertex");
+         return;
+      end if;
+      Put_Line
+        (Image
+           (H,
+            TopoProof.Topology.Vertices.Point_Of
+              (Session.Current_Session.Vertices, H)));
+   end Put_Vertex_Native;
+
+   procedure Put_Edge_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: E at 1.
+      E : TopoProof.Topology.Edges.Edge_Handle;
+
+   begin
+      --  A handle designates a stored edge of the run, or none: the
+      --  trace exists only for a created edge.
+      if not Conversions.Read_Edge_Handle (Data, 1, E)
+        or else not TopoProof.Topology.Edges.Contains
+          (Session.Current_Session.Links, E)
+      then
+         Session.Record_Failure ("error: unknown edge");
+         return;
+      end if;
+      declare
+         Pair : constant TopoProof.Topology.Edges.Vertex_Handle_Pair :=
+           TopoProof.Topology.Edges.Endpoints
+             (Session.Current_Session.Links, E);
+
+      begin
+         Put_Line (Image (E, Pair.From_Vertex, Pair.To_Vertex));
+      end;
+   end Put_Edge_Native;
 
    procedure Put_Orientation_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

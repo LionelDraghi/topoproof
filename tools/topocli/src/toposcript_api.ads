@@ -18,6 +18,8 @@ with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 with HAC_Sys.Builder;
 with TopoProof.Numerics;
+with TopoProof.Topology.Edges;
+with TopoProof.Topology.Vertices;
 with Topodraw;
 
 package TopoScript_API is
@@ -75,6 +77,19 @@ private
       --  clearing it, so the same chain can be classified first as a
       --  loop, then as a face boundary.
       Chain : Chain_Vectors.Vector;
+      --  The construction stores: one vertex store and one edge store
+      --  per run, at the kernel maximum capacities, so the kernel
+      --  preconditions of Create hold structurally for any script.
+      --  Create_Vertex and Create_Edge build the topology of the run
+      --  through them, and the Put_Vertex and Put_Edge traces read the
+      --  handles back. Handles stay valid for the whole run: stored
+      --  entities are never removed.
+      Vertices : TopoProof.Topology.Vertices.Vertex_Store
+        (TopoProof.Topology.Vertices.Vertex_Count_Range
+           (TopoProof.Topology.Vertices.Max_Vertices));
+      Links : TopoProof.Topology.Edges.Edge_Store
+        (TopoProof.Topology.Edges.Edge_Count_Range
+           (TopoProof.Topology.Edges.Max_Edges));
    end record;
 
 end TopoScript_API;
