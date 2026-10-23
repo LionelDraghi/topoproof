@@ -14,6 +14,12 @@
   - [Current situation](#current-situation)
   - [Security and API exposure](#security-and-api-exposure)
   - [Questions to arbitrate](#questions-to-arbitrate)
+- [DD-004: TopoScript as the single front-end, and the phased retirement of the command line](#dd-004-toposcript-as-the-single-front-end-and-the-phased-retirement-of-the-command-line)
+  - [Current situation](#current-situation-1)
+  - [Proposed decisions](#proposed-decisions-1)
+  - [Consequences](#consequences)
+  - [Difficulties and mitigations](#difficulties-and-mitigations)
+  - [Open questions](#open-questions-1)
 
 This document records design topics. A discussion is not a normative rule
 until its status becomes **decided** and the decision is reflected in the
@@ -243,3 +249,134 @@ trusted TopoProof test suite.
 4. How should script and scripting-API compatibility be versioned?
 5. Which capabilities must be restricted before standalone user extensions are
    considered safe?
+
+## DD-004: TopoScript as the single front-end, and the phased retirement of the command line
+
+- **Status:** decided (2026-10-23)
+- **Related task:** extends the arbitration scope of `TDL-DESIGN-004` (DD-003);
+  trims the TopoScript consolidation roadmap (development plan)
+- **Scope:** the `topocli` command-line form, the scripting API surface, the
+  executable documentation of every operation
+
+### Current situation
+
+Two front-ends converge on the proved kernel: the command-line form (15
+operations, their point-token syntax, their automatic diagram synthesis, their
+canonical outputs) and TopoScript (`topocli run FILE.topo`). The executable
+documentation runs both: 76 command invocations of the 15 operations, against
+6 script executions, over 77 bbt scenarios in 12 feature pages.
+
+Two front-ends mean duplicated knowledge: the canonical textual
+representations exist twice (`point X Y Z`, `loop closed ...`, `face ...`), the
+chain-classification diagnostics needed the shared `TopoDiagnostics` unit, and
+every operation is documented in the command form only, with script scenarios
+as a parallel pilot (translation, loops, faces). The consolidation increments
+exist because of this convergence: they keep two front-ends coherent.
+
+The scripting API exposes 3 of the 15 operations (translation and the loop and
+face classification chain): 12 operations (displacement, equality, orientation,
+intersection, the six contour predicates, vertex and edge construction) have
+no script equivalent, so the command line cannot be retired today.
+
+### Proposed decisions
+
+1. **TopoScript becomes the single front-end.** The 15 command-line operations
+   are retired; short scripts run inline (`topocli run --eval FRAGMENT`, the
+   switch syntax is arbitrated below), long scripts from files (already
+   `topocli run FILE`). The client keeps only the runner, the inline entry,
+   the output and status conventions, and the help.
+2. **Parity precedes retirement.** The scripting API reaches parity with the
+   15 operations before any command is deleted: each parity increment adds
+   the callback, the registration, the wrapper injection, the documentation
+   section, and the scenarios of one operation family. No deletion happens
+   while a feature page still runs the command form.
+3. **Every output line is explicitly printed.** The scripting operations
+   never emit anything on their own: every canonical line comes from an
+   explicit `Put` operation. The construction operations return their
+   handles and endpoints through out parameters — the store-and-handle
+   semantics of DD-002 stay observable values in the script world — and
+   `Put_Vertex` and `Put_Edge` print the trace lines, with the exact
+   current texts, when a scenario asks for them. The rewrite of a page is
+   judged on the readability of the script form, not on the preservation
+   of the command form's `Then` blocks: the pages are user documentation.
+4. **Diagrams become explicit.** The automatic scene synthesis of `--draw`
+   (axes, ticks, anchors, named points, labelled vectors) is replaced by
+   explicit drawing in the scripts, assisted by new drawing helpers where a
+   migration wave needs them. The images of the executable documentation are
+   regenerated and reviewed in the same change as each page's migration.
+5. **The migration runs in waves, doc-is-code.** One reviewed change per
+   operation family: parity increment, page rewrite from command form to
+   script form, regenerated images, bbt green, evidence consistent. The
+   command-line operations and their parser, dispatcher, and scene synthesis
+   are deleted in the last wave, when no scenario uses them.
+6. **The consolidation roadmap is trimmed accordingly.** The half of
+   `TDL-IMPROVE-004` that routes the canonical representations through the
+   command-line commands is dropped: the commands die instead. The
+   `Read_*` and `Write_*` conversion helpers and the `Image` formatters
+   remain, for the callbacks. The deferred items rise in priority once the
+   scripting API is the single interface: the external prelude
+   (`TDL-IMPROVE-007`), the single API description (`TDL-IMPROVE-008`), the
+   scanner strengthening (`TDL-IMPROVE-009`), and the semantic drawing
+   identifiers (`TDL-IMPROVE-010`).
+7. **A script never prints an expected value.** The actual results come from
+   the operations alone; the expected results live only in the bbt `Then`
+   steps. A scenario whose script declares a value and prints it as the
+   expected result would test the script against itself: it is a defect.
+   This promotes the DD-003 rule (no expected value in TopoScript) to an
+   invariant of every migrated page, and it is what the explicit-`Put`
+   decision above makes reviewable: each output line of a scenario is
+   visibly produced by a script line, never by a declaration.
+8. **`--output` stays; `--draw-with` dies; `--draw-short-labels` is
+   arbitrated per wave.** The script `Put` operations write through one
+   run-owned output destination — standard output by default, the
+   `--output` file opened once per run and closed at its end, with the
+   same accumulation semantics as the command form — so the output
+   contract is preserved. `--draw-with` has no replacement: a script
+   draws explicitly everything it wants, including the expected
+   geometry, under the anti-tautology invariant. `--draw-short-labels`
+   is decided by each migration wave with its scenario inventory in
+   hand: a script-side drawing option if a page needs it, deletion
+   otherwise.
+
+### Consequences
+
+- one front-end, one documentation form per operation; the convergence work
+  between two front-ends disappears with the second front-end;
+- the canonical representations, the diagnostics and the construction trace
+  have exactly one producer and one documentation form;
+- at the last wave, the command parser, the `Handle_*` dispatch, the
+  `--draw-with` and `--draw-short-labels` machinery and the command scene
+  synthesis are deleted, shrinking the client to the runner;
+- the future GUI host converges on the same interface: the session and the
+  scripting API prepare it (consolidation increments 1 and 2), and the
+  command line stops being a parallel thing to maintain.
+
+### Difficulties and mitigations
+
+- **Parity gap:** 12 operations to expose, each within the HAC subset bounds
+  recorded in DD-003 (procedures only, positional associations, `VString`
+  strings, 64-bit integers). Mechanical work, sequenced before everything
+  else.
+- **Cross-shell inline quoting:** an inline fragment crosses the shell, and
+  CI runs on Linux, macOS and Windows. The inline entry is optional and
+  documented; `run FILE` covers every long case; the switch syntax is tested
+  on the three runners during the inline increment.
+- **Scenario rewrite scale:** 76 invocations across 12 pages. The waves
+  bound every reviewed change; bbt is the net at each wave; no big-bang.
+- **Committed images change when drawing becomes explicit:** each image is
+  regenerated and reviewed inside its wave, never after.
+- **Block statements and control structures are not in the current HAC
+  subset:** every migrated scenario must stay within declarations followed
+  by statements, or wait for the DD-003 arbitration on control structures.
+
+### Open questions
+
+1. The inline switch syntax and its shell portability (candidate: one
+   argument after `run`, the fragment as a single `--eval`-style switch);
+   does the bbt `When I run` step quoting suffice on the three runners?
+2. Is the decision consistent with the security questions of DD-003: the
+   inline entry and the single-interface posture must be re-examined when
+   standalone user extensions and untrusted scripts are considered.
+3. The order of the migration waves, and whether the command-line page of
+   the executable documentation survives as the runner documentation or is
+   absorbed by the TopoScript page.

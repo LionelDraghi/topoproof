@@ -35,23 +35,31 @@
   - [Delivery Increments](#delivery-increments-1)
   - [Out of Scope](#out-of-scope-1)
   - [Completion Criteria](#completion-criteria-2)
-- [Milestone 7 - Transition to 3D](#milestone-7---transition-to-3d)
+- [TopoScript as the single front-end](#toposcript-as-the-single-front-end)
   - [Goal](#goal-3)
   - [Deliverables](#deliverables-3)
   - [Capabilities](#capabilities-3)
   - [Invariants](#invariants-3)
-  - [Proof Objectives](#proof-objectives-2)
-  - [Executable Scenarios](#executable-scenarios-3)
+  - [Delivery Increments](#delivery-increments-2)
+  - [Out of Scope](#out-of-scope-2)
   - [Completion Criteria](#completion-criteria-3)
-- [Milestone 8 - Minimal B-Rep](#milestone-8---minimal-b-rep)
+- [Milestone 7 - Transition to 3D](#milestone-7---transition-to-3d)
   - [Goal](#goal-4)
   - [Deliverables](#deliverables-4)
   - [Capabilities](#capabilities-4)
   - [Invariants](#invariants-4)
+  - [Proof Objectives](#proof-objectives-2)
+  - [Executable Scenarios](#executable-scenarios-3)
+  - [Completion Criteria](#completion-criteria-4)
+- [Milestone 8 - Minimal B-Rep](#milestone-8---minimal-b-rep)
+  - [Goal](#goal-5)
+  - [Deliverables](#deliverables-5)
+  - [Capabilities](#capabilities-5)
+  - [Invariants](#invariants-5)
   - [Proof Objectives](#proof-objectives-3)
   - [Executable Scenarios](#executable-scenarios-4)
-  - [Out of Scope](#out-of-scope-2)
-  - [Completion Criteria](#completion-criteria-4)
+  - [Out of Scope](#out-of-scope-3)
+  - [Completion Criteria](#completion-criteria-5)
 - [Completion rule](#completion-rule)
 
 ## Strategy
@@ -284,6 +292,14 @@ bbt scenario
 > work before the 3D types arrive. The full review content lives in
 > this section and in the `TDL` entries it references; the review file
 > itself is not archived in the repository.
+>
+> **Amended by DD-004 (2026-10-23):** the pivot to the single front-end
+> trims this roadmap: the canonical representations are owned by the
+> callbacks and the diagnostics only, the routing through the
+> command-line commands is dropped (the commands are retired by the
+> next section instead), and the deferred items (external prelude,
+> single API description, scanner strengthening, drawing identifiers)
+> rise in priority once the scripting API is the single interface.
 
 ### Goal
 
@@ -410,6 +426,101 @@ maintain.
 - repeated script executions do not leak the previous source buffers;
 - the edge-case scenarios of this section are executable and green;
 - `docs/features/toposcript.md` stays consistent with the behaviour.
+
+
+## TopoScript as the single front-end
+
+> **Status: planned for 0.1.4-dev.** This subject follows the TopoScript
+> consolidation and records the pivot decided by DD-004 (2026-10-23):
+> TopoScript becomes the single front-end, and the command-line
+> operations are retired by waves, after the scripting API reaches
+> parity.
+
+### Goal
+
+Make TopoScript the single front-end of the proved operations: one
+interface, one canonical documentation form per operation, and a client
+reduced to the runner, before the 3D types of Milestone 7 widen the API
+surface.
+
+### Deliverables
+
+- Scripting API parity with the 15 command operations, including the
+  construction operations with observable handles and the explicit
+  `Put_Vertex` and `Put_Edge` trace operations;
+- the canonical `Put` representations of every public result: vectors,
+  orientations, intersections, contour predicates, construction traces;
+- the inline script entry (`run` with an inline fragment), its quoting
+  documented and tested on the three CI runners;
+- the migration of the 12 feature pages from the command form to the
+  script form, images regenerated in the same waves;
+- the deletion of the command form: the operation parser, the `Handle_*`
+  dispatch, the command scene synthesis, and the command-only options;
+  `--output` stays for scripts: the `Put` operations write through one
+  run-owned output destination (DD-004, decision 8).
+
+### Capabilities
+
+- Every operation of the executable documentation runs as a script.
+- A short script runs inline from the command line; a long script runs
+  from a file.
+- Each output line of a scenario is visibly produced by an explicit
+  script line.
+
+### Invariants
+
+- A script never prints an expected value: the expected results live only
+  in the bbt `Then` steps (DD-004, decision 7).
+- The scripting operations never emit anything on their own: every
+  canonical line comes from an explicit `Put` (DD-004, decision 3).
+- The verdicts remain the responsibility of bbt; no parallel assertion
+  framework is introduced.
+- The output contract is unchanged: canonical standard output,
+  diagnostics on standard error, generated files, process status.
+- One wave is one reviewed change: parity increment, page rewrite,
+  regenerated images, bbt green, evidence consistent.
+
+### Delivery Increments
+
+1. Conversions and canonical output, callbacks only: the `Read_*` and
+   `Write_*` helpers, the `Image` formatters trimmed by DD-004, and the
+   run-owned output destination of the `Put` operations (DD-004,
+   decision 8);
+2. wrapper buffer ownership and the session edge-case scenarios
+   (consolidation increments 4 and 5);
+3. geometry wave: `displacement` and `equal` parity, then the migration
+   of `displacement.md` and `equality.md`;
+4. orientation and intersection wave: predicate parity, then the
+   migration of `orientation.md` and `intersection.md`;
+5. contour wave: the six contour predicates, then the migration of
+   `contours.md`;
+6. construction wave: `vertex` and `edge` parity with the explicit trace
+   operations, then the migration of `vertices.md` and `edges.md`;
+7. loop and face wave: the migration of `loops.md` and `faces.md` (the
+   operations already exist);
+8. inline entry: the `run` inline fragment, its quoting tested on the
+   three runners;
+9. retirement: `command-line.md` becomes the runner documentation, and
+   the command form is deleted.
+
+### Out of Scope
+
+- The GUI host and persistent macros: the session prepares them, they
+  are not delivered here;
+- new bbt wording: DD-003 rules the scenario embedding;
+- the sandboxing and capability questions of DD-003, kept by
+  `TDL-DESIGN-004`.
+
+### Completion Criteria
+
+- No feature page runs a command operation: `topocli` runs scripts only;
+- every public operation has one documentation form, executable and
+  green;
+- the client contains no operation parser, no command dispatcher, and no
+  command scene synthesis;
+- the anti-tautology invariant is reviewable on every migrated page:
+  each output line is produced by a script line, never by a
+  declaration.
 
 
 ## Milestone 7 - Transition to 3D

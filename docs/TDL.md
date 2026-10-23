@@ -71,8 +71,11 @@ design decision.
   Increment 3).
 - **Acceptance:** conversion helpers between the HAC element arrays and
   the TopoProof types exist and are used by every callback, and the
-  `Image` formatters are shared by the CLI commands, the callbacks and
-  the diagnostics, with no duplicated textual representation left.
+  `Image` formatters are shared by the callbacks and the diagnostics,
+  with no duplicated textual representation left. Amended by DD-004:
+  the routing through the command-line commands is dropped, the
+  commands are retired instead (development plan, TopoScript as the
+  single front-end, Increment 1).
 
 ### TDL-IMPROVE-005: fix the wrapper source-buffer ownership
 
@@ -153,6 +156,90 @@ design decision.
 - **Acceptance:** topodraw writes stable identifiers for the drawn
   objects, and the drawing scenarios check the intended object rather
   than a colour.
+
+### TDL-IMPROVE-011: bring the geometry family to scripting parity
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** DD-004 decides the pivot to the single front-end: the
+  command operations are retired by waves, after the scripting API
+  reaches parity. The geometry wave covers `displacement` and `equal`
+  (development plan, TopoScript as the single front-end, Increment 3).
+- **Acceptance:** the scripting API exposes the displacement and the
+  equality operations with their canonical `Put` representations, and
+  the `displacement.md` and `equality.md` pages run scripts only,
+  with their images regenerated in the same change.
+
+### TDL-IMPROVE-012: bring the predicates to scripting parity
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the orientation and intersection wave of the DD-004
+  pivot (development plan, TopoScript as the single front-end,
+  Increment 4).
+- **Acceptance:** the scripting API exposes the three-point orientation
+  and the exact intersection classification with their canonical `Put`
+  representations, and the `orientation.md` and `intersection.md` pages
+  run scripts only, with their images regenerated in the same change.
+
+### TDL-IMPROVE-013: bring the contour predicates to scripting parity
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the contour wave of the DD-004 pivot (development plan,
+  TopoScript as the single front-end, Increment 5).
+- **Acceptance:** the scripting API exposes continuity, closure,
+  orientation, self-intersection, validity and flat turns over a chain
+  of points with their canonical `Put` representations, and the
+  `contours.md` page runs scripts only, with its images regenerated in
+  the same change.
+
+### TDL-IMPROVE-014: bring the construction operations to scripting parity
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the construction wave of the DD-004 pivot: `vertex` and
+  `edge` become script operations, the handles stay observable values,
+  and the trace lines are printed by the explicit `Put_Vertex` and
+  `Put_Edge` (DD-004, decision 3) (development plan, TopoScript as
+  the single front-end, Increment 6).
+- **Acceptance:** the scripting API exposes the vertex and edge
+  creation with observable handles and the explicit trace operations,
+  and the `vertices.md` and `edges.md` pages run scripts only, with
+  their images regenerated in the same change.
+
+### TDL-IMPROVE-015: migrate the loop and face pages to scripts
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the loop and face wave of the DD-004 pivot: the
+  operations already exist, only the pages remain in the command form
+  (development plan, TopoScript as the single front-end, Increment 7).
+- **Acceptance:** the `loops.md` and `faces.md` pages run scripts only,
+  under the anti-tautology invariant, with their images regenerated in
+  the same change.
+
+### TDL-IMPROVE-016: run a script inline from the command line
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the inline entry of the DD-004 pivot: short scripts
+  replace the ergonomics of the command form (development plan,
+  TopoScript as the single front-end, Increment 8).
+- **Acceptance:** `topocli run` accepts an inline fragment, the
+  fragment quoting is documented, and the entry is exercised by a
+  bbt scenario on each CI platform.
+
+### TDL-IMPROVE-017: retire the command form
+
+- **Category:** IMPROVE
+- **Status:** open
+- **Context:** the retirement wave of the DD-004 pivot: the last wave
+  deletes what no scenario uses anymore (development plan, TopoScript
+  as the single front-end, Increment 9).
+- **Acceptance:** `command-line.md` documents the runner only, and the
+  client contains no operation parser, no command dispatcher and no
+  command scene synthesis.
 
 ## Completed
 
