@@ -26,6 +26,9 @@ and its Ada subset are presented in
 - [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
 - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
 - [Scenario: --output receives the canonical result of a script](#scenario---output-receives-the-canonical-result-of-a-script)
+- [Scenario: an inline fragment runs without a file](#scenario-an-inline-fragment-runs-without-a-file)
+- [Scenario: an inline rejection points at the inline line](#scenario-an-inline-rejection-points-at-the-inline-line)
+- [Scenario: an inline run writes to the output file](#scenario-an-inline-run-writes-to-the-output-file)
 - [Scenario: an empty fragment executes silently](#scenario-an-empty-fragment-executes-silently)
 - [Scenario: a fragment of declarations only executes silently](#scenario-a-fragment-of-declarations-only-executes-silently)
 - [Scenario: a compilation diagnostic points at the declaration line](#scenario-a-compilation-diagnostic-points-at-the-declaration-line)
@@ -205,6 +208,23 @@ topocli run FILE.topo
 The output contract holds identically: the canonical values go to
 standard output, the diagnostics to standard error with the fragment
 path, line and column, and the process status carries the verdict.
+
+A short script also runs inline, without a file:
+
+```text
+topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P);"
+```
+
+The fragment is the rest of the command line, every argument joined
+back with spaces, so it is usually passed as one double-quoted
+argument, and a shell or a runner that hands it over split on its
+spaces changes nothing: the join restores it, and the same command
+line runs on every platform. The `--output FILE` pair is extracted on
+the way. The fragment is split into lines at every semicolon:
+the wrapper line rules apply unchanged, the declarations precede the
+statements, and the diagnostics point at the inline lines under the
+`<inline>` name. A fragment comment may not carry a semicolon, since
+the split does not look inside comments.
 
 ## Scenarios
 
@@ -459,6 +479,35 @@ and the standard output stays empty.
   ```
 - And the file `result.out` is `point 15 -13 21`
 
+## Scenario: an inline fragment runs without a file
+
+The fragment is one quoted argument, split into lines at every
+semicolon: the whole script fits a single command line, the same one
+on every runner.
+
+- When I successfully run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); D : constant Vector_3D := (5, 7, -9); Result : Point_3D; Translate (P, D, Result); Put (Result);"`
+- Then the output is `point 15 -13 21`
+
+## Scenario: an inline rejection points at the inline line
+
+Each semicolon ends an inline line: the late declaration sits on the
+third one, and the diagnostic carries the `<inline>` name and its
+line.
+
+- When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`
+- Then the error output is `error: <inline>:3: declaration after the first executable statement`
+- And there is an error
+
+## Scenario: an inline run writes to the output file
+
+The inline entry owns the same option as the file entry.
+
+- When I successfully run `../bin/topocli run_code "A : constant Point_2D := (0, 0); B : constant Point_2D := (2, 0); K : Continuity_Kind; Add_Point (A); Add_Point (B); Add_Point (B); Add_Point (A); Contour_Continuity (K); Put_Continuity (K);" --output inline.out`
+- Then the output is
+  ```text
+  ```
+- And the file `inline.out` is `continuity continuous`
+
 ## Diagnostic drawing
 
 A script generates one diagnostic image through the drawing API,
@@ -512,10 +561,11 @@ and the scripting API are stable.
 
 ## CLI direction
 
-The command form is:
+The script entries are:
 
 ```text
 topocli run FILE.topo [--output FILE]
+topocli run_code "FRAGMENT" [--output FILE]
 ```
 
 Useful diagnostic options may later include:

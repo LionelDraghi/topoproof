@@ -233,8 +233,12 @@ design decision.
 - **Status:** open
 - **Context:** the inline entry of the DD-004 pivot: short scripts
   replace the ergonomics of the command form (development plan,
-  TopoScript as the single front-end, Increment 8).
-- **Acceptance:** `topocli run` accepts an inline fragment, the
+  TopoScript as the single front-end, Increment 8). Amended during
+  delivery: the entry is the distinct `run_code` command, so no
+  file-or-fragment heuristic exists; the fragment is one quoted
+  argument, split into lines at every semicolon, so the same command
+  line runs on every platform.
+- **Acceptance:** `topocli run_code` accepts an inline fragment, the
   fragment quoting is documented, and the entry is exercised by a
   bbt scenario on each CI platform.
 

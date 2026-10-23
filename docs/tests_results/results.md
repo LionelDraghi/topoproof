@@ -580,13 +580,30 @@
    - OK : And the file `result.out` is `point 15 -13 21`  
    - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
+   ### Scenario: [an inline fragment runs without a file](../features/toposcript.md): 
+   - OK : When I successfully run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); D : constant Vector_3D := (5, 7, -9); Result : Point_3D; Translate (P, D, Result); Put (Result);"`  
+   - OK : Then the output is `point 15 -13 21`  
+   - [X] scenario   [an inline fragment runs without a file](../features/toposcript.md) pass  
 
-## Summary : **Success**, 85 scenarios OK
+   ### Scenario: [an inline rejection points at the inline line](../features/toposcript.md): 
+   - OK : When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`  
+   - OK : Then the error output is `error: <inline>:3: declaration after the first executable statement`  
+   - OK : And there is an error  
+   - [X] scenario   [an inline rejection points at the inline line](../features/toposcript.md) pass  
+
+   ### Scenario: [an inline run writes to the output file](../features/toposcript.md): 
+   - OK : When I successfully run `../bin/topocli run_code "A : constant Point_2D := (0, 0); B : constant Point_2D := (2, 0); K : Continuity_Kind; Add_Point (A); Add_Point (B); Add_Point (B); Add_Point (A); Contour_Continuity (K); Put_Continuity (K);" --output inline.out`  
+   - OK : Then the output is  
+   - OK : And the file `inline.out` is `continuity continuous`  
+   - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
+
+
+## Summary : **Success**, 88 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 85    |
+| Successful | 88    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

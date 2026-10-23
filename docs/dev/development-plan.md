@@ -450,7 +450,8 @@ surface.
   `Put_Vertex` and `Put_Edge` trace operations;
 - the canonical `Put` representations of every public result: vectors,
   orientations, intersections, contour predicates, construction traces;
-- the inline script entry (`run` with an inline fragment), its quoting
+- the inline script entry (`run_code` with an inline fragment, a
+  distinct entry so no file-or-fragment heuristic exists), its quoting
   documented and tested on the three CI runners;
 - the migration of the 12 feature pages from the command form to the
   script form, images regenerated in the same waves;
@@ -503,8 +504,9 @@ surface.
    `Make_Loop_From_Edges` over the created edges, since the
    position-identified chain cannot express two distinct vertices at
    one point (DD-002, decision 6);
-8. inline entry: the `run` inline fragment, its quoting tested on the
-   three runners;
+8. inline entry: the `run_code` inline fragment, a distinct entry so no
+   file-or-fragment heuristic exists, its quoting tested on the three
+   runners;
 9. retirement: `command-line.md` becomes the runner documentation, and
    the command form is deleted.
 
