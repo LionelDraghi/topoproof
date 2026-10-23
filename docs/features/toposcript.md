@@ -26,6 +26,14 @@ and its Ada subset are presented in
 - [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
 - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
 - [Scenario: --output receives the canonical result of a script](#scenario---output-receives-the-canonical-result-of-a-script)
+- [Scenario: an empty fragment executes silently](#scenario-an-empty-fragment-executes-silently)
+- [Scenario: a fragment of declarations only executes silently](#scenario-a-fragment-of-declarations-only-executes-silently)
+- [Scenario: a compilation diagnostic points at the declaration line](#scenario-a-compilation-diagnostic-points-at-the-declaration-line)
+- [Scenario: a declaration split across several lines is rejected cleanly](#scenario-a-declaration-split-across-several-lines-is-rejected-cleanly)
+- [Scenario: a declaration form outside the subset is rejected before compilation](#scenario-a-declaration-form-outside-the-subset-is-rejected-before-compilation)
+- [Scenario: two consecutive image sessions produce two images](#scenario-two-consecutive-image-sessions-produce-two-images)
+- [Scenario: End_Image without Begin_Image records the rejection](#scenario-end_image-without-begin_image-records-the-rejection)
+- [Scenario: a chain continues after a rejected operation, the first failure is retained](#scenario-a-chain-continues-after-a-rejected-operation-the-first-failure-is-retained)
 - [Diagnostic drawing](#diagnostic-drawing)
 - [User macros and extensions](#user-macros-and-extensions)
 - [CLI direction](#cli-direction)
@@ -169,7 +177,138 @@ path, line and column, and the process status carries the verdict.
 
 The scenario embeds the TopoScript in a `Given` step: the temporary
 `.topo` file is an execution artefact produced by bbt, not a separately
-maintained test source.
+maintained test source. The fragment terminators are covered by
+construction: the wrapper accepts a fragment with or without a final
+line feed, and the Windows runners materialise every block with CRLF
+line endings, so both terminator forms stay exercised by the whole
+suite.
+
+## Scenario: an empty fragment executes silently
+
+- Given the file `empty.topo`
+  ```text
+  ```
+- When I successfully run `../bin/topocli run empty.topo`
+- Then the output is
+  ```text
+  ```
+
+## Scenario: a fragment of declarations only executes silently
+
+- Given the file `declarations_only.topo`
+  ```ada
+  P : constant Point_3D := (10, -20, 30);
+  D : constant Vector_3D := (5, 7, -9);
+  ```
+- When I successfully run `../bin/topocli run declarations_only.topo`
+- Then the output is
+  ```text
+  ```
+
+## Scenario: a compilation diagnostic points at the declaration line
+
+The diagnostics of the generated wrapper are mapped back to the
+fragment: the error on the first declaration line is reported on
+fragment line 1, not on a wrapper line.
+
+- Given the file `bad_declaration.topo`
+  ```ada
+  P : constant Point_3D := Q;
+  R : constant Point_3D := (4, 5, 6);
+
+  Put (R);
+  ```
+- When I run `../bin/topocli run bad_declaration.topo`
+- Then the error output contains `bad_declaration.topo:1:`
+- And there is an error
+
+## Scenario: a declaration split across several lines is rejected cleanly
+
+The line-based classifier of the wrapper rejects the bare identifier
+with the fragment location, instead of letting the fragment reach the
+compilation with a confusing message.
+
+- Given the file `split_declaration.topo`
+  ```ada
+  P
+     : constant Point_3D := (1, 2, 3);
+  ```
+- When I run `../bin/topocli run split_declaration.topo`
+- Then the error output is
+  ```text
+  error: split_declaration.topo:1: a bare identifier is neither a complete object declaration nor a statement: the initial subset rejects a declaration split across several lines
+  ```
+- And there is an error
+
+## Scenario: a declaration form outside the subset is rejected before compilation
+
+- Given the file `out_of_subset.topo`
+  ```ada
+  type Color is (Red);
+  ```
+- When I run `../bin/topocli run out_of_subset.topo`
+- Then the error output is
+  ```text
+  error: out_of_subset.topo:1: the initial TopoScript subset accepts object declarations and statements only
+  ```
+- And there is an error
+
+## Scenario: two consecutive image sessions produce two images
+
+- Given the file `two_images.topo`
+  ```ada
+  N1 : VString := +"../docs/features/images/toposcript_2.svg";
+  N2 : VString := +"../docs/features/images/toposcript_3.svg";
+  A  : constant Point_3D := (1, 2, 3);
+  B  : constant Point_3D := (4, 5, 6);
+
+  Begin_Image (N1);
+  Draw_Axes;
+  Draw_Point (A, Blue);
+  End_Image;
+
+  Begin_Image (N2);
+  Draw_Axes;
+  Draw_Point (B, Green);
+  End_Image;
+  ```
+- When I successfully run `../bin/topocli run two_images.topo`
+- Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`
+- And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`
+
+## Scenario: End_Image without Begin_Image records the rejection
+
+- Given the file `no_image.topo`
+  ```ada
+  End_Image;
+  ```
+- When I run `../bin/topocli run no_image.topo`
+- Then the error output is `error: no open image`
+- And there is an error
+
+## Scenario: a chain continues after a rejected operation, the first failure is retained
+
+The one-point chain is rejected as an open loop, and the diagnostic is
+retained; the script runs on, and the later successful operation writes
+its canonical result: the first rejection is never masked.
+
+- Given the file `first_failure.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  K : Loop_Kind;
+  P : constant Point_3D := (10, -20, 30);
+  D : constant Vector_3D := (5, 7, -9);
+  R : Point_3D;
+
+  Add_Point (A);
+  Make_Loop (K);
+  Translate (P, D, R);
+  Put (R);
+  ```
+- When I run `../bin/topocli run first_failure.topo`
+- Then the output is `point 15 -13 21`
+- And the error output is `error: open loop`
+- And there is an error
 
 ## Scenario: translate a point and a vector
 

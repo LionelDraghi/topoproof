@@ -411,6 +411,61 @@
 
 
 # Document: [toposcript.md](../features/toposcript.md)  
+   ### Scenario: [an empty fragment executes silently](../features/toposcript.md): 
+   - OK : Given the file `empty.topo`  
+   - OK : When I successfully run `../bin/topocli run empty.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [an empty fragment executes silently](../features/toposcript.md) pass  
+
+   ### Scenario: [a fragment of declarations only executes silently](../features/toposcript.md): 
+   - OK : Given the file `declarations_only.topo`  
+   - OK : When I successfully run `../bin/topocli run declarations_only.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [a fragment of declarations only executes silently](../features/toposcript.md) pass  
+
+   ### Scenario: [a compilation diagnostic points at the declaration line](../features/toposcript.md): 
+   - OK : Given the file `bad_declaration.topo`  
+   - OK : When I run `../bin/topocli run bad_declaration.topo`  
+   - OK : Then the error output contains `bad_declaration.topo:1:`  
+   - OK : And there is an error  
+   - [X] scenario   [a compilation diagnostic points at the declaration line](../features/toposcript.md) pass  
+
+   ### Scenario: [a declaration split across several lines is rejected cleanly](../features/toposcript.md): 
+   - OK : Given the file `split_declaration.topo`  
+   - OK : When I run `../bin/topocli run split_declaration.topo`  
+   - OK : Then the error output is  
+   - OK : And there is an error  
+   - [X] scenario   [a declaration split across several lines is rejected cleanly](../features/toposcript.md) pass  
+
+   ### Scenario: [a declaration form outside the subset is rejected before compilation](../features/toposcript.md): 
+   - OK : Given the file `out_of_subset.topo`  
+   - OK : When I run `../bin/topocli run out_of_subset.topo`  
+   - OK : Then the error output is  
+   - OK : And there is an error  
+   - [X] scenario   [a declaration form outside the subset is rejected before compilation](../features/toposcript.md) pass  
+
+   ### Scenario: [two consecutive image sessions produce two images](../features/toposcript.md): 
+   - OK : Given the file `two_images.topo`  
+   - OK : When I successfully run `../bin/topocli run two_images.topo`  
+   - OK : Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`  
+   - OK : And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`  
+   - [X] scenario   [two consecutive image sessions produce two images](../features/toposcript.md) pass  
+
+   ### Scenario: [End_Image without Begin_Image records the rejection](../features/toposcript.md): 
+   - OK : Given the file `no_image.topo`  
+   - OK : When I run `../bin/topocli run no_image.topo`  
+   - OK : Then the error output is `error: no open image`  
+   - OK : And there is an error  
+   - [X] scenario   [End_Image without Begin_Image records the rejection](../features/toposcript.md) pass  
+
+   ### Scenario: [a chain continues after a rejected operation, the first failure is retained](../features/toposcript.md): 
+   - OK : Given the file `first_failure.topo`  
+   - OK : When I run `../bin/topocli run first_failure.topo`  
+   - OK : Then the output is `point 15 -13 21`  
+   - OK : And the error output is `error: open loop`  
+   - OK : And there is an error  
+   - [X] scenario   [a chain continues after a rejected operation, the first failure is retained](../features/toposcript.md) pass  
+
    ### Scenario: [translate a point and a vector](../features/toposcript.md): 
    - OK : Given the file `translate.topo`  
    - OK : When I successfully run `../bin/topocli run translate.topo`  
@@ -446,12 +501,12 @@
    - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 78 scenarios OK
+## Summary : **Success**, 86 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 78    |
+| Successful | 86    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

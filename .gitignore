@@ -13,6 +13,7 @@ tools/topocli/config/
 *.o
 *.in
 *.out
+tests/*.topo
 .DS_Store
 Thumbs.db
 desktop.ini

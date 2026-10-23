@@ -10,6 +10,7 @@ with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 
 package body TopoScript_Wrapper is
 
@@ -86,6 +87,29 @@ package body TopoScript_Wrapper is
       end;
    end Is_Out_Of_Subset;
 
+   --  A line reduced to one bare identifier: neither a complete
+   --  object declaration nor a statement of the subset (a statement
+   --  is a call or an assignment, both of which carry more than the
+   --  identifier). A declaration split across several lines leaves
+   --  such a line, so it is rejected here, with the fragment
+   --  location, instead of reaching the HAC compilation with a
+   --  confusing message.
+   function Is_Identifier_Only (Line : String) return Boolean is
+      package CH renames Ada.Characters.Handling;
+      T : constant String := Trimmed (Line);
+      I : Natural := T'First;
+   begin
+      if T'Length = 0 or else not CH.Is_Letter (T (T'First)) then
+         return False;
+      end if;
+      while I <= T'Last
+        and then (CH.Is_Alphanumeric (T (I)) or else T (I) = '_')
+      loop
+         I := I + 1;
+      end loop;
+      return I > T'Last;
+   end Is_Identifier_Only;
+
    procedure Generate
      (Fragment :     String;
       Path     :     String;
@@ -138,6 +162,12 @@ package body TopoScript_Wrapper is
                   Reject (Line_Count,
                           "the initial TopoScript subset accepts " &
                           "object declarations and statements only");
+               elsif Is_Identifier_Only (Line) then
+                  Reject (Line_Count,
+                          "a bare identifier is neither a complete " &
+                          "object declaration nor a statement: the " &
+                          "initial subset rejects a declaration " &
+                          "split across several lines");
                elsif First_Statement = 0 then
                   if not Is_Declaration (Line) then
                      First_Statement := Line_Count;
@@ -267,21 +297,33 @@ package body TopoScript_Wrapper is
       Append_Line ("begin");
       Begin_Line := Count;
 
-      Line_Count := 0;
-      Start := Fragment'First;
-      while Start <= Fragment'Last loop
-         Finish := Start;
-         while Finish <= Fragment'Last
-           and then Fragment (Finish) /= ASCII.LF
-         loop
-            Finish := Finish + 1;
+      declare
+         No_Statement : Boolean := True;
+
+      begin
+         Line_Count := 0;
+         Start := Fragment'First;
+         while Start <= Fragment'Last loop
+            Finish := Start;
+            while Finish <= Fragment'Last
+              and then Fragment (Finish) /= ASCII.LF
+            loop
+               Finish := Finish + 1;
+            end loop;
+            Line_Count := Line_Count + 1;
+            if Line_Count >= First_Statement then
+               Append_Line (Fragment (Start .. Finish - 1));
+               No_Statement := False;
+            end if;
+            Start := Finish + 1;
          end loop;
-         Line_Count := Line_Count + 1;
-         if Line_Count >= First_Statement then
-            Append_Line (Fragment (Start .. Finish - 1));
+         --  The body must carry at least one statement: an empty
+         --  fragment, or a fragment of declarations only, executes
+         --  as a null statement.
+         if No_Statement then
+            Append_Line ("   null;");
          end if;
-         Start := Finish + 1;
-      end loop;
+      end;
 
       Append_Line ("end TopoScript_Run;");
 
@@ -308,9 +350,14 @@ package body TopoScript_Wrapper is
    end Open;
 
    procedure Set_Source (Content : String) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (String, String_Access);
    begin
-      --  One run wraps one source: the previous buffer is dropped
-      --  without deallocation.
+      --  One run wraps one source: the previous allocation, if any,
+      --  is reclaimed (development plan, TopoScript consolidation,
+      --  Increment 4), so a persistent host wrapping successive
+      --  sources leaks none of them.
+      Free (Text_Buffer);
       Text_Buffer := new String'(Content);
       Open (The_Stream, Text_Buffer.all'Access);
    end Set_Source;
