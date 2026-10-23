@@ -1328,7 +1328,12 @@ procedure TopoCLI is
    --  output, the diagnostics to standard error, and the process status
    --  carries the outcome.
    procedure Run_Script (Path : String) is
+      --  One run owns one session: the clean state is explicit, and
+      --  the callbacks of the run operate on this session.
+      Session : aliased TopoScript_API.Script_Session;
    begin
+      TopoScript_API.Reset (Session);
+      TopoScript_API.Designate (Session'Unchecked_Access);
       declare
          Fragment : Unbounded_String;
          F        : File_Type;
@@ -1387,9 +1392,11 @@ procedure TopoCLI is
                              (Post_Mortem.Unhandled));
                         Set_Exit_Status (Failure);
 
-                     elsif TopoScript_API.Last_Failure /= "" then
+                     elsif TopoScript_API.Last_Failure (Session) /= ""
+                     then
                         Put_Line
-                          (Standard_Error, TopoScript_API.Last_Failure);
+                          (Standard_Error,
+                           TopoScript_API.Last_Failure (Session));
                         Set_Exit_Status (Failure);
 
                      else

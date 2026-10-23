@@ -5,7 +5,6 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
-with Ada.Containers.Indefinite_Vectors;
 with Ada.Strings;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
@@ -29,15 +28,21 @@ with Topodraw;                        use Topodraw;
 
 package body TopoScript_API is
 
-   Failure : Unbounded_String;
+   --  The session designated for the current run. The HAC callbacks
+   --  receive only the element array, so this designation is the
+   --  single bridge between the callbacks and the run state: the
+   --  runner designates the session of the run before the build, and
+   --  the designation lives as long as the caller's session object,
+   --  which is guaranteed to outlive the run.
+   Current : Session_Access := null;
 
    --  The first rejected operation owns the diagnostic: a script runs
    --  on after a rejected operation, and the later ones must not mask
    --  the actual cause with their own rejection.
    procedure Record_Failure (Message : String) is
    begin
-      if Length (Failure) = 0 then
-         Failure := To_Unbounded_String (Message);
+      if Length (Current.Failure) = 0 then
+         Current.Failure := To_Unbounded_String (Message);
       end if;
    end Record_Failure;
 
@@ -145,11 +150,6 @@ package body TopoScript_API is
    --  renderer. The image is a generated file: it never pollutes the
    --  canonical standard output.
 
-   Image_Open   : Boolean := False;
-   Image_Name   : Unbounded_String;
-   The_Scene    : Topodraw.Scene;
-   Anchor_Count : Natural := 0;
-
    function To_Color is new To_Native_Any_Enum (Color_Kind);
 
    function Hex_Of (Color : Color_Kind) return String is
@@ -170,23 +170,23 @@ package body TopoScript_API is
    --  renderer stack up instead of duplicating.
    function New_Name return Unbounded_String is
    begin
-      Anchor_Count := Anchor_Count + 1;
+      Current.Anchor_Count := Current.Anchor_Count + 1;
       return To_Unbounded_String
-        ("A" & Ada.Strings.Fixed.Trim (Anchor_Count'Image,
+        ("A" & Ada.Strings.Fixed.Trim (Current.Anchor_Count'Image,
                                       Ada.Strings.Both));
    end New_Name;
 
    procedure Color_Point (X, Y, Z : Integer; Color : Unbounded_String) is
       Found : Boolean := False;
    begin
-      for Pt of The_Scene.Points loop
+      for Pt of Current.The_Scene.Points loop
          if Pt.X = X and then Pt.Y = Y and then Pt.Z = Z then
             Pt.Color := Color;
             Found    := True;
          end if;
       end loop;
       if not Found then
-         The_Scene.Points.Append
+         Current.The_Scene.Points.Append
            (Point_Rec'
               (Name  => New_Name,
                X     => X,
@@ -198,7 +198,7 @@ package body TopoScript_API is
 
    function Anchor_Name (X, Y, Z : Integer) return Unbounded_String is
    begin
-      for Pt of The_Scene.Points loop
+      for Pt of Current.The_Scene.Points loop
          if Pt.X = X and then Pt.Y = Y and then Pt.Z = Z then
             return Pt.Name;
          end if;
@@ -206,7 +206,7 @@ package body TopoScript_API is
       declare
          Name : constant Unbounded_String := New_Name;
       begin
-         The_Scene.Points.Append
+         Current.The_Scene.Points.Append
            (Point_Rec'
               (Name  => Name,
                X     => X,
@@ -219,26 +219,26 @@ package body TopoScript_API is
 
    procedure Begin_Image_Native (Data : in out HAC_Element_Array) is
    begin
-      Image_Name   :=
+      Current.Image_Name :=
         To_Unbounded_String
           (String'(HAC_Sys.Interfacing.To_Native (Data (1))));
-      Image_Open   := True;
-      The_Scene    := (others => <>);
-      Anchor_Count := 0;
+      Current.Image_Open := True;
+      Current.The_Scene  := (others => <>);
+      Current.Anchor_Count := 0;
    end Begin_Image_Native;
 
    procedure Draw_Axes_Native (Data : in out HAC_Element_Array) is
       pragma Unreferenced (Data);
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
       --  The same axes configuration as the client scenes: automatic
       --  tick marks, and the dashed coordinate paths of every point.
-      The_Scene.Draw_Axes := True;
-      The_Scene.Tick_Step := 0;
-      The_Scene.Anchors   := True;
+      Current.The_Scene.Draw_Axes := True;
+      Current.The_Scene.Tick_Step := 0;
+      Current.The_Scene.Anchors   := True;
    end Draw_Axes_Native;
 
    --  Native side of Draw_Point: the point colors the scene, and the
@@ -246,7 +246,7 @@ package body TopoScript_API is
    procedure Draw_Point_Native (Data : in out HAC_Element_Array) is
       PX, PY, PZ : Long_Long_Integer;
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
@@ -273,7 +273,7 @@ package body TopoScript_API is
       OX, OY, OZ    : Long_Long_Integer;
       VDX, VDY, VDZ : Long_Long_Integer;
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
@@ -304,7 +304,7 @@ package body TopoScript_API is
          To_Name :=
            Anchor_Name (Integer (OX + VDX), Integer (OY + VDY),
                         Integer (OZ + VDZ));
-         The_Scene.Vectors.Append
+         Current.The_Scene.Vectors.Append
            (Vector_Rec'
               (From_Name => From_Name,
                To_Name   => To_Name,
@@ -319,7 +319,7 @@ package body TopoScript_API is
    procedure Draw_Point_2D_Native (Data : in out HAC_Element_Array) is
       PX, PY : Long_Long_Integer;
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
@@ -341,7 +341,7 @@ package body TopoScript_API is
    procedure Draw_Edge_Native (Data : in out HAC_Element_Array) is
       PX, PY, QX, QY : Long_Long_Integer;
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
@@ -365,7 +365,7 @@ package body TopoScript_API is
          DX : constant Integer := Integer (QX - PX);
          DY : constant Integer := Integer (QY - PY);
       begin
-         The_Scene.Vectors.Append
+         Current.The_Scene.Vectors.Append
            (Vector_Rec'
               (From_Name =>
                  Anchor_Name (Integer (PX), Integer (PY), 0),
@@ -385,17 +385,17 @@ package body TopoScript_API is
    procedure End_Image_Native (Data : in out HAC_Element_Array) is
       pragma Unreferenced (Data);
    begin
-      if not Image_Open then
+      if not Current.Image_Open then
          Record_Failure ("error: no open image");
          return;
       end if;
-      Image_Open := False;
+      Current.Image_Open := False;
 
       declare
          F : File_Type;
       begin
-         Create (F, Out_File, To_String (Image_Name));
-         Put (F, Render (The_Scene));
+         Create (F, Out_File, To_String (Current.Image_Name));
+         Put (F, Render (Current.The_Scene));
          Close (F);
       exception
          when Scene_Error =>
@@ -414,22 +414,7 @@ package body TopoScript_API is
    --  Loop and face building (development plan, Milestone 6, Increment
    --  5): the script accumulates a chain of 2D points, then Make_Loop
    --  and Make_Face run the exact kernel classification, the same one
-   --  as the loop and face client operations. In the script chain, a
-   --  vertex is identified by its position: a repeated position
-   --  closes on the same vertex. The chain lives for the whole script
-   --  run: Add_Point always appends, and Make_Loop and Make_Face
-   --  classify the chain as it stands at the call without ever
-   --  clearing it, so the same chain can be classified first as a
-   --  loop, then as a face boundary.
-
-   type Chain_Point is record
-      X, Y : Grid_Coordinate;
-   end record;
-
-   package Chain_Vectors is new Ada.Containers.Indefinite_Vectors
-     (Positive, Chain_Point);
-
-   Chain : Chain_Vectors.Vector;
+   --  as the loop and face client operations.
 
    package Handle_Vectors is new Ada.Containers.Indefinite_Vectors
      (Positive, TopoProof.Topology.Vertices.Vertex_Handle);
@@ -451,12 +436,14 @@ package body TopoScript_API is
          Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
-      Chain.Append
+      Current.Chain.Append
         (Chain_Point'(X => Grid_Coordinate (PX),
                       Y => Grid_Coordinate (PY)));
    end Add_Point_Native;
 
-   function Distinct_Count return Natural is
+   --  The number of distinct positions of the chain: a repeated
+   --  position is one vertex.
+   function Distinct_Count (Chain : Chain_Vectors.Vector) return Natural is
       N : constant Natural := Natural (Chain.Length);
       Count : Natural := 0;
    begin
@@ -484,7 +471,8 @@ package body TopoScript_API is
    --  call; on rejection the failure is already recorded, and the
    --  chain is reported as not buildable.
    procedure Build_Chain
-     (Store   :    out TopoProof.Topology.Vertices.Vertex_Store;
+     (Chain   :        Chain_Vectors.Vector;
+      Store   :    out TopoProof.Topology.Vertices.Vertex_Store;
       Links   :    out TopoProof.Topology.Edges.Edge_Store;
       Handles :    out TopoProof.Topology.Loops.Edge_Handle_Array;
       OK      :    out Boolean)
@@ -568,7 +556,7 @@ package body TopoScript_API is
    end Classify_Chain;
 
    procedure Make_Loop_Native (Data : in out HAC_Element_Array) is
-      N : constant Natural := Natural (Chain.Length);
+      N : constant Natural := Natural (Current.Chain.Length);
       Kind : Loop_Kind := Open_Chain;
    begin
       if N < 2 then
@@ -585,14 +573,14 @@ package body TopoScript_API is
       declare
          Store : TopoProof.Topology.Vertices.Vertex_Store
            (TopoProof.Topology.Vertices.Vertex_Count_Range
-              (Distinct_Count));
+              (Distinct_Count (Current.Chain)));
          Links : TopoProof.Topology.Edges.Edge_Store
            (TopoProof.Topology.Edges.Edge_Count_Range (N - 1));
          Handles : TopoProof.Topology.Loops.Edge_Handle_Array (1 .. N - 1);
          OK : Boolean;
          L : TopoProof.Topology.Loops.Loop_2D;
       begin
-         Build_Chain (Store, Links, Handles, OK);
+         Build_Chain (Current.Chain, Store, Links, Handles, OK);
          if not OK then
             Data (1) := Loop_To_HAC (Degenerate_Support);
             return;
@@ -618,7 +606,7 @@ package body TopoScript_API is
    end Make_Loop_Native;
 
    procedure Make_Face_Native (Data : in out HAC_Element_Array) is
-      N : constant Natural := Natural (Chain.Length);
+      N : constant Natural := Natural (Current.Chain.Length);
       Kind : Face_Kind := Face_Invalid_Boundary;
    begin
       if N < 2 then
@@ -635,14 +623,14 @@ package body TopoScript_API is
       declare
          Store : TopoProof.Topology.Vertices.Vertex_Store
            (TopoProof.Topology.Vertices.Vertex_Count_Range
-              (Distinct_Count));
+              (Distinct_Count (Current.Chain)));
          Links : TopoProof.Topology.Edges.Edge_Store
            (TopoProof.Topology.Edges.Edge_Count_Range (N - 1));
          Handles : TopoProof.Topology.Loops.Edge_Handle_Array (1 .. N - 1);
          OK : Boolean;
          L : TopoProof.Topology.Loops.Loop_2D;
       begin
-         Build_Chain (Store, Links, Handles, OK);
+         Build_Chain (Current.Chain, Store, Links, Handles, OK);
          if not OK then
             Data (1) := Face_To_HAC (Face_Invalid_Boundary);
             return;
@@ -759,9 +747,24 @@ package body TopoScript_API is
       Register (BD, Put_Face_Native'Access, "Put_Face");
    end Register_All;
 
-   function Last_Failure return String is
+   procedure Reset (Session : in out Script_Session) is
    begin
-      return To_String (Failure);
+      Session.Failure      := Null_Unbounded_String;
+      Session.Image_Open   := False;
+      Session.Image_Name   := Null_Unbounded_String;
+      Session.The_Scene    := (others => <>);
+      Session.Anchor_Count := 0;
+      Session.Chain.Clear;
+   end Reset;
+
+   procedure Designate (Session : Session_Access) is
+   begin
+      Current := Session;
+   end Designate;
+
+   function Last_Failure (Session : Script_Session) return String is
+   begin
+      return To_String (Session.Failure);
    end Last_Failure;
 
 end TopoScript_API;
