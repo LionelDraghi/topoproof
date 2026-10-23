@@ -40,22 +40,37 @@ procedure TopoCLI is
    Draw_With               : Unbounded_String;
    Short_Labels            : Boolean := False;
 
+   --  The file of --output, created once per run: every line of the
+   --  canonical output accumulates in it, instead of each line
+   --  recreating the file and erasing the previous ones.
+   Output_File : File_Type;
+
    procedure Emit (S : String);
 
    procedure Emit (S : String) is
-      F : File_Type;
-
    begin
       if Length (Output_Path) = 0 then
          Put_Line (S);
 
       else
-         Create (F, Out_File, To_String (Output_Path));
-         Put_Line (F, S);
-         Close (F);
+         if not Is_Open (Output_File) then
+            Create (Output_File, Out_File, To_String (Output_Path));
+         end if;
+         Put_Line (Output_File, S);
 
       end if;
    end Emit;
+
+   --  Close the output file, if the run opened one.
+   procedure Close_Output;
+
+   procedure Close_Output is
+   begin
+      if Is_Open (Output_File) then
+         Close (Output_File);
+
+      end if;
+   end Close_Output;
 
    function Token (S : in out Unbounded_String) return String;
 
@@ -1467,6 +1482,7 @@ begin
          Emit ("             contour_self_intersects, contour_valid, "
                & "contour_no_flat_turns");
          Emit ("             vertex, edge, loop, face");
+         Close_Output;
          return;
 
       else
@@ -1505,13 +1521,16 @@ begin
       raise Usage_Error;
 
    end if;
+   Close_Output;
 
 exception
    when Usage_Error =>
+      Close_Output;
       Put_Line (Standard_Error, "error: invalid command line");
       Put_Line (Standard_Error, "try 'topocli --help'");
       Set_Exit_Status (Failure);
    when Name_Error =>
+      Close_Output;
       Put_Line (Standard_Error, "error: input or output file cannot be opened");
       Set_Exit_Status (Failure);
 

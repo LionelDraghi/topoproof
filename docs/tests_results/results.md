@@ -6,6 +6,11 @@
    - OK : And the output contains `operations: translate, displacement, equal, orientation, intersect`  
    - [X] scenario   [display help](../features/command-line.md) pass  
 
+   ### Scenario: [--output receives the whole multi-line result](../features/command-line.md): 
+   - OK : When I successfully run `../bin/topocli vertex A=(0, 0) B=(1, 1) C=(2, 3) --output vertices.out`  
+   - OK : Then the file `vertices.out` is  
+   - [X] scenario   [--output receives the whole multi-line result](../features/command-line.md) pass  
+
 
 # Document: [translation.md](../features/translation.md)  
    ### Scenario: [translate command-line values](../features/translation.md): 
@@ -434,12 +439,12 @@
    - [X] scenario   [draw the diagnostic image of the translation](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 76 scenarios OK
+## Summary : **Success**, 77 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 76    |
+| Successful | 77    |
 | Empty      | 0     |
 | Not Run    | 0     |
 
