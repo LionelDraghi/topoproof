@@ -30,6 +30,7 @@ with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with TopoScript_API;
 with TopoScript_Diagnostics;
 with TopoScript_Wrapper;
+with TopoDiagnostics;                 use TopoDiagnostics;
 with Topodraw;                        use Topodraw;
 
 procedure TopoCLI is
@@ -462,8 +463,773 @@ procedure TopoCLI is
          & Img (Point_Of (Store, H).Y));
    end Ensure_Vertex;
 
-   procedure Execute (Line : String);
+   --  The closed point sequence of a command chain: the chain points,
+   --  in order.
+   function Sequence_Of (Chain : Point_Vectors.Vector)
+      return Segment_Sequence_2D
+   is
+      Seq : Segment_Sequence_2D (Natural (Chain.Length));
 
+   begin
+      for I in 1 .. Natural (Chain.Length) loop
+         Seq.Points (I) := Point_Of (Chain (I));
+      end loop;
+      return Seq;
+   end Sequence_Of;
+
+   --  Write the diagram of one contour command: the chain of the
+   --  command, plus the extra geometry of --draw-with.
+   procedure Draw_Contour
+      (Chain      : Point_Vectors.Vector;
+       With_Chain : Point_Vectors.Vector)
+   is
+   begin
+      if Length (Draw_Path) > 0 then
+         declare
+            S : Scene := New_Scene;
+
+         begin
+            Draw_Chain (S, Chain);
+            Draw (S, With_Chain);
+         end;
+      end if;
+   end Draw_Contour;
+
+   --  Build the vertex and edge stores of the loop and face commands
+   --  from their command chain: the chain closes when it returns to its
+   --  first name, one vertex is created per distinct name, and one edge
+   --  per consecutive pair, so the chain of N points builds N - 1 edges.
+   --  The vertex and edge lines are emitted as they are created, and the
+   --  diagram grows alongside. The degeneracy precondition of the edge
+   --  is checked before the call: the kernel contract is never violated
+   --  from the command line, and a degenerate edge stops the
+   --  construction with its diagnostic, leaving OK to False.
+   procedure Build_Edge_Chain
+      (Chain   :        Point_Vectors.Vector;
+       Store   : in out Vertex_Store;
+       Edges   : in out Edge_Store;
+       Handles :    out Edge_Handle_Array;
+       S       : in out Scene;
+       OK      :    out Boolean)
+   is
+      Names    : Point_Vectors.Vector;
+      Vertices : Handle_Vectors.Vector;
+      Tokens   : Handle_Vectors.Vector;
+
+   begin
+      OK := True;
+      for I in 1 .. Natural (Chain.Length) loop
+         declare
+            H : Vertex_Handle;
+
+         begin
+            Ensure_Vertex (Store, Names, Vertices, S, Chain (I), H);
+            Tokens.Append (H);
+         end;
+      end loop;
+      for I in 2 .. Natural (Chain.Length) loop
+         if Tokens (I - 1) = Tokens (I) then
+            Emit ("error: degenerate edge");
+            Set_Exit_Status (Failure);
+            OK := False;
+            return;
+
+         end if;
+         declare
+            E : Edge_Handle;
+
+         begin
+            Create (Edges, Store, Tokens (I - 1), Tokens (I), E);
+            Handles (I - 1) := E;
+            if Length (Draw_Path) > 0 then
+               Add_Segment (S, Chain (I - 1), Chain (I));
+            end if;
+            Emit
+              ("edge " & Img (E) & " vertex " & Img (Tokens (I - 1))
+               & " vertex " & Img (Tokens (I)));
+         end;
+      end loop;
+   end Build_Edge_Chain;
+
+   ---------------------------------------------------------------------------
+   --  One procedure per command
+   --
+   --  Each handler runs at one level of abstraction: parse the operands
+   --  from R, draw the scene of the command, run the kernel operation,
+   --  emit the canonical result or the diagnostic. R and Defs are shared
+   --  with the caller: the point names defined by one command are
+   --  visible to the whole command line.
+   ---------------------------------------------------------------------------
+
+   procedure Handle_Translate
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      P : constant Parsed_Point := Next_Point (R, Defs);
+      D : constant Parsed_Point := Next_Point (R, Defs);
+
+   begin
+      Require_3D (P);
+      Require_3D (D);
+      Require_End (R);
+      declare
+         Pt : constant Point_3D  := (C (P.X), C (P.Y), C (P.Z));
+         Vc : constant Vector_3D := (V (D.X), V (D.Y), V (D.Z));
+
+      begin
+         if Length (Draw_Path) > 0 then
+            declare
+               S  : Scene := New_Scene;
+               QX : constant Wide_Coordinate :=
+                 Wide_Coordinate (P.X) + Wide_Coordinate (D.X);
+               QY : constant Wide_Coordinate :=
+                 Wide_Coordinate (P.Y) + Wide_Coordinate (D.Y);
+               QZ : constant Wide_Coordinate :=
+                 Wide_Coordinate (P.Z) + Wide_Coordinate (D.Z);
+
+            begin
+               Add_Point (S, To_String (P.Name), P.X, P.Y, P.Z);
+               if QX >= Wide_Coordinate (Integer'First)
+                 and then QX <= Wide_Coordinate (Integer'Last)
+                 and then QY >= Wide_Coordinate (Integer'First)
+                 and then QY <= Wide_Coordinate (Integer'Last)
+                 and then QZ >= Wide_Coordinate (Integer'First)
+                 and then QZ <= Wide_Coordinate (Integer'Last)
+               then
+                  declare
+                     Q : constant Parsed_Point :=
+                       (To_Unbounded_String ("Q"), Integer (QX),
+                        Integer (QY), Integer (QZ), Three_D);
+
+                  begin
+                     Add_Point (S, "Q", Q.X, Q.Y, Q.Z);
+                     Add_Segment_3D (S, P, Q);
+                  end;
+
+               end if;
+               Draw (S, With_Chain);
+            end;
+         end if;
+         if not Translation_Is_Representable (Pt, Vc) then
+            Emit ("error: translation is not representable");
+            Set_Exit_Status (Failure);
+
+         else
+            declare
+               Q : constant Point_3D := Translate (Pt, Vc);
+
+            begin
+               Emit
+                 ("point " & Img (Q.X) & " " & Img (Q.Y) & " "
+                  & Img (Q.Z));
+            end;
+         end if;
+      end;
+   end Handle_Translate;
+
+   procedure Handle_Displacement
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      A : constant Parsed_Point := Next_Point (R, Defs);
+      B : constant Parsed_Point := Next_Point (R, Defs);
+
+   begin
+      Require_3D (A);
+      Require_3D (B);
+      Require_End (R);
+      declare
+         Pa : constant Point_3D := (C (A.X), C (A.Y), C (A.Z));
+         Pb : constant Point_3D := (C (B.X), C (B.Y), C (B.Z));
+         D  : constant Vector_3D := Displacement (Pa, Pb);
+
+      begin
+         if Length (Draw_Path) > 0 then
+            declare
+               S : Scene := New_Scene;
+
+            begin
+               Add_Point (S, To_String (A.Name), A.X, A.Y, A.Z);
+               Add_Point (S, To_String (B.Name), B.X, B.Y, B.Z);
+               Add_Segment_3D (S, A, B);
+               Draw (S, With_Chain);
+            end;
+         end if;
+         Emit
+           ("vector " & Img (D.DX) & " " & Img (D.DY) & " " & Img (D.DZ));
+      end;
+   end Handle_Displacement;
+
+   procedure Handle_Equal
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      A : constant Parsed_Point := Next_Point (R, Defs);
+      B : constant Parsed_Point := Next_Point (R, Defs);
+
+   begin
+      Require_3D (A);
+      Require_3D (B);
+      Require_End (R);
+      declare
+         Pa : constant Point_3D := (C (A.X), C (A.Y), C (A.Z));
+         Pb : constant Point_3D := (C (B.X), C (B.Y), C (B.Z));
+
+      begin
+         if Length (Draw_Path) > 0 then
+            declare
+               S : Scene := New_Scene;
+
+            begin
+               Add_Point (S, To_String (A.Name), A.X, A.Y, A.Z);
+               Add_Point (S, To_String (B.Name), B.X, B.Y, B.Z);
+               Draw (S, With_Chain);
+            end;
+         end if;
+         if Pa = Pb then
+            Emit ("equal true");
+
+         else
+            Emit ("equal false");
+
+         end if;
+      end;
+   end Handle_Equal;
+
+   procedure Handle_Orientation
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      A : constant Parsed_Point := Next_Point (R, Defs);
+      B : constant Parsed_Point := Next_Point (R, Defs);
+      P : constant Parsed_Point := Next_Point (R, Defs);
+
+   begin
+      Require_2D (A);
+      Require_2D (B);
+      Require_2D (P);
+      Require_End (R);
+      declare
+         Pa : constant Point_2D := Point_Of (A);
+         Pb : constant Point_2D := Point_Of (B);
+         Pp : constant Point_2D := Point_Of (P);
+
+      begin
+         if Length (Draw_Path) > 0 then
+            declare
+               S : Scene := New_Scene;
+
+            begin
+               Add_Point (S, To_String (A.Name), A.X, A.Y, 0);
+               Add_Point (S, To_String (B.Name), B.X, B.Y, 0);
+               Add_Point (S, To_String (P.Name), P.X, P.Y, 0);
+               Add_Segment (S, A, B);
+               Add_Segment (S, B, P);
+               Draw (S, With_Chain);
+            end;
+         end if;
+         case Orientation (Pa, Pb, Pp) is
+            when Counter_Clockwise =>
+               Emit ("orientation counter_clockwise");
+
+            when Clockwise =>
+               Emit ("orientation clockwise");
+
+            when Collinear =>
+               Emit ("orientation collinear");
+
+         end case;
+      end;
+   end Handle_Orientation;
+
+   procedure Handle_Intersect
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      A : constant Parsed_Point := Next_Point (R, Defs);
+      B : constant Parsed_Point := Next_Point (R, Defs);
+      C : constant Parsed_Point := Next_Point (R, Defs);
+      D : constant Parsed_Point := Next_Point (R, Defs);
+
+   begin
+      Require_2D (A);
+      Require_2D (B);
+      Require_2D (C);
+      Require_2D (D);
+      Require_End (R);
+      declare
+         S1 : constant Segment_2D :=
+           (Point_Of (A), Point_Of (B));
+         S2 : constant Segment_2D :=
+           (Point_Of (C), Point_Of (D));
+         Res : constant Intersection_Result := Intersection (S1, S2);
+
+      begin
+         if Length (Draw_Path) > 0 then
+            declare
+               S : Scene := New_Scene;
+
+            begin
+               Add_Point (S, To_String (A.Name), A.X, A.Y, 0);
+               Add_Point (S, To_String (B.Name), B.X, B.Y, 0);
+               Add_Point (S, To_String (C.Name), C.X, C.Y, 0);
+               Add_Point (S, To_String (D.Name), D.X, D.Y, 0);
+               Add_Segment (S, A, B);
+               Add_Segment (S, C, D);
+               if Res.Kind = Point_Intersection then
+                  Add_Point (S, "P", Integer (Res.Point.X),
+                             Integer (Res.Point.Y), 0);
+
+               end if;
+               Draw (S, With_Chain);
+            end;
+         end if;
+         case Res.Kind is
+            when No_Intersection =>
+               Emit ("intersection no_intersection");
+            when Point_Intersection =>
+               Emit
+                 ("intersection point_intersection " & Img (Res.Point.X)
+                  & " " & Img (Res.Point.Y));
+            when Off_Grid_Crossing =>
+               Emit ("intersection off_grid_crossing");
+            when Overlap =>
+               Emit
+                 ("intersection overlap " & Img (Res.Overlap.From_Point.X)
+                  & " " & Img (Res.Overlap.From_Point.Y) & " "
+                  & Img (Res.Overlap.To_Point.X) & " "
+                  & Img (Res.Overlap.To_Point.Y));
+
+         end case;
+      end;
+   end Handle_Intersect;
+
+   procedure Handle_Contour_Continuity
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+
+   begin
+      Require_End (R);
+      if Natural (Chain.Length) mod 2 /= 0 then
+         raise Usage_Error;
+
+      end if;
+      declare
+         Continuous : Boolean := True;
+
+      begin
+         for I in 1 .. Natural (Chain.Length) / 2 - 1 loop
+            if Point_Of (Chain (2 * I)) /= Point_Of (Chain (2 * I + 1))
+            then
+               Continuous := False;
+
+            end if;
+         end loop;
+         if Continuous then
+            Emit ("continuity continuous");
+
+         else
+            Emit ("continuity discontinuous");
+
+         end if;
+         Draw_Contour (Chain, With_Chain);
+      end;
+   end Handle_Contour_Continuity;
+
+   procedure Handle_Contour_Closure
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      Seq   : constant Segment_Sequence_2D := Sequence_Of (Chain);
+
+   begin
+      Require_End (R);
+      Draw_Contour (Chain, With_Chain);
+      if Is_Closed (Seq) then
+         Emit ("closure closed");
+
+      else
+         Emit ("closure open");
+
+      end if;
+   end Handle_Contour_Closure;
+
+   procedure Handle_Contour_Orientation
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      Seq   : constant Segment_Sequence_2D := Sequence_Of (Chain);
+
+   begin
+      Require_End (R);
+      Draw_Contour (Chain, With_Chain);
+      if Natural (Chain.Length) < 3 then
+         Emit ("error: at least 3 points required for orientation");
+         Set_Exit_Status (Failure);
+
+      elsif not Is_Closed (Seq) then
+         Emit ("error: sequence is not closed");
+         Set_Exit_Status (Failure);
+
+      elsif not Is_Valid (Seq) then
+         Emit ("error: sequence is not valid");
+         Set_Exit_Status (Failure);
+
+      else
+         case Orientation (Seq) is
+            when Counter_Clockwise =>
+               Emit ("orientation counter_clockwise");
+            when Clockwise =>
+               Emit ("orientation clockwise");
+            when Degenerate =>
+               Emit ("orientation degenerate");
+
+         end case;
+      end if;
+   end Handle_Contour_Orientation;
+
+   procedure Handle_Contour_Self_Intersects
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      Seq   : constant Segment_Sequence_2D := Sequence_Of (Chain);
+
+   begin
+      Require_End (R);
+      Draw_Contour (Chain, With_Chain);
+      if Self_Intersects (Seq) then
+         Emit ("true");
+
+      else
+         Emit ("false");
+
+      end if;
+   end Handle_Contour_Self_Intersects;
+
+   procedure Handle_Contour_Valid
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      Seq   : constant Segment_Sequence_2D := Sequence_Of (Chain);
+
+   begin
+      Require_End (R);
+      Draw_Contour (Chain, With_Chain);
+      if Is_Valid (Seq) then
+         Emit ("true");
+
+      else
+         Emit ("false");
+
+      end if;
+   end Handle_Contour_Valid;
+
+   procedure Handle_Contour_No_Flat_Turns
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      Seq   : constant Segment_Sequence_2D := Sequence_Of (Chain);
+
+   begin
+      Require_End (R);
+      Draw_Contour (Chain, With_Chain);
+      if Has_No_Flat_Turns (Seq) then
+         Emit ("true");
+
+      else
+         Emit ("false");
+
+      end if;
+   end Handle_Contour_No_Flat_Turns;
+
+   procedure Handle_Vertex
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+
+   begin
+      Require_End (R);
+      if Natural (Chain.Length) = 0 then
+         raise Usage_Error;
+
+      end if;
+      for C of Chain loop
+         Require_2D (C);
+      end loop;
+      --  One command builds one store, sized exactly for its
+      --  points: the capacity is known before any creation, so the
+      --  kernel precondition of Create holds structurally.
+      if Natural (Chain.Length) > Max_Vertices then
+         Emit ("error: too many vertices for one store");
+         Set_Exit_Status (Failure);
+         return;
+
+      end if;
+      declare
+         Store : Vertex_Store (Vertex_Count_Range (Natural (Chain.Length)));
+         H     : Vertex_Handle;
+         S     : Scene := New_Scene;
+
+      begin
+         for I in 1 .. Natural (Chain.Length) loop
+            Create (Store, Point_Of (Chain (I)), H);
+            if Length (Draw_Path) > 0 then
+               Add_Point (S, "V" & Img (H), Chain (I).X, Chain (I).Y, 0);
+            end if;
+            Emit
+              ("vertex " & Img (H) & " point "
+               & Img (Point_Of (Store, H).X) & " "
+               & Img (Point_Of (Store, H).Y));
+         end loop;
+         Draw (S, With_Chain);
+      end;
+   end Handle_Vertex;
+
+   procedure Handle_Edge
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+
+   begin
+      Require_End (R);
+      if Natural (Chain.Length) = 0
+        or else Natural (Chain.Length) mod 2 /= 0
+      then
+         raise Usage_Error;
+
+      end if;
+      for C of Chain loop
+         Require_2D (C);
+      end loop;
+      --  Within the command, a name designates one vertex: a
+      --  repeated name is the same handle, never a new vertex.
+      --  Distinct names at the same position are distinct
+      --  vertices: identity is not position. One store holds
+      --  the distinct names, the other one edge per pair.
+      declare
+         Store   : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+         Edges   : Edge_Store (Edge_Count_Range (Natural (Chain.Length) / 2));
+         Names   : Point_Vectors.Vector;
+         Handles : Handle_Vectors.Vector;
+         S       : Scene := New_Scene;
+
+      begin
+         for P in 1 .. Natural (Chain.Length) / 2 loop
+            declare
+               A, B : Vertex_Handle;
+               E    : Edge_Handle;
+
+            begin
+               Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P - 1), A);
+               Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P), B);
+               --  The degeneracy precondition is checked before
+               --  the call: the kernel contract is never
+               --  violated from the command line.
+               if A = B then
+                  Emit ("error: degenerate edge");
+                  Set_Exit_Status (Failure);
+                  return;
+
+               end if;
+               Create (Edges, Store, A, B, E);
+               if Length (Draw_Path) > 0 then
+                  Add_Segment (S, Chain (2 * P - 1), Chain (2 * P));
+               end if;
+               Emit
+                 ("edge " & Img (E) & " vertex " & Img (A) & " vertex "
+                  & Img (B));
+            end;
+         end loop;
+         Draw (S, With_Chain);
+      end;
+   end Handle_Edge;
+
+   procedure Handle_Loop
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      N     : constant Natural := Natural (Chain.Length);
+
+   begin
+      Require_End (R);
+      if N < 2 then
+         raise Usage_Error;
+
+      end if;
+      for C of Chain loop
+         Require_2D (C);
+      end loop;
+      --  The loop of N - 1 edges must fit the longest loop.
+      if N - 1 > Max_Loop_Length then
+         Emit ("error: too many edges for one loop");
+         Set_Exit_Status (Failure);
+         return;
+
+      end if;
+      declare
+         Store   : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+         Edges   : Edge_Store (Edge_Count_Range (N - 1));
+         Handles : Edge_Handle_Array (1 .. N - 1);
+         S       : Scene := New_Scene;
+         OK      : Boolean;
+
+      begin
+         Build_Edge_Chain (Chain, Store, Edges, Handles, S, OK);
+         if not OK then
+            return;
+
+         end if;
+         declare
+            --  The loop is classified exactly before it is
+            --  built: only a valid loop reaches Make_Loop, so
+            --  the kernel precondition holds.
+            Status : constant Loop_Validity :=
+               Classify_Loop (Edges, Store, Handles);
+
+         begin
+            case Status is
+               when Valid_Loop =>
+                  declare
+                     L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
+
+                  begin
+                     case Loop_Orientation (Edges, Store, L) is
+                        when Counter_Clockwise =>
+                           Emit ("loop closed counter_clockwise");
+                        when Clockwise =>
+                           Emit ("loop closed clockwise");
+                        when Degenerate =>
+                           Emit ("loop closed degenerate");
+
+                     end case;
+                  end;
+               when Orphan_Edge | Missing_Endpoint | Open_Chain
+                  | Disconnected_Chain | Degenerate_Support
+               =>
+                  Emit (Loop_Diagnostic (Status));
+                  Set_Exit_Status (Failure);
+
+            end case;
+         end;
+         Draw (S, With_Chain);
+      end;
+   end Handle_Loop;
+
+   procedure Handle_Face
+      (R          : in out Unbounded_String;
+       Defs       : in out Point_Vectors.Vector;
+       With_Chain :        Point_Vectors.Vector)
+   is
+      Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
+      N     : constant Natural := Natural (Chain.Length);
+
+   begin
+      Require_End (R);
+      if N < 2 then
+         raise Usage_Error;
+
+      end if;
+      for C of Chain loop
+         Require_2D (C);
+      end loop;
+      --  Same construction as the loop command. The face
+      --  classification then completes the loop classification.
+      if N - 1 > Max_Loop_Length then
+         Emit ("error: too many edges for one loop");
+         Set_Exit_Status (Failure);
+         return;
+
+      end if;
+      declare
+         Store   : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
+         Edges   : Edge_Store (Edge_Count_Range (N - 1));
+         Handles : Edge_Handle_Array (1 .. N - 1);
+         S       : Scene := New_Scene;
+         OK      : Boolean;
+
+      begin
+         Build_Edge_Chain (Chain, Store, Edges, Handles, S, OK);
+         if not OK then
+            return;
+
+         end if;
+         declare
+            --  The chain is classified exactly, then a valid
+            --  loop is classified again as a face boundary:
+            --  only a valid boundary reaches Make_Face, so the
+            --  kernel precondition holds.
+            Status : constant Loop_Validity :=
+               Classify_Loop (Edges, Store, Handles);
+
+         begin
+            if Status /= Valid_Loop then
+               Emit (Loop_Diagnostic (Status));
+               Set_Exit_Status (Failure);
+
+            else
+               declare
+                  L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
+
+               begin
+                  case Classify_Face (Edges, Store, L) is
+                     when Valid_Face =>
+                        declare
+                           F : constant Face_2D :=
+                              Make_Face (Edges, Store, L);
+
+                        begin
+                           case Face_Orientation (Edges, Store, F) is
+                              when Counter_Clockwise =>
+                                 Emit ("face counter_clockwise");
+                              when Clockwise =>
+                                 Emit ("face clockwise");
+                              when Degenerate =>
+                                 Emit ("face degenerate");
+
+                           end case;
+                        end;
+                     when Invalid_Boundary =>
+                        Emit (Face_Diagnostic (Invalid_Boundary));
+                        Set_Exit_Status (Failure);
+                     when Degenerate_Boundary =>
+                        Emit (Face_Diagnostic (Degenerate_Boundary));
+                        Set_Exit_Status (Failure);
+
+                  end case;
+               end;
+            end if;
+         end;
+         Draw (S, With_Chain);
+      end;
+   end Handle_Face;
+
+   --  Dispatch one command line to its handler: the operand tokens are
+   --  consumed from R, the operation runs, and the canonical result or
+   --  the diagnostic is emitted.
    procedure Execute (Line : String) is
       R    : Unbounded_String := To_Unbounded_String (Line);
       Op   : constant String  := Token (R);
@@ -485,798 +1251,49 @@ procedure TopoCLI is
          end;
       end if;
       if Op = "translate" then
-         declare
-            P : constant Parsed_Point := Next_Point (R, Defs);
-            D : constant Parsed_Point := Next_Point (R, Defs);
-
-         begin
-            Require_3D (P);
-            Require_3D (D);
-            Require_End (R);
-            declare
-               Pt : constant Point_3D  := (C (P.X), C (P.Y), C (P.Z));
-               Vc : constant Vector_3D := (V (D.X), V (D.Y), V (D.Z));
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S  : Scene := New_Scene;
-                     QX : constant Wide_Coordinate :=
-                       Wide_Coordinate (P.X) + Wide_Coordinate (D.X);
-                     QY : constant Wide_Coordinate :=
-                       Wide_Coordinate (P.Y) + Wide_Coordinate (D.Y);
-                     QZ : constant Wide_Coordinate :=
-                       Wide_Coordinate (P.Z) + Wide_Coordinate (D.Z);
-
-                  begin
-                     Add_Point (S, To_String (P.Name), P.X, P.Y, P.Z);
-                     if QX >= Wide_Coordinate (Integer'First)
-                       and then QX <= Wide_Coordinate (Integer'Last)
-                       and then QY >= Wide_Coordinate (Integer'First)
-                       and then QY <= Wide_Coordinate (Integer'Last)
-                       and then QZ >= Wide_Coordinate (Integer'First)
-                       and then QZ <= Wide_Coordinate (Integer'Last)
-                     then
-                        declare
-                           Q : constant Parsed_Point :=
-                             (To_Unbounded_String ("Q"), Integer (QX),
-                              Integer (QY), Integer (QZ), Three_D);
-
-                        begin
-                           Add_Point (S, "Q", Q.X, Q.Y, Q.Z);
-                           Add_Segment_3D (S, P, Q);
-                        end;
-
-                     end if;
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if not Translation_Is_Representable (Pt, Vc) then
-                  Emit ("error: translation is not representable");
-                  Set_Exit_Status (Failure);
-
-               else
-                  declare
-                     Q : constant Point_3D := Translate (Pt, Vc);
-
-                  begin
-                     Emit
-                       ("point " & Img (Q.X) & " " & Img (Q.Y) & " "
-                        & Img (Q.Z));
-                  end;
-               end if;
-            end;
-         end;
+         Handle_Translate (R, Defs, With_Chain);
 
       elsif Op = "displacement" then
-         declare
-            A : constant Parsed_Point := Next_Point (R, Defs);
-            B : constant Parsed_Point := Next_Point (R, Defs);
-
-         begin
-            Require_3D (A);
-            Require_3D (B);
-            Require_End (R);
-            declare
-               Pa : constant Point_3D := (C (A.X), C (A.Y), C (A.Z));
-               Pb : constant Point_3D := (C (B.X), C (B.Y), C (B.Z));
-               D  : constant Vector_3D := Displacement (Pa, Pb);
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Add_Point (S, To_String (A.Name), A.X, A.Y, A.Z);
-                     Add_Point (S, To_String (B.Name), B.X, B.Y, B.Z);
-                     Add_Segment_3D (S, A, B);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               Emit
-                 ("vector " & Img (D.DX) & " " & Img (D.DY) & " " & Img (D.DZ));
-            end;
-         end;
+         Handle_Displacement (R, Defs, With_Chain);
 
       elsif Op = "equal" then
-         declare
-            A : constant Parsed_Point := Next_Point (R, Defs);
-            B : constant Parsed_Point := Next_Point (R, Defs);
-
-         begin
-            Require_3D (A);
-            Require_3D (B);
-            Require_End (R);
-            declare
-               Pa : constant Point_3D := (C (A.X), C (A.Y), C (A.Z));
-               Pb : constant Point_3D := (C (B.X), C (B.Y), C (B.Z));
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Add_Point (S, To_String (A.Name), A.X, A.Y, A.Z);
-                     Add_Point (S, To_String (B.Name), B.X, B.Y, B.Z);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if Pa = Pb then
-                  Emit ("equal true");
-
-               else
-                  Emit ("equal false");
-
-               end if;
-            end;
-         end;
+         Handle_Equal (R, Defs, With_Chain);
 
       elsif Op = "orientation" then
-         declare
-            A : constant Parsed_Point := Next_Point (R, Defs);
-            B : constant Parsed_Point := Next_Point (R, Defs);
-            P : constant Parsed_Point := Next_Point (R, Defs);
-
-         begin
-            Require_2D (A);
-            Require_2D (B);
-            Require_2D (P);
-            Require_End (R);
-            declare
-               Pa : constant Point_2D := Point_Of (A);
-               Pb : constant Point_2D := Point_Of (B);
-               Pp : constant Point_2D := Point_Of (P);
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Add_Point (S, To_String (A.Name), A.X, A.Y, 0);
-                     Add_Point (S, To_String (B.Name), B.X, B.Y, 0);
-                     Add_Point (S, To_String (P.Name), P.X, P.Y, 0);
-                     Add_Segment (S, A, B);
-                     Add_Segment (S, B, P);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               case Orientation (Pa, Pb, Pp) is
-                  when Counter_Clockwise =>
-                     Emit ("orientation counter_clockwise");
-
-                  when Clockwise =>
-                     Emit ("orientation clockwise");
-
-                  when Collinear =>
-                     Emit ("orientation collinear");
-
-               end case;
-            end;
-         end;
+         Handle_Orientation (R, Defs, With_Chain);
 
       elsif Op = "intersect" then
-         declare
-            A : constant Parsed_Point := Next_Point (R, Defs);
-            B : constant Parsed_Point := Next_Point (R, Defs);
-            C : constant Parsed_Point := Next_Point (R, Defs);
-            D : constant Parsed_Point := Next_Point (R, Defs);
-
-         begin
-            Require_2D (A);
-            Require_2D (B);
-            Require_2D (C);
-            Require_2D (D);
-            Require_End (R);
-            declare
-               S1 : constant Segment_2D :=
-                 (Point_Of (A), Point_Of (B));
-               S2 : constant Segment_2D :=
-                 (Point_Of (C), Point_Of (D));
-               Res : constant Intersection_Result := Intersection (S1, S2);
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Add_Point (S, To_String (A.Name), A.X, A.Y, 0);
-                     Add_Point (S, To_String (B.Name), B.X, B.Y, 0);
-                     Add_Point (S, To_String (C.Name), C.X, C.Y, 0);
-                     Add_Point (S, To_String (D.Name), D.X, D.Y, 0);
-                     Add_Segment (S, A, B);
-                     Add_Segment (S, C, D);
-                     if Res.Kind = Point_Intersection then
-                        Add_Point (S, "P", Integer (Res.Point.X),
-                                   Integer (Res.Point.Y), 0);
-
-                     end if;
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               case Res.Kind is
-                  when No_Intersection =>
-                     Emit ("intersection no_intersection");
-                  when Point_Intersection =>
-                     Emit
-                       ("intersection point_intersection " & Img (Res.Point.X)
-                        & " " & Img (Res.Point.Y));
-                  when Off_Grid_Crossing =>
-                     Emit ("intersection off_grid_crossing");
-                  when Overlap =>
-                     Emit
-                       ("intersection overlap " & Img (Res.Overlap.From_Point.X)
-                        & " " & Img (Res.Overlap.From_Point.Y) & " "
-                        & Img (Res.Overlap.To_Point.X) & " "
-                        & Img (Res.Overlap.To_Point.Y));
-
-               end case;
-            end;
-         end;
+         Handle_Intersect (R, Defs, With_Chain);
 
       elsif Op = "contour_continuity" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            if Natural (Chain.Length) mod 2 /= 0 then
-               raise Usage_Error;
-
-            end if;
-            declare
-               S         : Scene := New_Scene;
-               Continuous : Boolean := True;
-
-            begin
-               if Length (Draw_Path) > 0 then
-                  Draw_Chain (S, Chain);
-               end if;
-               for I in 1 .. Natural (Chain.Length) / 2 - 1 loop
-                  if Point_Of (Chain (2 * I)) /= Point_Of (Chain (2 * I + 1))
-                  then
-                     Continuous := False;
-
-                  end if;
-               end loop;
-               if Continuous then
-                  Emit ("continuity continuous");
-
-               else
-                  Emit ("continuity discontinuous");
-
-               end if;
-               Draw (S, With_Chain);
-            end;
-         end;
+         Handle_Contour_Continuity (R, Defs, With_Chain);
 
       elsif Op = "contour_closure" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            declare
-               N   : constant Natural := Natural (Chain.Length);
-               Seq : Segment_Sequence_2D (N);
-
-            begin
-               for I in 1 .. N loop
-                  Seq.Points (I) := Point_Of (Chain (I));
-               end loop;
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Draw_Chain (S, Chain);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if Is_Closed (Seq) then
-                  Emit ("closure closed");
-
-               else
-                  Emit ("closure open");
-
-               end if;
-            end;
-         end;
+         Handle_Contour_Closure (R, Defs, With_Chain);
 
       elsif Op = "contour_orientation" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            declare
-               N   : constant Natural := Natural (Chain.Length);
-               Seq : Segment_Sequence_2D (N);
-
-            begin
-               for I in 1 .. N loop
-                  Seq.Points (I) := Point_Of (Chain (I));
-               end loop;
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Draw_Chain (S, Chain);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if N < 3 then
-                  Emit ("error: at least 3 points required for orientation");
-                  Set_Exit_Status (Failure);
-
-               elsif not Is_Closed (Seq) then
-                  Emit ("error: sequence is not closed");
-                  Set_Exit_Status (Failure);
-
-               elsif not Is_Valid (Seq) then
-                  Emit ("error: sequence is not valid");
-                  Set_Exit_Status (Failure);
-
-               else
-                  case Orientation (Seq) is
-                     when Counter_Clockwise =>
-                        Emit ("orientation counter_clockwise");
-                     when Clockwise =>
-                        Emit ("orientation clockwise");
-                     when Degenerate =>
-                        Emit ("orientation degenerate");
-
-                  end case;
-               end if;
-            end;
-         end;
+         Handle_Contour_Orientation (R, Defs, With_Chain);
 
       elsif Op = "contour_self_intersects" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            declare
-               N   : constant Natural := Natural (Chain.Length);
-               Seq : Segment_Sequence_2D (N);
-
-            begin
-               for I in 1 .. N loop
-                  Seq.Points (I) := Point_Of (Chain (I));
-               end loop;
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Draw_Chain (S, Chain);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if Self_Intersects (Seq) then
-                  Emit ("true");
-
-               else
-                  Emit ("false");
-
-               end if;
-            end;
-         end;
+         Handle_Contour_Self_Intersects (R, Defs, With_Chain);
 
       elsif Op = "contour_valid" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            declare
-               N   : constant Natural := Natural (Chain.Length);
-               Seq : Segment_Sequence_2D (N);
-
-            begin
-               for I in 1 .. N loop
-                  Seq.Points (I) := Point_Of (Chain (I));
-               end loop;
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Draw_Chain (S, Chain);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if Is_Valid (Seq) then
-                  Emit ("true");
-
-               else
-                  Emit ("false");
-
-               end if;
-            end;
-         end;
+         Handle_Contour_Valid (R, Defs, With_Chain);
 
       elsif Op = "contour_no_flat_turns" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            declare
-               N   : constant Natural := Natural (Chain.Length);
-               Seq : Segment_Sequence_2D (N);
-
-            begin
-               for I in 1 .. N loop
-                  Seq.Points (I) := Point_Of (Chain (I));
-               end loop;
-               if Length (Draw_Path) > 0 then
-                  declare
-                     S : Scene := New_Scene;
-
-                  begin
-                     Draw_Chain (S, Chain);
-                     Draw (S, With_Chain);
-                  end;
-               end if;
-               if Has_No_Flat_Turns (Seq) then
-                  Emit ("true");
-
-               else
-                  Emit ("false");
-
-               end if;
-            end;
-         end;
+         Handle_Contour_No_Flat_Turns (R, Defs, With_Chain);
 
       elsif Op = "vertex" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            if Natural (Chain.Length) = 0 then
-               raise Usage_Error;
-
-            end if;
-            for C of Chain loop
-               Require_2D (C);
-            end loop;
-            --  One command builds one store, sized exactly for its
-            --  points: the capacity is known before any creation, so the
-            --  kernel precondition of Create holds structurally.
-            if Natural (Chain.Length) > Max_Vertices then
-               Emit ("error: too many vertices for one store");
-               Set_Exit_Status (Failure);
-               return;
-
-            end if;
-            declare
-               Store : Vertex_Store (Vertex_Count_Range (Natural (Chain.Length)));
-               H     : Vertex_Handle;
-               S     : Scene := New_Scene;
-
-            begin
-               for I in 1 .. Natural (Chain.Length) loop
-                  Create (Store, Point_Of (Chain (I)), H);
-                  if Length (Draw_Path) > 0 then
-                     Add_Point (S, "V" & Img (H), Chain (I).X, Chain (I).Y, 0);
-                  end if;
-                  Emit
-                    ("vertex " & Img (H) & " point "
-                     & Img (Point_Of (Store, H).X) & " "
-                     & Img (Point_Of (Store, H).Y));
-               end loop;
-               Draw (S, With_Chain);
-            end;
-         end;
+         Handle_Vertex (R, Defs, With_Chain);
 
       elsif Op = "edge" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-
-         begin
-            Require_End (R);
-            if Natural (Chain.Length) = 0
-              or else Natural (Chain.Length) mod 2 /= 0
-            then
-               raise Usage_Error;
-
-            end if;
-            for C of Chain loop
-               Require_2D (C);
-            end loop;
-            --  Within the command, a name designates one vertex: a
-            --  repeated name is the same handle, never a new vertex.
-            --  Distinct names at the same position are distinct
-            --  vertices: identity is not position. One store holds
-            --  the distinct names, the other one edge per pair.
-            declare
-               Store   : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
-               Edges   : Edge_Store (Edge_Count_Range (Natural (Chain.Length) / 2));
-               Names   : Point_Vectors.Vector;
-               Handles : Handle_Vectors.Vector;
-               S       : Scene := New_Scene;
-
-            begin
-               for P in 1 .. Natural (Chain.Length) / 2 loop
-                  declare
-                     A, B : Vertex_Handle;
-                     E    : Edge_Handle;
-
-                  begin
-                     Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P - 1), A);
-                     Ensure_Vertex (Store, Names, Handles, S, Chain (2 * P), B);
-                     --  The degeneracy precondition is checked before
-                     --  the call: the kernel contract is never
-                     --  violated from the command line.
-                     if A = B then
-                        Emit ("error: degenerate edge");
-                        Set_Exit_Status (Failure);
-                        return;
-
-                     end if;
-                     Create (Edges, Store, A, B, E);
-                     if Length (Draw_Path) > 0 then
-                        Add_Segment (S, Chain (2 * P - 1), Chain (2 * P));
-                     end if;
-                     Emit
-                       ("edge " & Img (E) & " vertex " & Img (A) & " vertex "
-                        & Img (B));
-                  end;
-               end loop;
-               Draw (S, With_Chain);
-            end;
-         end;
+         Handle_Edge (R, Defs, With_Chain);
 
       elsif Op = "loop" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-            N     : constant Natural := Natural (Chain.Length);
-
-         begin
-            Require_End (R);
-            if N < 2 then
-               raise Usage_Error;
-
-            end if;
-            for C of Chain loop
-               Require_2D (C);
-            end loop;
-            --  The chain closes when it returns to its first name.
-            --  One vertex per distinct name, one edge per consecutive
-            --  pair, so the loop of N - 1 edges must fit the longest
-            --  loop.
-            if N - 1 > Max_Loop_Length then
-               Emit ("error: too many edges for one loop");
-               Set_Exit_Status (Failure);
-               return;
-
-            end if;
-            declare
-               Store    : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
-               Edges    : Edge_Store (Edge_Count_Range (N - 1));
-               Names    : Point_Vectors.Vector;
-               Vertices : Handle_Vectors.Vector;
-               Tokens   : Handle_Vectors.Vector;
-               Handles  : Edge_Handle_Array (1 .. N - 1);
-               S        : Scene := New_Scene;
-
-            begin
-               for I in 1 .. N loop
-                  declare
-                     H : Vertex_Handle;
-
-                  begin
-                     Ensure_Vertex (Store, Names, Vertices, S, Chain (I), H);
-                     Tokens.Append (H);
-                  end;
-               end loop;
-               for I in 2 .. N loop
-                  declare
-                     E : Edge_Handle;
-
-                  begin
-                     --  The degeneracy precondition of the edge is
-                     --  checked before the call: the kernel contract
-                     --  is never violated from the command line.
-                     if Tokens (I - 1) = Tokens (I) then
-                        Emit ("error: degenerate edge");
-                        Set_Exit_Status (Failure);
-                        return;
-
-                     end if;
-                     Create (Edges, Store, Tokens (I - 1), Tokens (I), E);
-                     Handles (I - 1) := E;
-                     if Length (Draw_Path) > 0 then
-                        Add_Segment (S, Chain (I - 1), Chain (I));
-                     end if;
-                     Emit
-                       ("edge " & Img (E) & " vertex " & Img (Tokens (I - 1))
-                        & " vertex " & Img (Tokens (I)));
-                  end;
-               end loop;
-               declare
-                  --  The loop is classified exactly before it is
-                  --  built: only a valid loop reaches Make_Loop, so
-                  --  the kernel precondition holds.
-                  Status : constant Loop_Validity :=
-                     Classify_Loop (Edges, Store, Handles);
-
-               begin
-                  case Status is
-                     when Valid_Loop =>
-                        declare
-                           L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
-
-                        begin
-                           case Loop_Orientation (Edges, Store, L) is
-                              when Counter_Clockwise =>
-                                 Emit ("loop closed counter_clockwise");
-                              when Clockwise =>
-                                 Emit ("loop closed clockwise");
-                              when Degenerate =>
-                                 Emit ("loop closed degenerate");
-
-                           end case;
-                        end;
-                     when Open_Chain =>
-                        Emit ("error: open loop");
-                        Set_Exit_Status (Failure);
-                     when Degenerate_Support =>
-                        Emit ("error: degenerate edge support");
-                        Set_Exit_Status (Failure);
-                     when Orphan_Edge =>
-                        Emit ("error: orphan edge");
-                        Set_Exit_Status (Failure);
-                     when Missing_Endpoint =>
-                        Emit ("error: missing endpoint");
-                        Set_Exit_Status (Failure);
-                     when Disconnected_Chain =>
-                        Emit ("error: disconnected chain");
-                        Set_Exit_Status (Failure);
-
-                  end case;
-               end;
-               Draw (S, With_Chain);
-            end;
-         end;
+         Handle_Loop (R, Defs, With_Chain);
 
       elsif Op = "face" then
-         declare
-            Chain : constant Point_Vectors.Vector := Parse_Chain (R, Defs);
-            N     : constant Natural := Natural (Chain.Length);
-
-         begin
-            Require_End (R);
-            if N < 2 then
-               raise Usage_Error;
-
-            end if;
-            for C of Chain loop
-               Require_2D (C);
-            end loop;
-            --  Same construction as the loop command: the chain closes
-            --  when it returns to its first name, one vertex per
-            --  distinct name, one edge per consecutive pair. The face
-            --  classification then completes the loop classification.
-            if N - 1 > Max_Loop_Length then
-               Emit ("error: too many edges for one loop");
-               Set_Exit_Status (Failure);
-               return;
-
-            end if;
-            declare
-               Store    : Vertex_Store (Vertex_Count_Range (Distinct_Names (Chain)));
-               Edges    : Edge_Store (Edge_Count_Range (N - 1));
-               Names    : Point_Vectors.Vector;
-               Vertices : Handle_Vectors.Vector;
-               Tokens   : Handle_Vectors.Vector;
-               Handles  : Edge_Handle_Array (1 .. N - 1);
-               S        : Scene := New_Scene;
-
-            begin
-               for I in 1 .. N loop
-                  declare
-                     H : Vertex_Handle;
-
-                  begin
-                     Ensure_Vertex (Store, Names, Vertices, S, Chain (I), H);
-                     Tokens.Append (H);
-                  end;
-               end loop;
-               for I in 2 .. N loop
-                  declare
-                     E : Edge_Handle;
-
-                  begin
-                     --  The degeneracy precondition of the edge is
-                     --  checked before the call: the kernel contract
-                     --  is never violated from the command line.
-                     if Tokens (I - 1) = Tokens (I) then
-                        Emit ("error: degenerate edge");
-                        Set_Exit_Status (Failure);
-                        return;
-
-                     end if;
-                     Create (Edges, Store, Tokens (I - 1), Tokens (I), E);
-                     Handles (I - 1) := E;
-                     if Length (Draw_Path) > 0 then
-                        Add_Segment (S, Chain (I - 1), Chain (I));
-                     end if;
-                     Emit
-                       ("edge " & Img (E) & " vertex " & Img (Tokens (I - 1))
-                        & " vertex " & Img (Tokens (I)));
-                  end;
-               end loop;
-               declare
-                  --  The chain is classified exactly, then a valid
-                  --  loop is classified again as a face boundary:
-                  --  only a valid boundary reaches Make_Face, so the
-                  --  kernel precondition holds.
-                  Status : constant Loop_Validity :=
-                     Classify_Loop (Edges, Store, Handles);
-
-               begin
-                  if Status /= Valid_Loop then
-                     case Status is
-                        when Open_Chain =>
-                           Emit ("error: open loop");
-                        when Degenerate_Support =>
-                           Emit ("error: degenerate edge support");
-                        when Orphan_Edge =>
-                           Emit ("error: orphan edge");
-                        when Missing_Endpoint =>
-                           Emit ("error: missing endpoint");
-                        when Disconnected_Chain =>
-                           Emit ("error: disconnected chain");
-                        when Valid_Loop =>
-                           null;
-
-                     end case;
-                     Set_Exit_Status (Failure);
-
-                  else
-                     declare
-                        L : constant Loop_2D := Make_Loop (Edges, Store, Handles);
-
-                     begin
-                        case Classify_Face (Edges, Store, L) is
-                           when Valid_Face =>
-                              declare
-                                 F : constant Face_2D :=
-                                    Make_Face (Edges, Store, L);
-
-                              begin
-                                 case Face_Orientation (Edges, Store, F) is
-                                    when Counter_Clockwise =>
-                                       Emit ("face counter_clockwise");
-                                    when Clockwise =>
-                                       Emit ("face clockwise");
-                                    when Degenerate =>
-                                       Emit ("face degenerate");
-
-                                 end case;
-                              end;
-                           when Invalid_Boundary =>
-                              Emit ("error: invalid loop");
-                              Set_Exit_Status (Failure);
-                           when Degenerate_Boundary =>
-                              Emit ("error: degenerate face boundary");
-                              Set_Exit_Status (Failure);
-
-                        end case;
-                     end;
-                  end if;
-               end;
-               Draw (S, With_Chain);
-            end;
-         end;
+         Handle_Face (R, Defs, With_Chain);
 
       else
          raise Usage_Error;
@@ -1304,7 +1321,7 @@ procedure TopoCLI is
          Open (F, In_File, Path);
          while not End_Of_File (F) loop
             Append (Fragment, Get_Line (F));
-            Append (Fragment, ASCII.LF & "");
+            Append (Fragment, ASCII.LF);
          end loop;
          Close (F);
 
@@ -1401,7 +1418,7 @@ begin
         or else Argument (I) = "--draw"
       then
          declare
-            Is_Input : constant Boolean := Argument (I) = "--input";
+            Option : constant String := Argument (I);
 
          begin
             I := I + 1;
@@ -1409,10 +1426,10 @@ begin
                raise Usage_Error;
 
             end if;
-            if Is_Input then
+            if Option = "--input" then
                Input_Path := To_Unbounded_String (Argument (I));
 
-            elsif Argument (I - 1) = "--output" then
+            elsif Option = "--output" then
                Output_Path := To_Unbounded_String (Argument (I));
 
             else

@@ -24,6 +24,7 @@ with TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;
 with TopoProof.Topology.Vertices;
 
+with TopoDiagnostics;                 use TopoDiagnostics;
 with Topodraw;                        use Topodraw;
 
 package body TopoScript_API is
@@ -415,7 +416,11 @@ package body TopoScript_API is
    --  and Make_Face run the exact kernel classification, the same one
    --  as the loop and face client operations. In the script chain, a
    --  vertex is identified by its position: a repeated position
-   --  closes on the same vertex.
+   --  closes on the same vertex. The chain lives for the whole script
+   --  run: Add_Point always appends, and Make_Loop and Make_Face
+   --  classify the chain as it stands at the call without ever
+   --  clearing it, so the same chain can be classified first as a
+   --  loop, then as a face boundary.
 
    type Chain_Point is record
       X, Y : Grid_Coordinate;
@@ -546,30 +551,20 @@ package body TopoScript_API is
       L       :    out TopoProof.Topology.Loops.Loop_2D;
       Valid   :    out Boolean)
    is
+      use type TopoProof.Topology.Loops.Loop_Validity;
+      Status : constant TopoProof.Topology.Loops.Loop_Validity :=
+         TopoProof.Topology.Loops.Classify_Loop (Links, Store, Handles);
    begin
-      case TopoProof.Topology.Loops.Classify_Loop (Links, Store,
-                                                   Handles)
-      is
-         when TopoProof.Topology.Loops.Valid_Loop =>
-            L := TopoProof.Topology.Loops.Make_Loop (Links, Store,
-                                                    Handles);
-            Valid := True;
-         when TopoProof.Topology.Loops.Open_Chain =>
-            Record_Failure ("error: open loop");
-            Valid := False;
-         when TopoProof.Topology.Loops.Orphan_Edge =>
-            Record_Failure ("error: orphan edge");
-            Valid := False;
-         when TopoProof.Topology.Loops.Missing_Endpoint =>
-            Record_Failure ("error: missing endpoint");
-            Valid := False;
-         when TopoProof.Topology.Loops.Disconnected_Chain =>
-            Record_Failure ("error: disconnected chain");
-            Valid := False;
-         when TopoProof.Topology.Loops.Degenerate_Support =>
-            Record_Failure ("error: degenerate edge support");
-            Valid := False;
-      end case;
+      if Status = TopoProof.Topology.Loops.Valid_Loop then
+         L := TopoProof.Topology.Loops.Make_Loop (Links, Store,
+                                                  Handles);
+         Valid := True;
+
+      else
+         Record_Failure (Loop_Diagnostic (Status));
+         Valid := False;
+
+      end if;
    end Classify_Chain;
 
    procedure Make_Loop_Native (Data : in out HAC_Element_Array) is
@@ -577,7 +572,8 @@ package body TopoScript_API is
       Kind : Loop_Kind := Open_Chain;
    begin
       if N < 2 then
-         Record_Failure ("error: open loop");
+         Record_Failure
+           (Loop_Diagnostic (TopoProof.Topology.Loops.Open_Chain));
          Data (1) := Loop_To_HAC (Kind);
          return;
       elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
@@ -626,7 +622,8 @@ package body TopoScript_API is
       Kind : Face_Kind := Face_Invalid_Boundary;
    begin
       if N < 2 then
-         Record_Failure ("error: open loop");
+         Record_Failure
+           (Loop_Diagnostic (TopoProof.Topology.Loops.Open_Chain));
          Data (1) := Face_To_HAC (Kind);
          return;
       elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
@@ -682,10 +679,14 @@ package body TopoScript_API is
                      end case;
                   end;
                when TopoProof.Topology.Faces.Invalid_Boundary =>
-                  Record_Failure ("error: invalid loop");
+                  Record_Failure
+                    (Face_Diagnostic
+                       (TopoProof.Topology.Faces.Invalid_Boundary));
                when TopoProof.Topology.Faces.Degenerate_Boundary =>
                   Kind := Face_Degenerate_Boundary;
-                  Record_Failure ("error: degenerate face boundary");
+                  Record_Failure
+                    (Face_Diagnostic
+                       (TopoProof.Topology.Faces.Degenerate_Boundary));
             end case;
          end if;
       end;
@@ -702,15 +703,23 @@ package body TopoScript_API is
          when Degenerate =>
             Put_Line ("loop closed degenerate");
          when Open_Chain =>
-            Record_Failure ("error: open loop");
+            Record_Failure
+              (Loop_Diagnostic (TopoProof.Topology.Loops.Open_Chain));
          when Orphan_Edge =>
-            Record_Failure ("error: orphan edge");
+            Record_Failure
+              (Loop_Diagnostic (TopoProof.Topology.Loops.Orphan_Edge));
          when Missing_Endpoint =>
-            Record_Failure ("error: missing endpoint");
+            Record_Failure
+              (Loop_Diagnostic
+                 (TopoProof.Topology.Loops.Missing_Endpoint));
          when Disconnected_Chain =>
-            Record_Failure ("error: disconnected chain");
+            Record_Failure
+              (Loop_Diagnostic
+                 (TopoProof.Topology.Loops.Disconnected_Chain));
          when Degenerate_Support =>
-            Record_Failure ("error: degenerate edge support");
+            Record_Failure
+              (Loop_Diagnostic
+                 (TopoProof.Topology.Loops.Degenerate_Support));
       end case;
    end Put_Loop_Native;
 
@@ -722,9 +731,13 @@ package body TopoScript_API is
          when Face_Clockwise =>
             Put_Line ("face clockwise");
          when Face_Degenerate_Boundary =>
-            Record_Failure ("error: degenerate face boundary");
+            Record_Failure
+              (Face_Diagnostic
+                 (TopoProof.Topology.Faces.Degenerate_Boundary));
          when Face_Invalid_Boundary =>
-            Record_Failure ("error: invalid loop");
+            Record_Failure
+              (Face_Diagnostic
+                 (TopoProof.Topology.Faces.Invalid_Boundary));
       end case;
    end Put_Face_Native;
 

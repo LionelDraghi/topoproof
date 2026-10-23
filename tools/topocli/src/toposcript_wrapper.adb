@@ -104,7 +104,7 @@ package body TopoScript_Wrapper is
       procedure Append_Line (Content : String) is
       begin
          Append (Source, Content);
-         Append (Source, ASCII.LF & "");
+         Append (Source, ASCII.LF);
          Count := Count + 1;
       end Append_Line;
 

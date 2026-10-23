@@ -23,13 +23,17 @@ The shared rules for Lionel's Ada projects live in the [reference repository on 
 Inspect -> specify -> implement -> prove -> test -> document
 ```
 
-Before considering a change complete, run:
+During development, run the target of the step under work: `make build`,
+`make test` or `make prove`; `make check` chains the three at once, so
+running the four commands in sequence is redundant, since `check` is
+`build` + `test` + `prove`.
+
+Before considering a change complete, run the complete chain from a
+clean state:
 
 ```sh
-make build
-make test
-make prove
-make check
+make clean
+make all
 ```
 
 Do not add a public operation without a contract. Keep each change within the current milestone. Justify all numeric bounds. Prefer Ada/GNAT semantic tools over textual search when inspecting declarations and references.
