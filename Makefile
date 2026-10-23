@@ -46,7 +46,7 @@ SARIF_SWITCHES := --sarif-file=$(SARIF_FILE) --sarif-base-uri=$(SARIF_BASE_URI)
 .SILENT:
 
 .DEFAULT_GOAL := all
-.PHONY: help all build release test prove prove+ proof-badge format check clean
+.PHONY: help all build release test prove prove+ prove-stats proof-badge format check clean
 .PHONY: evidence-dirs proof-evidence evidence-checker check-proof-evidence
 
 help:
@@ -62,6 +62,8 @@ help:
 	echo "  prove      : run GNATprove on every kernel unit (-U, level 2)"
 	echo "               and validate the proof evidence"
 	echo "  prove+     : escalate unproved checks (level 4, counterexamples)"
+	echo "  prove-stats: run the same analysis with per-check statistics"
+	echo "               (prover steps and times), to target optimizations"
 	echo "  check      : build, test, prove and validate the evidence:"
 	echo "               the complete verification chain"
 	echo "  format     : reformat the Ada sources with GNATformat"
@@ -173,6 +175,24 @@ prove+:
 
 	$(GNATPROVE) $(KERNEL) $(ANALYSIS) \
 	  --level=4
+
+# Proof statistics: the same analysis as `make prove`, with
+# --report=statistics, so every proved check reports the number of
+# prover steps and its time, and the report lists the most difficult
+# checks. The run writes to the isolated obj/stats (--subdirs), so the
+# canonical evidence of obj/gnatprove is left untouched; the report is
+# kept with the other proof artifacts. No --assumptions: that extra pass
+# produces no statistics and doubles the wall time.
+prove-stats: evidence-dirs
+	echo
+	echo === collecting the proof statistics
+
+	$(ALR) exec -- bash -c 'set -o pipefail; gnatprove $(KERNEL) --mode=all --report=statistics --warnings=error --level=2 --output-header --subdirs=stats 2>&1 | tee $(PROOF_ARTIFACTS)/prove-stats.log'
+	cp obj/stats/gnatprove/gnatprove.out $(PROOF_ARTIFACTS)/gnatprove-stats.out
+	echo
+	echo The most difficult proved checks:
+	sed -n '/Most difficult proved checks/,+12p' $(PROOF_ARTIFACTS)/gnatprove-stats.out
+	sed -n 's/^max steps used for successful proof: /max steps used for a successful proof: /p' $(PROOF_ARTIFACTS)/gnatprove-stats.out
 
 format:
 	echo

@@ -44,6 +44,8 @@ make test    # run executable tests
 make prove   # run GNATprove (level 2: the daily, fast policy)
 make prove+  # escalate unproved checks (level 4: larger solver budgets
              # and counterexamples; proved checks come from the cache)
+make prove-stats # per-check proof statistics (prover steps and times),
+             # to target the optimizations before they are needed
 make check   # run the complete verification chain
 make format  # reformat the Ada sources with GNATformat
 alr test     # build, then run the executable documentation through bbt
@@ -56,6 +58,12 @@ generates counterexamples, which often suggest the missing intermediate
 assertion or a test scenario. GNATprove caches proved checks, so escalation
 only re-attempts the failures. Before declaring a milestone complete, the
 escalation must leave no unproved check.
+
+To target proof optimization, `make prove-stats` runs the same level-2
+analysis with `--report=statistics`: every proved check reports its prover
+steps and time, the report lists the most difficult checks, and the
+canonical evidence of `obj/gnatprove` stays untouched since the run writes
+to the isolated `obj/stats` (the report is kept in `artifacts/gnatprove/`).
 
 `make check` must build the project, run the bbt scenarios, run GNATprove on
 all kernel units with `-U` (including units not reachable from a main),
