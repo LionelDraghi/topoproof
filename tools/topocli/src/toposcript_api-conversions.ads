@@ -7,12 +7,15 @@
 
 --  The conversions between the HAC element arrays and the TopoProof
 --  grid types (development plan, TopoScript consolidation,
---  Increment 2): every domain callback reads the script values through
---  these helpers, instead of repeating the widest-integer decoding and
---  the grid-domain checks.
+--  Increment 2 and the single front-end Increment 1): every domain
+--  callback reads and writes its script values through these helpers,
+--  instead of repeating the widest-integer decoding and the
+--  grid-domain checks.
 
 with Ada.Text_IO;
 with HAC_Sys.Interfacing;
+with TopoProof.Geometry.Points;
+with TopoProof.Geometry.Vectors;
 with TopoProof.Numerics;
 
 package TopoScript_API.Conversions is
@@ -34,5 +37,35 @@ package TopoScript_API.Conversions is
    --  The canonical decimal image of one grid coordinate.
    package Grid_IO is new Ada.Text_IO.Integer_IO
      (TopoProof.Numerics.Grid_Coordinate);
+
+   --  Read one script point from the HAC elements at From: the
+   --  components are read on the widest native integer and checked
+   --  against the grid domain. False means at least one component is
+   --  outside the grid: P is then left unassigned, and the caller
+   --  records its own diagnostic.
+   function Read_Point_2D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      P    : out TopoProof.Geometry.Points.Point_2D) return Boolean;
+
+   function Read_Point_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      P    : out TopoProof.Geometry.Points.Point_3D) return Boolean;
+
+   --  Read one script vector from the HAC elements at From. The script
+   --  vector components are checked against the grid domain, the
+   --  documented input contract of the scripting API (DD-003), which
+   --  is narrower than the Vector_Component domain of the kernel.
+   function Read_Vector_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean;
+
+   --  Write one point into the HAC elements at From.
+   procedure Write_Point_3D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      P    :        TopoProof.Geometry.Points.Point_3D);
 
 end TopoScript_API.Conversions;

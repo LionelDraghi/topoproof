@@ -25,6 +25,7 @@ and its Ada subset are presented in
 - [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
 - [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
 - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
+- [Scenario: --output receives the canonical result of a script](#scenario---output-receives-the-canonical-result-of-a-script)
 - [Diagnostic drawing](#diagnostic-drawing)
 - [User macros and extensions](#user-macros-and-extensions)
 - [CLI direction](#cli-direction)
@@ -100,7 +101,11 @@ for these scenarios.
 
 Script execution preserves a stable separation between outputs:
 
-- standard output contains the canonical value inspected by bbt;
+- standard output contains the canonical value inspected by bbt; with
+  `--output FILE`, the file receives every canonical line of the run
+  instead: it is created at the first line and closed at the end of the
+  run, with the same accumulation semantics as the command form
+  (DD-004, decision 8);
 - standard error contains diagnostics and execution errors;
 - the process status reports successful or failed execution.
 
@@ -257,6 +262,27 @@ carries the result only.
 
 ![Diagnostic image of the translation](images/toposcript_1.svg)
 
+## Scenario: --output receives the canonical result of a script
+
+With `--output FILE`, every canonical line of the run goes to the file,
+and the standard output stays empty.
+
+- Given the file `translate_output.topo`
+  ```ada
+  P      : constant Point_3D := (10, -20, 30);
+  D      : constant Vector_3D := (5, 7, -9);
+  Result : Point_3D;
+
+  Translate (P, D, Result);
+
+  Put (Result);
+  ```
+- When I successfully run `../bin/topocli run translate_output.topo --output result.out`
+- Then the output is
+  ```text
+  ```
+- And the file `result.out` is `point 15 -13 21`
+
 ## Diagnostic drawing
 
 A script generates one diagnostic image through the drawing API,
@@ -313,7 +339,7 @@ and the scripting API are stable.
 The command form is:
 
 ```text
-topocli run FILE.topo
+topocli run FILE.topo [--output FILE]
 ```
 
 Useful diagnostic options may later include:

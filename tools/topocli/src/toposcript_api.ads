@@ -15,6 +15,7 @@
 
 with Ada.Containers.Indefinite_Vectors;
 with Ada.Strings.Unbounded;
+with Ada.Text_IO;
 with HAC_Sys.Builder;
 with TopoProof.Numerics;
 with Topodraw;
@@ -62,6 +63,12 @@ private
       The_Scene : Topodraw.Scene;
       --  The counter of the anchor names of the scene points.
       Anchor_Count : Natural := 0;
+      --  The run-owned output destination (DD-004, decision 8): an
+      --  empty path keeps the standard output; otherwise every Put
+      --  line goes to the file, created at the first line and closed
+      --  at the end of the run.
+      Output_Path : Ada.Strings.Unbounded.Unbounded_String;
+      Output_File : Ada.Text_IO.File_Type;
       --  The topology chain: it lives for the whole script run.
       --  Add_Point always appends, and Make_Loop and Make_Face
       --  classify the chain as it stands at the call without ever

@@ -438,13 +438,20 @@
    - OK : And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`    
    - [X] scenario   [draw the diagnostic image of the translation](../features/toposcript.md) pass  
 
+   ### Scenario: [--output receives the canonical result of a script](../features/toposcript.md): 
+   - OK : Given the file `translate_output.topo`  
+   - OK : When I successfully run `../bin/topocli run translate_output.topo --output result.out`  
+   - OK : Then the output is  
+   - OK : And the file `result.out` is `point 15 -13 21`  
+   - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
-## Summary : **Success**, 77 scenarios OK
+
+## Summary : **Success**, 78 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 77    |
+| Successful | 78    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

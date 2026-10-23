@@ -14,10 +14,15 @@ with Ada.Text_IO;
 with TopoScript_API.Conversions;
 with TopoScript_API.Session;
 
+with TopoProof.Geometry.Points;
+with TopoProof.Geometry.Vectors;
+with TopoProof.Numerics;
 with Topodraw;
 use Topodraw;
 
 package body TopoScript_API.Drawing is
+
+   use type TopoProof.Numerics.Grid_Coordinate;
 
    function To_Color is new HAC_Sys.Interfacing.To_Native_Any_Enum
      (Color_Kind);
@@ -120,50 +125,40 @@ package body TopoScript_API.Drawing is
    procedure Draw_Point_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      PX, PY, PZ : Long_Long_Integer;
+      P : TopoProof.Geometry.Points.Point_3D;
    begin
       if not Session.Current_Session.Image_Open then
          Session.Record_Failure ("error: no open image");
          return;
       end if;
-      PX := Conversions.To_Long (Data (1));
-      PY := Conversions.To_Long (Data (2));
-      PZ := Conversions.To_Long (Data (3));
-      if not Conversions.Grid_In_Range (PX)
-        or else not Conversions.Grid_In_Range (PY)
-        or else not Conversions.Grid_In_Range (PZ)
-      then
+      if not Conversions.Read_Point_3D (Data, 1, P) then
          Session.Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
 
       Color_Point
-        (Integer (PX), Integer (PY), Integer (PZ),
+        (Integer (P.X), Integer (P.Y), Integer (P.Z),
          To_Unbounded_String (Hex_Of (To_Color (Data (4)))));
    end Draw_Point_Native;
 
    procedure Draw_Vector_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      OX, OY, OZ    : Long_Long_Integer;
-      VDX, VDY, VDZ : Long_Long_Integer;
+      O : TopoProof.Geometry.Points.Point_3D;
+      V : TopoProof.Geometry.Vectors.Vector_3D;
    begin
       if not Session.Current_Session.Image_Open then
          Session.Record_Failure ("error: no open image");
          return;
       end if;
-      OX  := Conversions.To_Long (Data (1));
-      OY  := Conversions.To_Long (Data (2));
-      OZ  := Conversions.To_Long (Data (3));
-      VDX := Conversions.To_Long (Data (4));
-      VDY := Conversions.To_Long (Data (5));
-      VDZ := Conversions.To_Long (Data (6));
-      if not Conversions.Grid_In_Range (OX)
-        or else not Conversions.Grid_In_Range (OY)
-        or else not Conversions.Grid_In_Range (OZ)
-        or else not Conversions.Grid_In_Range (OX + VDX)
-        or else not Conversions.Grid_In_Range (OY + VDY)
-        or else not Conversions.Grid_In_Range (OZ + VDZ)
+      if not Conversions.Read_Point_3D (Data, 1, O)
+        or else not Conversions.Read_Vector_3D (Data, 4, V)
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.X) + Long_Long_Integer (V.DX))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.Y) + Long_Long_Integer (V.DY))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.Z) + Long_Long_Integer (V.DZ))
       then
          Session.Record_Failure ("error: vector outside the grid");
          return;
@@ -175,10 +170,11 @@ package body TopoScript_API.Drawing is
          --  The anchor points stay plain: only the vector carries the
          --  color, unless the script has drawn the same position.
          From_Name :=
-           Anchor_Name (Integer (OX), Integer (OY), Integer (OZ));
+           Anchor_Name (Integer (O.X), Integer (O.Y), Integer (O.Z));
          To_Name :=
-           Anchor_Name (Integer (OX + VDX), Integer (OY + VDY),
-                        Integer (OZ + VDZ));
+           Anchor_Name (Integer (O.X) + Integer (V.DX),
+                        Integer (O.Y) + Integer (V.DY),
+                        Integer (O.Z) + Integer (V.DZ));
          Session.Current_Session.The_Scene.Vectors.Append
            (Vector_Rec'
               (From_Name => From_Name,
@@ -192,61 +188,52 @@ package body TopoScript_API.Drawing is
    procedure Draw_Point_2D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      PX, PY : Long_Long_Integer;
+      P : TopoProof.Geometry.Points.Point_2D;
    begin
       if not Session.Current_Session.Image_Open then
          Session.Record_Failure ("error: no open image");
          return;
       end if;
-      PX := Conversions.To_Long (Data (1));
-      PY := Conversions.To_Long (Data (2));
-      if not Conversions.Grid_In_Range (PX)
-        or else not Conversions.Grid_In_Range (PY)
-      then
+      if not Conversions.Read_Point_2D (Data, 1, P) then
          Session.Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
 
       Color_Point
-        (Integer (PX), Integer (PY), 0,
+        (Integer (P.X), Integer (P.Y), 0,
          To_Unbounded_String (Hex_Of (To_Color (Data (3)))));
    end Draw_Point_2D_Native;
 
    procedure Draw_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      PX, PY, QX, QY : Long_Long_Integer;
+      P : TopoProof.Geometry.Points.Point_2D;
+      Q : TopoProof.Geometry.Points.Point_2D;
    begin
       if not Session.Current_Session.Image_Open then
          Session.Record_Failure ("error: no open image");
          return;
       end if;
-      PX := Conversions.To_Long (Data (1));
-      PY := Conversions.To_Long (Data (2));
-      QX := Conversions.To_Long (Data (3));
-      QY := Conversions.To_Long (Data (4));
-      if not Conversions.Grid_In_Range (PX)
-        or else not Conversions.Grid_In_Range (PY)
-        or else not Conversions.Grid_In_Range (QX)
-        or else not Conversions.Grid_In_Range (QY)
+      if not Conversions.Read_Point_2D (Data, 1, P)
+        or else not Conversions.Read_Point_2D (Data, 3, Q)
       then
          Session.Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
-      if PX = QX and then PY = QY then
+      if P.X = Q.X and then P.Y = Q.Y then
          return;
       end if;
 
       declare
-         DX : constant Integer := Integer (QX - PX);
-         DY : constant Integer := Integer (QY - PY);
+         DX : constant Integer := Integer (Q.X) - Integer (P.X);
+         DY : constant Integer := Integer (Q.Y) - Integer (P.Y);
       begin
          Session.Current_Session.The_Scene.Vectors.Append
            (Vector_Rec'
               (From_Name =>
-                 Anchor_Name (Integer (PX), Integer (PY), 0),
+                 Anchor_Name (Integer (P.X), Integer (P.Y), 0),
                To_Name   =>
-                 Anchor_Name (Integer (QX), Integer (QY), 0),
+                 Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
                Label     =>
                  To_Unbounded_String
                    ("(" & Ada.Strings.Fixed.Trim

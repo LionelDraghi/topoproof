@@ -25,6 +25,10 @@ package body TopoScript_API.Session is
       Session.Image_Name   := Null_Unbounded_String;
       Session.The_Scene    := (others => <>);
       Session.Anchor_Count := 0;
+      if Ada.Text_IO.Is_Open (Session.Output_File) then
+         Ada.Text_IO.Close (Session.Output_File);
+      end if;
+      Session.Output_Path := Null_Unbounded_String;
       Session.Chain.Clear;
    end Reset;
 

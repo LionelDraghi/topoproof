@@ -28,6 +28,7 @@ with TopoProof.Topology.Faces;        use TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;        use TopoProof.Topology.Loops;
 with TopoProof.Topology.Vertices;    use TopoProof.Topology.Vertices;
 with TopoScript_API;
+with TopoScript_API.Output;
 with TopoScript_API.Session;
 with TopoScript_Diagnostics;
 with TopoScript_Wrapper;
@@ -1335,6 +1336,12 @@ procedure TopoCLI is
    begin
       TopoScript_API.Session.Reset (Session);
       TopoScript_API.Session.Designate (Session'Unchecked_Access);
+      --  The run-owned output destination (DD-004, decision 8): with
+      --  --output, every canonical Put line goes to the file instead
+      --  of the standard output.
+      if Length (Output_Path) > 0 then
+         TopoScript_API.Output.Set_Output_Path (To_String (Output_Path));
+      end if;
       declare
          Fragment : Unbounded_String;
          F        : File_Type;
@@ -1413,8 +1420,11 @@ procedure TopoCLI is
                end if;
             end;
 
+            TopoScript_API.Output.Close_Output;
+
          exception
             when E : TopoScript_Wrapper.Wrapper_Error =>
+               TopoScript_API.Output.Close_Output;
                Put_Line
                  (Standard_Error, Ada.Exceptions.Exception_Message (E));
                Set_Exit_Status (Failure);
@@ -1422,6 +1432,7 @@ procedure TopoCLI is
 
       exception
          when Name_Error | Use_Error =>
+            TopoScript_API.Output.Close_Output;
             Put_Line (Standard_Error, "error: file not found: " & Path);
             Set_Exit_Status (Failure);
       end;
@@ -1431,8 +1442,25 @@ procedure TopoCLI is
    I    : Positive := 1;
 
 begin
-   --  TopoScript: `topocli run FILE.topo` owns the whole command line.
-   if Argument_Count = 2 and then Argument (1) = "run" then
+   --  TopoScript: `topocli run FILE.topo [--output FILE]` owns the
+   --  whole command line: the output file of the canonical results is
+   --  the only option of the script runner (DD-004, decision 8).
+   if Argument_Count >= 2 and then Argument (1) = "run" then
+      declare
+         J : Positive := 3;
+      begin
+         while J <= Argument_Count loop
+            if Argument (J) = "--output" and then J < Argument_Count then
+               Output_Path := To_Unbounded_String (Argument (J + 1));
+               J := J + 1;
+
+            else
+               raise Usage_Error;
+
+            end if;
+            J := J + 1;
+         end loop;
+      end;
       Run_Script (Argument (2));
       return;
    end if;

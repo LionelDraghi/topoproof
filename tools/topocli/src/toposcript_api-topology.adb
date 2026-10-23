@@ -11,8 +11,8 @@ with TopoDiagnostics;
 with TopoScript_API.Conversions;
 with TopoScript_API.Session;
 
+with TopoProof.Geometry.Points;
 with TopoProof.Geometry.Segment_Sequences;
-with TopoProof.Numerics;
 with TopoProof.Topology.Edges;
 with TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;
@@ -26,20 +26,14 @@ package body TopoScript_API.Topology is
    procedure Add_Point_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      PX, PY : Long_Long_Integer;
+      P : TopoProof.Geometry.Points.Point_2D;
    begin
-      PX := Conversions.To_Long (Data (1));
-      PY := Conversions.To_Long (Data (2));
-      if not Conversions.Grid_In_Range (PX)
-        or else not Conversions.Grid_In_Range (PY)
-      then
+      if not Conversions.Read_Point_2D (Data, 1, P) then
          Session.Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
       Session.Current_Session.Chain.Append
-        (Chain_Point'
-           (X => TopoProof.Numerics.Grid_Coordinate (PX),
-            Y => TopoProof.Numerics.Grid_Coordinate (PY)));
+        (Chain_Point'(X => P.X, Y => P.Y));
    end Add_Point_Native;
 
    --  The number of distinct positions of the chain: a repeated

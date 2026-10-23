@@ -5,64 +5,97 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
+with Ada.Strings.Fixed;
+with Ada.Strings.Unbounded;
+use Ada.Strings.Unbounded;
 with Ada.Text_IO;
-use Ada.Text_IO;
 
 with TopoDiagnostics;
 with TopoScript_API.Conversions;
 with TopoScript_API.Session;
-with TopoScript_API.Topology;
 
-with TopoProof.Geometry.Points;
 with TopoProof.Numerics;
 with TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;
 
 package body TopoScript_API.Output is
 
+   --  The trimmed decimal image of one grid coordinate: the canonical
+   --  form of every coordinate in a result line.
+   function Img (C : TopoProof.Numerics.Grid_Coordinate) return String is
+     (Ada.Strings.Fixed.Trim (C'Image, Ada.Strings.Both));
+
+   function Image (P : TopoProof.Geometry.Points.Point_3D) return String is
+     ("point " & Img (P.X) & " " & Img (P.Y) & " " & Img (P.Z));
+
+   function Image (K : Loop_Result) return String is
+     (case K is
+         when Topology.Counter_Clockwise => "loop closed counter_clockwise",
+         when Topology.Clockwise         => "loop closed clockwise",
+         when Topology.Degenerate        => "loop closed degenerate");
+
+   function Image (K : Face_Result) return String is
+     (case K is
+         when Topology.Face_Counter_Clockwise => "face counter_clockwise",
+         when Topology.Face_Clockwise         => "face clockwise");
+
+   procedure Set_Output_Path (Path : String) is
+   begin
+      Session.Current_Session.Output_Path := To_Unbounded_String (Path);
+   end Set_Output_Path;
+
+   procedure Put_Line (S : String) is
+   begin
+      if Length (Session.Current_Session.Output_Path) = 0 then
+         Ada.Text_IO.Put_Line (S);
+
+      else
+         if not Ada.Text_IO.Is_Open (Session.Current_Session.Output_File)
+         then
+            Ada.Text_IO.Create
+              (Session.Current_Session.Output_File,
+               Ada.Text_IO.Out_File,
+               To_String (Session.Current_Session.Output_Path));
+         end if;
+         Ada.Text_IO.Put_Line (Session.Current_Session.Output_File, S);
+
+      end if;
+   end Put_Line;
+
+   procedure Close_Output is
+   begin
+      if Ada.Text_IO.Is_Open (Session.Current_Session.Output_File) then
+         Ada.Text_IO.Close (Session.Current_Session.Output_File);
+
+      end if;
+   end Close_Output;
+
    procedure Put_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
-      PX, PY, PZ : Long_Long_Integer;
+      P : TopoProof.Geometry.Points.Point_3D;
+
    begin
-      PX := Conversions.To_Long (Data (1));
-      PY := Conversions.To_Long (Data (2));
-      PZ := Conversions.To_Long (Data (3));
-      if not Conversions.Grid_In_Range (PX)
-        or else not Conversions.Grid_In_Range (PY)
-        or else not Conversions.Grid_In_Range (PZ)
-      then
+      if not Conversions.Read_Point_3D (Data, 1, P) then
          Session.Record_Failure ("error: coordinate outside the grid");
          return;
       end if;
 
-      declare
-         P : constant TopoProof.Geometry.Points.Point_3D :=
-           (X => TopoProof.Numerics.Grid_Coordinate (PX),
-            Y => TopoProof.Numerics.Grid_Coordinate (PY),
-            Z => TopoProof.Numerics.Grid_Coordinate (PZ));
-      begin
-         Put ("point ");
-         Conversions.Grid_IO.Put (P.X, Width => 0);
-         Put (" ");
-         Conversions.Grid_IO.Put (P.Y, Width => 0);
-         Put (" ");
-         Conversions.Grid_IO.Put (P.Z, Width => 0);
-         New_Line;
-      end;
+      Put_Line (Image (P));
    end Put_Native;
 
    procedure Put_Loop_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
+      K : constant Topology.Loop_Kind := Topology.To_Loop_Kind (Data (1));
+
    begin
-      case Topology.To_Loop_Kind (Data (1)) is
-         when Topology.Counter_Clockwise =>
-            Put_Line ("loop closed counter_clockwise");
-         when Topology.Clockwise =>
-            Put_Line ("loop closed clockwise");
-         when Topology.Degenerate =>
-            Put_Line ("loop closed degenerate");
+      case K is
+         when Topology.Counter_Clockwise
+            | Topology.Clockwise
+            | Topology.Degenerate
+         =>
+            Put_Line (Image (K));
          when Topology.Open_Chain =>
             Session.Record_Failure
               (TopoDiagnostics.Loop_Diagnostic
@@ -89,12 +122,14 @@ package body TopoScript_API.Output is
    procedure Put_Face_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
+      K : constant Topology.Face_Kind := Topology.To_Face_Kind (Data (1));
+
    begin
-      case Topology.To_Face_Kind (Data (1)) is
-         when Topology.Face_Counter_Clockwise =>
-            Put_Line ("face counter_clockwise");
-         when Topology.Face_Clockwise =>
-            Put_Line ("face clockwise");
+      case K is
+         when Topology.Face_Counter_Clockwise
+            | Topology.Face_Clockwise
+         =>
+            Put_Line (Image (K));
          when Topology.Face_Degenerate_Boundary =>
             Session.Record_Failure
               (TopoDiagnostics.Face_Diagnostic
