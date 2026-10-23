@@ -12,6 +12,8 @@
 --  (DD-004, decision 8).
 
 with HAC_Sys.Interfacing;
+with TopoProof.Geometry.Intersections;
+with TopoProof.Geometry.Orientations;
 with TopoProof.Geometry.Points;
 with TopoProof.Geometry.Vectors;
 with TopoScript_API.Geometry;
@@ -44,6 +46,21 @@ package TopoScript_API.Output is
    --  `equal false`.
    function Image (K : Geometry.Equal_Kind) return String;
 
+   --  The canonical image of an orientation result:
+   --  `orientation counter_clockwise`, `orientation clockwise` or
+   --  `orientation collinear`.
+   function Image
+     (K : TopoProof.Geometry.Orientations.Orientation_Kind) return String;
+
+   --  The canonical image of an intersection result: the kind line,
+   --  with the common position of a point intersection, or the two
+   --  boundaries of an overlap. The coordinates are the ones the kind
+   --  reports: PX, PY for a point intersection, PX, PY, QX, QY for an
+   --  overlap.
+   function Image
+     (K            : TopoProof.Geometry.Intersections.Intersection_Kind;
+      PX, PY, QX, QY : TopoProof.Numerics.Grid_Coordinate) return String;
+
    --  The run-owned output destination: the Put operations write
    --  through it, standard output by default.
 
@@ -71,6 +88,16 @@ package TopoScript_API.Output is
    --  Native side of Put_Equal: writes the canonical image of the
    --  equality result.
    procedure Put_Equal_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Orientation: writes the canonical image of
+   --  the orientation result.
+   procedure Put_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Intersection: writes the canonical image of
+   --  the intersection result, kind and reported positions.
+   procedure Put_Intersection_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Loop: writes `loop closed ...`, or records

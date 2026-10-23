@@ -38,7 +38,9 @@ operation, drawn in red.
   ```
 - When I successfully run `../bin/topocli run displacement.topo`
 - Then the output is `vector 5 -7 9`
-- And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`
+- And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`  
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
+  displacement vector, the actual result of the scenario, is drawn red.)
 
 ![Displacement diagram](images/displacement_1.svg)
 

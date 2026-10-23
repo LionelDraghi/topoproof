@@ -56,7 +56,7 @@
    - OK : Given the file `displacement.topo`  
    - OK : When I successfully run `../bin/topocli run displacement.topo`  
    - OK : Then the output is `vector 5 -7 9`  
-   - OK : And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`  
+   - OK : And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`    
    - [X] scenario   [compute the displacement between two points](../features/displacement.md) pass  
 
    ### Scenario: [the result of a script run goes to the output file](../features/displacement.md): 
@@ -72,133 +72,149 @@
    - OK : Given the file `equal_true.topo`  
    - OK : When I successfully run `../bin/topocli run equal_true.topo`  
    - OK : Then the output is `equal true`  
-   - OK : And the file `../docs/features/images/equality_1.svg` contains `#1a7f37`  
+   - OK : And the file `../docs/features/images/equality_1.svg` contains `#1a7f37`    
    - [X] scenario   [identical points are equal](../features/equality.md) pass  
 
    ### Scenario: [different points are not equal](../features/equality.md): 
    - OK : Given the file `equal_false.topo`  
    - OK : When I successfully run `../bin/topocli run equal_false.topo`  
    - OK : Then the output is `equal false`  
-   - OK : And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`  
+   - OK : And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`    
    - [X] scenario   [different points are not equal](../features/equality.md) pass  
 
    ### Scenario: [opposite points are not equal](../features/equality.md): 
    - OK : Given the file `equal_opposite.topo`  
    - OK : When I successfully run `../bin/topocli run equal_opposite.topo`  
    - OK : Then the output is `equal false`  
-   - OK : And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`  
+   - OK : And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`    
    - [X] scenario   [opposite points are not equal](../features/equality.md) pass  
 
 
 # Document: [orientation.md](../features/orientation.md)  
    ### Scenario: [a counter-clockwise path](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_1.svg`  
+   - OK : Given the file `ccw_path.topo`  
+   - OK : When I successfully run `../bin/topocli run ccw_path.topo`  
    - OK : Then the output is `orientation counter_clockwise`  
+   - OK : And the file `../docs/features/images/orientation_1.svg` contains `#cf222e`    
    - [X] scenario   [a counter-clockwise path](../features/orientation.md) pass  
 
    ### Scenario: [a clockwise path](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, -1) --draw ../docs/features/images/orientation_3.svg`  
+   - OK : Given the file `cw_path.topo`  
+   - OK : When I successfully run `../bin/topocli run cw_path.topo`  
    - OK : Then the output is `orientation clockwise`  
    - [X] scenario   [a clockwise path](../features/orientation.md) pass  
 
    ### Scenario: [three aligned points are collinear](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(2, 2) C=(4, 4) --draw ../docs/features/images/orientation_4.svg`  
+   - OK : Given the file `collinear_path.topo`  
+   - OK : When I successfully run `../bin/topocli run collinear_path.topo`  
    - OK : Then the output is `orientation collinear`  
    - [X] scenario   [three aligned points are collinear](../features/orientation.md) pass  
 
    ### Scenario: [two coincident points make a degenerate collinear path](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(5, 7) B=(5, 7) C=(9, -3) --draw ../docs/features/images/orientation_5.svg`  
+   - OK : Given the file `degenerate_path.topo`  
+   - OK : When I successfully run `../bin/topocli run degenerate_path.topo`  
    - OK : Then the output is `orientation collinear`  
    - [X] scenario   [two coincident points make a degenerate collinear path](../features/orientation.md) pass  
 
    ### Scenario: [the extreme corners of the grid do not overflow](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(1073741823, 0) B=(0, 1073741823) C=(-1073741823, -1073741823) --draw ../docs/features/images/orientation_6.svg --draw-short-labels`  
+   - OK : Given the file `corners_path.topo`  
+   - OK : When I successfully run `../bin/topocli run corners_path.topo`  
    - OK : Then the output is `orientation counter_clockwise`  
    - [X] scenario   [the extreme corners of the grid do not overflow](../features/orientation.md) pass  
 
    ### Scenario: [a cyclic permutation keeps the orientation](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_1.svg`  
-   - OK : Then the output is `orientation counter_clockwise`  
-   - OK : When I successfully run `../bin/topocli orientation A=(1, 0) B=(1, 1) C=(0, 0)`  
-   - OK : Then the output is `orientation counter_clockwise`  
+   - OK : Given the file `cyclic_path.topo`  
+   - OK : When I successfully run `../bin/topocli run cyclic_path.topo`  
+   - OK : Then the output is  
    - [X] scenario   [a cyclic permutation keeps the orientation](../features/orientation.md) pass  
 
    ### Scenario: [exchanging two points mirrors the orientation](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 1) C=(1, 0) --draw ../docs/features/images/orientation_2.svg`  
+   - OK : Given the file `exchanged_path.topo`  
+   - OK : When I successfully run `../bin/topocli run exchanged_path.topo`  
    - OK : Then the output is `orientation clockwise`  
+   - OK : And the file `../docs/features/images/orientation_2.svg` contains `#cf222e`    
    - [X] scenario   [exchanging two points mirrors the orientation](../features/orientation.md) pass  
 
    ### Scenario: [the orientation is invariant under translation](../features/orientation.md): 
-   - OK : When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_7.svg --draw-with E=(3,2)F=(4,2)G=(4,3)`  
-   - OK : Then the output is `orientation counter_clockwise`  
-   - OK : When I successfully run `../bin/topocli orientation A=(3, 2) B=(4, 2) C=(4, 3)`  
-   - OK : Then the output is `orientation counter_clockwise`  
+   - OK : Given the file `translated_path.topo`  
+   - OK : When I successfully run `../bin/topocli run translated_path.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/orientation_7.svg` contains `#cf222e`    
    - [X] scenario   [the orientation is invariant under translation](../features/orientation.md) pass  
 
 
 # Document: [intersection.md](../features/intersection.md)  
    ### Scenario: [a proper crossing on a grid position](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`  
+   - OK : Given the file `crossing_grid.topo`  
+   - OK : When I successfully run `../bin/topocli run crossing_grid.topo`  
    - OK : Then the output is `intersection point_intersection 1 1`  
+   - OK : And the file `../docs/features/images/intersection_1.svg` contains `#1a7f37`    
    - [X] scenario   [a proper crossing on a grid position](../features/intersection.md) pass  
 
    ### Scenario: [a proper crossing off the grid](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 1) C=(0, 1) D=(1, 0) --draw ../docs/features/images/intersection_2.svg`  
+   - OK : Given the file `crossing_off_grid.topo`  
+   - OK : When I successfully run `../bin/topocli run crossing_off_grid.topo`  
    - OK : Then the output is `intersection off_grid_crossing`  
    - [X] scenario   [a proper crossing off the grid](../features/intersection.md) pass  
 
    ### Scenario: [collinear segments overlap](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`  
+   - OK : Given the file `overlap.topo`  
+   - OK : When I successfully run `../bin/topocli run overlap.topo`  
    - OK : Then the output is `intersection overlap 2 0 4 0`  
    - [X] scenario   [collinear segments overlap](../features/intersection.md) pass  
 
    ### Scenario: [collinear segments touch at one point](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 0) C=(2, 0) D=(4, 0) --draw ../docs/features/images/intersection_4.svg`  
+   - OK : Given the file `touch.topo`  
+   - OK : When I successfully run `../bin/topocli run touch.topo`  
    - OK : Then the output is `intersection point_intersection 2 0`  
    - [X] scenario   [collinear segments touch at one point](../features/intersection.md) pass  
 
    ### Scenario: [collinear segments do not meet](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 0) C=(2, 0) D=(3, 0) --draw ../docs/features/images/intersection_5.svg`  
+   - OK : Given the file `gap.topo`  
+   - OK : When I successfully run `../bin/topocli run gap.topo`  
    - OK : Then the output is `intersection no_intersection`  
    - [X] scenario   [collinear segments do not meet](../features/intersection.md) pass  
 
    ### Scenario: [an endpoint on the other segment](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 0) C=(1, 0) D=(1, 1) --draw ../docs/features/images/intersection_6.svg`  
+   - OK : Given the file `junction.topo`  
+   - OK : When I successfully run `../bin/topocli run junction.topo`  
    - OK : Then the output is `intersection point_intersection 1 0`  
    - [X] scenario   [an endpoint on the other segment](../features/intersection.md) pass  
 
    ### Scenario: [a degenerate point segment on another segment](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(2, 1) A C=(0, 0) D=(4, 2) --draw ../docs/features/images/intersection_7.svg`  
+   - OK : Given the file `point_on_segment.topo`  
+   - OK : When I successfully run `../bin/topocli run point_on_segment.topo`  
    - OK : Then the output is `intersection point_intersection 2 1`  
    - [X] scenario   [a degenerate point segment on another segment](../features/intersection.md) pass  
 
    ### Scenario: [two identical degenerate point segments](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(1, 1) A B=(1, 1) B`  
+   - OK : Given the file `two_points.topo`  
+   - OK : When I successfully run `../bin/topocli run two_points.topo`  
    - OK : Then the output is `intersection point_intersection 1 1`  
    - [X] scenario   [two identical degenerate point segments](../features/intersection.md) pass  
 
    ### Scenario: [disjoint segments](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(1, 0) C=(0, 2) D=(1, 2)`  
+   - OK : Given the file `disjoint.topo`  
+   - OK : When I successfully run `../bin/topocli run disjoint.topo`  
    - OK : Then the output is `intersection no_intersection`  
    - [X] scenario   [disjoint segments](../features/intersection.md) pass  
 
    ### Scenario: [the grid corners do not overflow](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, -1073741823) B=(0, 1073741823) C=(-1073741823, 0) D=(1073741823, 0) --draw ../docs/features/images/intersection_8.svg --draw-short-labels`  
+   - OK : Given the file `corner_diagonals.topo`  
+   - OK : When I successfully run `../bin/topocli run corner_diagonals.topo`  
    - OK : Then the output is `intersection point_intersection 0 0`  
    - [X] scenario   [the grid corners do not overflow](../features/intersection.md) pass  
 
    ### Scenario: [the order of the arguments does not matter](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) --draw ../docs/features/images/intersection_1.svg`  
-   - OK : Then the output is `intersection point_intersection 1 1`  
-   - OK : When I successfully run `../bin/topocli intersect A=(2, 0) B=(0, 2) C=(0, 0) D=(2, 2)`  
-   - OK : Then the output is `intersection point_intersection 1 1`  
+   - OK : Given the file `symmetric_crossing.topo`  
+   - OK : When I successfully run `../bin/topocli run symmetric_crossing.topo`  
+   - OK : Then the output is  
    - [X] scenario   [the order of the arguments does not matter](../features/intersection.md) pass  
 
    ### Scenario: [the overlap is returned identically in both orders](../features/intersection.md): 
-   - OK : When I successfully run `../bin/topocli intersect A=(0, 0) B=(4, 0) C=(2, 0) D=(6, 0) --draw ../docs/features/images/intersection_3.svg`  
-   - OK : Then the output is `intersection overlap 2 0 4 0`  
-   - OK : When I successfully run `../bin/topocli intersect A=(2, 0) B=(6, 0) C=(0, 0) D=(4, 0)`  
-   - OK : Then the output is `intersection overlap 2 0 4 0`  
+   - OK : Given the file `symmetric_overlap.topo`  
+   - OK : When I successfully run `../bin/topocli run symmetric_overlap.topo`  
+   - OK : Then the output is  
    - [X] scenario   [the overlap is returned identically in both orders](../features/intersection.md) pass  
 
 
@@ -462,8 +478,8 @@
    ### Scenario: [two consecutive image sessions produce two images](../features/toposcript.md): 
    - OK : Given the file `two_images.topo`  
    - OK : When I successfully run `../bin/topocli run two_images.topo`  
-   - OK : Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`  
-   - OK : And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`  
+   - OK : Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`    
+   - OK : And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`    
    - [X] scenario   [two consecutive image sessions produce two images](../features/toposcript.md) pass  
 
    ### Scenario: [End_Image without Begin_Image records the rejection](../features/toposcript.md): 

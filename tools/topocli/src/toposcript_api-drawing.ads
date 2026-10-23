@@ -53,6 +53,13 @@ package TopoScript_API.Drawing is
    procedure Draw_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Draw_Segment_2D: the plain 2D segment from P to
+   --  Q, without label: the diagrams of crossing segments, where the
+   --  displacement labels of Draw_Edge would overlap at the common
+   --  midpoint.
+   procedure Draw_Segment_2D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of End_Image: renders the scene of the open image
    --  through the topodraw renderer, and closes the image.
    procedure End_Image_Native

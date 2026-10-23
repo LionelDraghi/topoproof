@@ -167,8 +167,11 @@ design decision.
   (development plan, TopoScript as the single front-end, Increment 3).
 - **Acceptance:** the scripting API exposes the displacement and the
   equality operations with their canonical `Put` representations, and
-  the `displacement.md` and `equality.md` pages run scripts only,
-  with their images regenerated in the same change.
+  the `translation.md`, `displacement.md` and `equality.md` pages run
+  scripts only, with their images regenerated in the same change. The
+  migration also fixes the label collision of `translation_2.svg`,
+  where the point of the rejection scenario sits exactly on the tip of
+  the X axis, under its letter.
 
 ### TDL-IMPROVE-012: bring the predicates to scripting parity
 

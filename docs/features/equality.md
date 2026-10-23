@@ -42,7 +42,10 @@ positions.
   ```
 - When I successfully run `../bin/topocli run equal_true.topo`
 - Then the output is `equal true`
-- And the file `../docs/features/images/equality_1.svg` contains `#1a7f37`
+- And the file `../docs/features/images/equality_1.svg` contains `#1a7f37`  
+  (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
+  the point `B` is drawn; it stacks on `A`, since both positions
+  coincide.)
 
 ## Scenario: different points are not equal
 
@@ -70,7 +73,9 @@ vertical axis.
   ```
 - When I successfully run `../bin/topocli run equal_false.topo`
 - Then the output is `equal false`
-- And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`
+- And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`  
+  (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
+  the point `B` is drawn, at its own distinct position.)
 
 ## Scenario: opposite points are not equal
 
@@ -98,4 +103,6 @@ origin.
   ```
 - When I successfully run `../bin/topocli run equal_opposite.topo`
 - Then the output is `equal false`
-- And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`
+- And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`  
+  (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
+  the point `B` is drawn, symmetric to `A` about the origin.)

@@ -20,9 +20,15 @@ package body TopoScript_API is
       Register (BD, Geometry.Translate_Native'Access, "Translate");
       Register (BD, Geometry.Displacement_Native'Access, "Displacement");
       Register (BD, Geometry.Equal_Native'Access, "Equal");
+      Register (BD, Geometry.Orientation_Native'Access, "Orientation");
+      Register (BD, Geometry.Intersection_Native'Access, "Intersection");
       Register (BD, Output.Put_Native'Access, "Put");
       Register (BD, Output.Put_Vector_Native'Access, "Put_Vector");
       Register (BD, Output.Put_Equal_Native'Access, "Put_Equal");
+      Register (BD, Output.Put_Orientation_Native'Access,
+                "Put_Orientation");
+      Register (BD, Output.Put_Intersection_Native'Access,
+                "Put_Intersection");
       Register (BD, Drawing.Begin_Image_Native'Access, "Begin_Image");
       Register (BD, Drawing.Draw_Axes_Native'Access, "Draw_Axes");
       Register (BD, Drawing.Draw_Point_Native'Access, "Draw_Point");
@@ -30,6 +36,8 @@ package body TopoScript_API is
       Register (BD, Drawing.Draw_Point_2D_Native'Access,
                 "Draw_Point_2D");
       Register (BD, Drawing.Draw_Edge_Native'Access, "Draw_Edge");
+      Register (BD, Drawing.Draw_Segment_2D_Native'Access,
+                "Draw_Segment_2D");
       Register (BD, Drawing.End_Image_Native'Access, "End_Image");
       Register (BD, Topology.Add_Point_Native'Access, "Add_Point");
       Register (BD, Topology.Make_Loop_Native'Access, "Make_Loop");

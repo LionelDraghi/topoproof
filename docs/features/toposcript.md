@@ -135,6 +135,9 @@ Types:
 | `Point_3D`, `Vector_3D`, `Point_2D` | grid values, built from integer aggregates |
 | `Color_Kind` | `Blue`, `Green`, `Red` |
 | `Equal_Kind` | `Equal_True`, `Equal_False` |
+| `Orientation_Kind` | `Orientation_Collinear`, `Orientation_Counter_Clockwise`, `Orientation_Clockwise` (prefixed: HAC does not overload enumeration literals) |
+| `Intersection_Kind` | `No_Intersection`, `Point_Intersection`, `Off_Grid_Crossing`, `Overlap` |
+| `Intersection_Result` | the intersection kind, with the reported positions |
 | `Loop_Kind` | `Counter_Clockwise`, `Clockwise`, `Degenerate`, or the kernel rejection kinds |
 | `Face_Kind` | `Face_Counter_Clockwise`, `Face_Clockwise`, `Face_Degenerate_Boundary`, `Face_Invalid_Boundary` |
 
@@ -145,9 +148,13 @@ Operations:
 | `Translate (P, V, Result)` | runs the proved `Translate` on the point `P` and the vector `V` |
 | `Displacement (A, B, Result)` | computes the exact vector from `A` to `B` |
 | `Equal (A, B, Result)` | compares two points exactly, through `Equal_True` / `Equal_False` |
+| `Orientation (A, B, C, Result)` | classifies the 2D path `A -> B -> C` exactly |
+| `Intersection (A, B, C, D, Result)` | classifies the exact intersection of the segments `A -> B` and `C -> D`, with the reported positions |
 | `Put (P)` | writes `point X Y Z` on standard output |
 | `Put_Vector (D)` | writes `vector DX DY DZ` on standard output |
 | `Put_Equal (K)` | writes `equal true` or `equal false` on standard output |
+| `Put_Orientation (K)` | writes `orientation ...` on standard output |
+| `Put_Intersection (R)` | writes the intersection line of `R` on standard output |
 | `Add_Point (P)` | appends a 2D point to the chain |
 | `Make_Loop (K)` | classifies the accumulated chain as a loop, the kernel classification |
 | `Make_Face (K)` | classifies the same chain as a face boundary |
@@ -159,6 +166,7 @@ Operations:
 | `Draw_Vector (Origin, Value, Color)` | draws the labeled arrow of the vector |
 | `Draw_Point_2D (P, Color)` | colors a 2D point of the image |
 | `Draw_Edge (P, Q, Color)` | draws the labeled segment arrow from `P` to `Q` |
+| `Draw_Segment_2D (P, Q, Color)` | draws the plain 2D segment from `P` to `Q`, without label |
 | `End_Image` | renders the image through the topodraw renderer |
 
 The rejected operations record the same diagnostics as the client
@@ -278,8 +286,12 @@ compilation with a confusing message.
   End_Image;
   ```
 - When I successfully run `../bin/topocli run two_images.topo`
-- Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`
-- And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`
+- Then the file `../docs/features/images/toposcript_2.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the point `A` of the first image is drawn.)
+- And the file `../docs/features/images/toposcript_3.svg` contains `#1a7f37`  
+  (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
+  the point `B` of the second image is drawn.)
 
 ## Scenario: End_Image without Begin_Image records the rejection
 

@@ -6,10 +6,14 @@
 -- -----------------------------------------------------------------------------
 
 --  The geometry domain of the scripting API (development plan,
---  TopoScript consolidation, Increment 2): the native side of the
---  proved geometric operations.
+--  TopoScript consolidation, Increment 2, and the single front-end
+--  Increments 3 and 4): the native side of the proved geometric
+--  operations.
 
 with HAC_Sys.Interfacing;
+
+with TopoProof.Geometry.Intersections;
+with TopoProof.Geometry.Orientations;
 
 package TopoScript_API.Geometry is
 
@@ -22,6 +26,23 @@ package TopoScript_API.Geometry is
 
    function To_Equal_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
      (Equal_Kind);
+
+   --  The HAC representations of the kernel classification kinds: the
+   --  wrapper injects the same types in the script world, with the
+   --  same positions.
+   function Orientation_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (TopoProof.Geometry.Orientations.Orientation_Kind);
+
+   function To_Orientation_Kind is
+     new HAC_Sys.Interfacing.To_Native_Any_Enum
+       (TopoProof.Geometry.Orientations.Orientation_Kind);
+
+   function Intersection_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (TopoProof.Geometry.Intersections.Intersection_Kind);
+
+   function To_Intersection_Kind is
+     new HAC_Sys.Interfacing.To_Native_Any_Enum
+       (TopoProof.Geometry.Intersections.Intersection_Kind);
 
    --  Native side of Translate: the script passes the point and the
    --  vector as records; the callback runs the proved Translate and
@@ -39,6 +60,19 @@ package TopoScript_API.Geometry is
    --  equality of the kernel and writes the result into the out
    --  parameter.
    procedure Equal_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Orientation: the callback runs the exact
+   --  orientation classification of the kernel on the 2D path
+   --  A -> B -> C, and writes the kind into the out parameter.
+   procedure Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Intersection: the callback runs the exact
+   --  intersection classification of the kernel on the segments
+   --  A -> B and C -> D, and writes the kind with the common
+   --  position, or the two overlap boundaries, into the out record.
+   procedure Intersection_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
 end TopoScript_API.Geometry;

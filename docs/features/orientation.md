@@ -1,13 +1,11 @@
 # Orientation <!-- omit from toc -->
 
-`orientation` classifies exactly the path formed by three 2D points:
-`topocli orientation A=(AX, AY) B=(BX, BY) C=(CX, CY)`.
-The result is `orientation counter_clockwise`, `orientation clockwise` or
-`orientation collinear`, according to the exact sign of the determinant:
-
-```text
-(BX - AX) * (CY - AY) - (BY - AY) * (CX - AX)
-```
+`Orientation` classifies exactly the path formed by three 2D points,
+the proved orientation of the kernel. The result is one of
+`Orientation_Counter_Clockwise`, `Orientation_Clockwise` or
+`Orientation_Collinear`, and the canonical result line is
+`orientation counter_clockwise`, `orientation clockwise` or
+`orientation collinear`, written by the explicit `Put_Orientation`.
 
 There is no tolerance, no angle computation and no floating-point value: the
 three products and their difference are computed exactly in integer types
@@ -38,10 +36,32 @@ mirrors the orientation.
 
 ## Scenario: a counter-clockwise path
 
-![Counter-clockwise turn](images/orientation_1.svg)
+- Given the file `ccw_path.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (1, 1);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_1.svg";
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_1.svg`
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Green);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run ccw_path.topo`
 - Then the output is `orientation counter_clockwise`
+- And the file `../docs/features/images/orientation_1.svg` contains `#cf222e`  
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the point `C`, the target of the turn, is drawn red.)
 
 ## Scenario: a clockwise path
 
@@ -49,7 +69,28 @@ The path turns right at `(1, 0)`.
 
 ![Clockwise turn](images/orientation_3.svg)
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, -1) --draw ../docs/features/images/orientation_3.svg`
+- Given the file `cw_path.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (1, -1);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_3.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Green);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run cw_path.topo`
 - Then the output is `orientation clockwise`
 
 ## Scenario: three aligned points are collinear
@@ -58,7 +99,28 @@ The path stays on the diagonal line: no turn at all.
 
 ![Collinear path](images/orientation_4.svg)
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(2, 2) C=(4, 4) --draw ../docs/features/images/orientation_4.svg`
+- Given the file `collinear_path.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (2, 2);
+  C    : constant Point_2D := (4, 4);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_4.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Green);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run collinear_path.topo`
 - Then the output is `orientation collinear`
 
 ## Scenario: two coincident points make a degenerate collinear path
@@ -68,7 +130,26 @@ reaching `C`.
 
 ![Degenerate path with coincident points](images/orientation_5.svg)
 
-- When I successfully run `../bin/topocli orientation A=(5, 7) B=(5, 7) C=(9, -3) --draw ../docs/features/images/orientation_5.svg`
+- Given the file `degenerate_path.topo`
+  ```ada
+  A    : constant Point_2D := (5, 7);
+  B    : constant Point_2D := (5, 7);
+  C    : constant Point_2D := (9, -3);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_5.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run degenerate_path.topo`
 - Then the output is `orientation collinear`
 
 ## Scenario: the extreme corners of the grid do not overflow
@@ -78,7 +159,28 @@ coordinates is computed exactly in the `Determinant` domain.
 
 ![Path on the grid corners](images/orientation_6.svg)
 
-- When I successfully run `../bin/topocli orientation A=(1073741823, 0) B=(0, 1073741823) C=(-1073741823, -1073741823) --draw ../docs/features/images/orientation_6.svg --draw-short-labels`
+- Given the file `corners_path.topo`
+  ```ada
+  A    : constant Point_2D := (1073741823, 0);
+  B    : constant Point_2D := (0, 1073741823);
+  C    : constant Point_2D := (-1073741823, -1073741823);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_6.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Green);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run corners_path.topo`
 - Then the output is `orientation counter_clockwise`
 
 ## Proved property
@@ -97,14 +199,29 @@ the determinant of extreme coordinates is bounded by 8E18, within the proved
 ## Scenario: a cyclic permutation keeps the orientation
 
 The same triangle as the first scenario, visited from a different starting
-point.
+point: one script classifies both paths, and both results are written.
 
 ![Counter-clockwise turn](images/orientation_1.svg)
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_1.svg`
-- Then the output is `orientation counter_clockwise`
-- When I successfully run `../bin/topocli orientation A=(1, 0) B=(1, 1) C=(0, 0)`
-- Then the output is `orientation counter_clockwise`
+- Given the file `cyclic_path.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (1, 0);
+  C : constant Point_2D := (1, 1);
+  K : Orientation_Kind;
+
+  Orientation (A, B, C, K);
+  Put_Orientation (K);
+
+  Orientation (B, C, A, K);
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run cyclic_path.topo`
+- Then the output is
+  ```text
+  orientation counter_clockwise
+  orientation counter_clockwise
+  ```
 
 ## Scenario: exchanging two points mirrors the orientation
 
@@ -112,19 +229,75 @@ The exchanged path of the first scenario.
 
 ![Clockwise turn](images/orientation_2.svg)
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 1) C=(1, 0) --draw ../docs/features/images/orientation_2.svg`
+- Given the file `exchanged_path.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 1);
+  C    : constant Point_2D := (1, 0);
+  K    : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_2.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Green);
+  Draw_Point_2D (C, Red);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Orientation (A, B, C, K);
+
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run exchanged_path.topo`
 - Then the output is `orientation clockwise`
+- And the file `../docs/features/images/orientation_2.svg` contains `#cf222e`  
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the point `C`, the target of the mirrored turn, is drawn red.)
 
 ## Scenario: the orientation is invariant under translation
 
 The same path as the first scenario, translated by `(3, 2)`: the turn
-direction is unchanged. The diagram shows both paths: the translated path
-is passed to `--draw-with`, so the two commands of the scenario share one
-image without overlapping.
+direction is unchanged. The script draws both paths in one image, the
+translated one in red.
 
 ![A path and its translation](images/orientation_7.svg)
 
-- When I successfully run `../bin/topocli orientation A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/orientation_7.svg --draw-with E=(3,2)F=(4,2)G=(4,3)`
-- Then the output is `orientation counter_clockwise`
-- When I successfully run `../bin/topocli orientation A=(3, 2) B=(4, 2) C=(4, 3)`
-- Then the output is `orientation counter_clockwise`
+- Given the file `translated_path.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (1, 0);
+  C : constant Point_2D := (1, 1);
+  E : constant Point_2D := (3, 2);
+  F : constant Point_2D := (4, 2);
+  G : constant Point_2D := (4, 3);
+  K : Orientation_Kind;
+  Name : VString := +"../docs/features/images/orientation_7.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (E, F, Red);
+  Draw_Edge (F, G, Red);
+  End_Image;
+
+  Orientation (A, B, C, K);
+  Put_Orientation (K);
+
+  Orientation (E, F, G, K);
+  Put_Orientation (K);
+  ```
+- When I successfully run `../bin/topocli run translated_path.topo`
+- Then the output is
+  ```text
+  orientation counter_clockwise
+  orientation counter_clockwise
+  ```
+- And the file `../docs/features/images/orientation_7.svg` contains `#cf222e`  
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the translated path, drawn in red, is in the image.)

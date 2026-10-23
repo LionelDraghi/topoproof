@@ -489,7 +489,7 @@ surface.
 2. wrapper buffer ownership and the session edge-case scenarios
    (consolidation increments 4 and 5);
 3. geometry wave: `displacement` and `equal` parity, then the migration
-   of `displacement.md` and `equality.md`;
+   of `translation.md`, `displacement.md` and `equality.md`;
 4. orientation and intersection wave: predicate parity, then the
    migration of `orientation.md` and `intersection.md`;
 5. contour wave: the six contour predicates, then the migration of

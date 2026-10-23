@@ -245,6 +245,39 @@ package body TopoScript_API.Drawing is
       end;
    end Draw_Edge_Native;
 
+   procedure Draw_Segment_2D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..2, Q at 3..4, Color at 5.
+      P : TopoProof.Geometry.Points.Point_2D;
+      Q : TopoProof.Geometry.Points.Point_2D;
+
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure ("error: no open image");
+         return;
+      end if;
+      if not Conversions.Read_Point_2D (Data, 1, P)
+        or else not Conversions.Read_Point_2D (Data, 3, Q)
+      then
+         Session.Record_Failure ("error: coordinate outside the grid");
+         return;
+      end if;
+      if P.X = Q.X and then P.Y = Q.Y then
+         return;
+      end if;
+
+      Session.Current_Session.The_Scene.Vectors.Append
+        (Vector_Rec'
+           (From_Name =>
+              Anchor_Name (Integer (P.X), Integer (P.Y), 0),
+            To_Name   =>
+              Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
+            Label     => Null_Unbounded_String,
+            Color     =>
+              To_Unbounded_String (Hex_Of (To_Color (Data (5))))));
+   end Draw_Segment_2D_Native;
+
    procedure End_Image_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is

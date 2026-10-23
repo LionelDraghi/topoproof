@@ -1,13 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
 <rect width="640" height="400" fill="#ffffff"/>
-<line x1="320.0" y1="221.7" x2="395.2" y2="265.1" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
-<line x1="395.2" y1="265.1" x2="357.6" y2="286.9" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
-<circle cx="395.2" cy="265.1" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
-<circle cx="357.6" cy="286.9" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
-<line x1="320.0" y1="221.7" x2="395.2" y2="265.1" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
-<line x1="395.2" y1="265.1" x2="357.6" y2="286.9" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
-<circle cx="395.2" cy="265.1" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
-<circle cx="357.6" cy="286.9" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
 <circle cx="320.0" cy="221.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
 <circle cx="320.0" cy="221.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
 <line x1="320.0" y1="221.7" x2="470.4" y2="308.6" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
@@ -37,17 +29,13 @@
 <line x1="315.7" y1="132.4" x2="324.3" y2="137.4" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="315.7" y1="88.9" x2="324.3" y2="93.9" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="315.7" y1="45.5" x2="324.3" y2="50.5" stroke="#8b949e" stroke-width="1.0"/>
-<circle cx="357.6" cy="286.9" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="367.6" y="276.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (2, 1, 0)</text>
-<circle cx="357.6" cy="286.9" r="9.0" fill="none" stroke="#1f6feb" stroke-width="1.5" stroke-dasharray="3 2"/>
-<text x="367.6" y="306.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (2, 1, 0)</text>
 <circle cx="320.0" cy="221.7" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="330.0" y="211.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (0, 0, 0)</text>
+<text x="330.0" y="211.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (0, 0, 0)</text>
 <circle cx="395.2" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="405.2" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (4, 2, 0)</text>
-<circle cx="357.6" cy="286.9" r="13.0" fill="none" stroke="#1f6feb" stroke-width="1.5" stroke-dasharray="3 2"/>
-<text x="367.6" y="336.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">P (2, 1, 0)</text>
-<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
-<line x1="320.0" y1="221.7" x2="395.2" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow)"/>
+<text x="405.2" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (4, 2, 0)</text>
+<circle cx="357.6" cy="286.9" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="367.6" y="276.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">A3 (2, 1, 0)</text>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
+<line x1="320.0" y1="221.7" x2="395.2" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow1)"/>
 <text x="357.6" y="278.9" fill="#1a7f37" font-family="sans-serif" font-size="13">(4, 2)</text>
 </svg>

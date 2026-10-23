@@ -54,6 +54,32 @@ package body TopoScript_API.Output is
          when Geometry.Equal_True  => "equal true",
          when Geometry.Equal_False => "equal false");
 
+   function Image
+     (K : TopoProof.Geometry.Orientations.Orientation_Kind) return String
+   is
+     (case K is
+         when TopoProof.Geometry.Orientations.Collinear =>
+            "orientation collinear",
+         when TopoProof.Geometry.Orientations.Counter_Clockwise =>
+            "orientation counter_clockwise",
+         when TopoProof.Geometry.Orientations.Clockwise =>
+            "orientation clockwise");
+
+   function Image
+     (K            : TopoProof.Geometry.Intersections.Intersection_Kind;
+      PX, PY, QX, QY : TopoProof.Numerics.Grid_Coordinate) return String
+   is
+     (case K is
+         when TopoProof.Geometry.Intersections.No_Intersection =>
+            "intersection no_intersection",
+         when TopoProof.Geometry.Intersections.Point_Intersection =>
+            "intersection point_intersection " & Img (PX) & " " & Img (PY),
+         when TopoProof.Geometry.Intersections.Off_Grid_Crossing =>
+            "intersection off_grid_crossing",
+         when TopoProof.Geometry.Intersections.Overlap =>
+            "intersection overlap " & Img (PX) & " " & Img (PY)
+            & " " & Img (QX) & " " & Img (QY));
+
    procedure Set_Output_Path (Path : String) is
    begin
       Session.Current_Session.Output_Path := To_Unbounded_String (Path);
@@ -123,6 +149,67 @@ package body TopoScript_API.Output is
    begin
       Put_Line (Image (K));
    end Put_Equal_Native;
+
+   procedure Put_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant TopoProof.Geometry.Orientations.Orientation_Kind :=
+        Geometry.To_Orientation_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Orientation_Native;
+
+   procedure Put_Intersection_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: R at 1..5: the kind, then four coordinates.
+      K  : constant TopoProof.Geometry.Intersections.Intersection_Kind :=
+        Geometry.To_Intersection_Kind (Data (1));
+      PX : constant Long_Long_Integer := Conversions.To_Long (Data (2));
+      PY : constant Long_Long_Integer := Conversions.To_Long (Data (3));
+      QX : constant Long_Long_Integer := Conversions.To_Long (Data (4));
+      QY : constant Long_Long_Integer := Conversions.To_Long (Data (5));
+
+   begin
+      case K is
+         when TopoProof.Geometry.Intersections.No_Intersection
+            | TopoProof.Geometry.Intersections.Off_Grid_Crossing
+         =>
+            Put_Line (Image (K, 0, 0, 0, 0));
+         when TopoProof.Geometry.Intersections.Point_Intersection =>
+            if not Conversions.Grid_In_Range (PX)
+              or else not Conversions.Grid_In_Range (PY)
+            then
+               Session.Record_Failure
+                 ("error: coordinate outside the grid");
+               return;
+            end if;
+            Put_Line
+              (Image
+                 (K,
+                  TopoProof.Numerics.Grid_Coordinate (PX),
+                  TopoProof.Numerics.Grid_Coordinate (PY),
+                  0, 0));
+         when TopoProof.Geometry.Intersections.Overlap =>
+            if not Conversions.Grid_In_Range (PX)
+              or else not Conversions.Grid_In_Range (PY)
+              or else not Conversions.Grid_In_Range (QX)
+              or else not Conversions.Grid_In_Range (QY)
+            then
+               Session.Record_Failure
+                 ("error: coordinate outside the grid");
+               return;
+            end if;
+            Put_Line
+              (Image
+                 (K,
+                  TopoProof.Numerics.Grid_Coordinate (PX),
+                  TopoProof.Numerics.Grid_Coordinate (PY),
+                  TopoProof.Numerics.Grid_Coordinate (QX),
+                  TopoProof.Numerics.Grid_Coordinate (QY)));
+      end case;
+   end Put_Intersection_Native;
 
    procedure Put_Loop_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

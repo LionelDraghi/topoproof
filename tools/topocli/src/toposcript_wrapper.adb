@@ -241,6 +241,38 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Equal (K : in Equal_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Orientation_Kind is");
+      Append_Line ("      (Orientation_Collinear, " &
+                   "Orientation_Counter_Clockwise, Orientation_Clockwise);");
+      Append_Line ("");
+      Append_Line ("   procedure Orientation");
+      Append_Line
+        ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
+         "Result : out Orientation_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Orientation (K : in Orientation_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   type Intersection_Kind is");
+      Append_Line ("      (No_Intersection, Point_Intersection,");
+      Append_Line ("       Off_Grid_Crossing, Overlap);");
+      Append_Line ("");
+      Append_Line ("   type Intersection_Result is record");
+      Append_Line ("      K : Intersection_Kind;");
+      Append_Line ("      PX, PY, QX, QY : Integer;");
+      Append_Line ("   end record;");
+      Append_Line ("");
+      Append_Line ("   procedure Intersection");
+      Append_Line
+        ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
+         "D : in Point_2D; Result : out Intersection_Result)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Intersection " &
+                   "(R : in Intersection_Result)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   type Color_Kind is (Blue, Green, Red);");
       Append_Line ("");
       Append_Line ("   procedure Begin_Image (Name : in VString)");
@@ -265,6 +297,11 @@ package body TopoScript_Wrapper is
       Append_Line ("");
       Append_Line
         ("   procedure Draw_Edge (P, Q : in Point_2D; " &
+         "Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
+        ("   procedure Draw_Segment_2D (P, Q : in Point_2D; " &
          "Color : in Color_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");

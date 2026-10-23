@@ -12,9 +12,6 @@
 <line x1="407.8" y1="301.3" x2="320.0" y2="352.0" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
 <circle cx="407.8" cy="301.3" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
 <circle cx="320.0" cy="352.0" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
-<line x1="320.0" y1="250.7" x2="407.8" y2="301.3" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
-<circle cx="407.8" cy="301.3" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
-<circle cx="407.8" cy="301.3" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
 <line x1="320.0" y1="250.7" x2="407.8" y2="301.3" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
 <text x="413.8" y="315.3" fill="#8b949e" font-family="sans-serif" font-size="13">X</text>
 <line x1="320.0" y1="250.7" x2="232.2" y2="301.3" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
@@ -29,18 +26,16 @@
 <line x1="315.7" y1="146.8" x2="324.3" y2="151.8" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="315.7" y1="45.5" x2="324.3" y2="50.5" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="320.0" cy="250.7" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="330.0" y="240.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (0, 0, 0)</text>
+<text x="330.0" y="240.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (0, 0, 0)</text>
 <circle cx="495.5" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="505.5" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (2, 0, 0)</text>
+<text x="505.5" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (2, 0, 0)</text>
 <circle cx="407.8" cy="301.3" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="417.8" y="291.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (1, 0, 0)</text>
+<text x="417.8" y="291.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">A3 (1, 0, 0)</text>
 <circle cx="320.0" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="330.0" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (1, 1, 0)</text>
-<circle cx="407.8" cy="301.3" r="9.0" fill="none" stroke="#1f6feb" stroke-width="1.5" stroke-dasharray="3 2"/>
-<text x="417.8" y="321.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">P (1, 0, 0)</text>
-<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
-<line x1="320.0" y1="250.7" x2="495.5" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow)"/>
-<text x="407.8" y="293.3" fill="#1a7f37" font-family="sans-serif" font-size="13">(2, 0)</text>
-<line x1="407.8" y1="301.3" x2="320.0" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow)"/>
+<text x="330.0" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A4 (1, 1, 0)</text>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker><marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
+<line x1="320.0" y1="250.7" x2="495.5" y2="352.0" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
+<text x="407.8" y="293.3" fill="#1f6feb" font-family="sans-serif" font-size="13">(2, 0)</text>
+<line x1="407.8" y1="301.3" x2="320.0" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow2)"/>
 <text x="363.9" y="318.7" fill="#1a7f37" font-family="sans-serif" font-size="13">(0, 1)</text>
 </svg>
