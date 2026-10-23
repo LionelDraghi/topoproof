@@ -140,6 +140,10 @@ Types:
 | `Intersection_Result` | the intersection kind, with the reported positions |
 | `Loop_Kind` | `Counter_Clockwise`, `Clockwise`, `Degenerate`, or the kernel rejection kinds |
 | `Face_Kind` | `Face_Counter_Clockwise`, `Face_Clockwise`, `Face_Degenerate_Boundary`, `Face_Invalid_Boundary` |
+| `Continuity_Kind` | `Continuous`, `Discontinuous` |
+| `Closure_Kind` | `Closed`, `Open` |
+| `Contour_Orientation_Kind` | `Contour_Counter_Clockwise`, `Contour_Clockwise`, `Contour_Degenerate` (prefixed: HAC does not overload enumeration literals) |
+| `Bool_Kind` | `Bool_True`, `Bool_False` |
 
 Operations:
 
@@ -158,8 +162,18 @@ Operations:
 | `Add_Point (P)` | appends a 2D point to the chain |
 | `Make_Loop (K)` | classifies the accumulated chain as a loop, the kernel classification |
 | `Make_Face (K)` | classifies the same chain as a face boundary |
+| `Contour_Continuity (K)` | classifies the chain read as segment pairs: `Continuous` when the endpoint of each segment equals the start point of the next |
+| `Contour_Closure (K)` | classifies whether the chain is closed, the kernel `Is_Closed` |
+| `Contour_Orientation (K)` | classifies the closed, valid chain by the sign of its signed area, with the client pre-check diagnostics |
+| `Contour_Self_Intersects (B)` | classifies whether the chain self-intersects, the kernel classification |
+| `Contour_Valid (B)` | classifies the geometric validity of the chain, the kernel `Is_Valid` |
+| `Contour_No_Flat_Turns (B)` | classifies the absence of flat turns, the kernel `Has_No_Flat_Turns` |
 | `Put_Loop (K)` | writes `loop closed ...`, or records the rejection diagnostic |
 | `Put_Face (K)` | writes `face ...`, or records the rejection diagnostic |
+| `Put_Continuity (K)` | writes `continuity continuous` or `continuity discontinuous` on standard output |
+| `Put_Closure (K)` | writes `closure closed` or `closure open` on standard output |
+| `Put_Contour_Orientation (K)` | writes `orientation counter_clockwise`, `orientation clockwise` or `orientation degenerate` on standard output |
+| `Put_Bool (B)` | writes `true` or `false` on standard output |
 | `Begin_Image (Name)` | opens one image under the `VString` name |
 | `Draw_Axes` | axes with automatic ticks and dashed coordinate paths |
 | `Draw_Point (P, Color)` | colors a 3D point of the image |

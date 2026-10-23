@@ -44,6 +44,24 @@ package body TopoScript_API is
       Register (BD, Topology.Make_Face_Native'Access, "Make_Face");
       Register (BD, Output.Put_Loop_Native'Access, "Put_Loop");
       Register (BD, Output.Put_Face_Native'Access, "Put_Face");
+      Register (BD, Topology.Contour_Continuity_Native'Access,
+                "Contour_Continuity");
+      Register (BD, Topology.Contour_Closure_Native'Access,
+                "Contour_Closure");
+      Register (BD, Topology.Contour_Orientation_Native'Access,
+                "Contour_Orientation");
+      Register (BD, Topology.Contour_Self_Intersects_Native'Access,
+                "Contour_Self_Intersects");
+      Register (BD, Topology.Contour_Valid_Native'Access,
+                "Contour_Valid");
+      Register (BD, Topology.Contour_No_Flat_Turns_Native'Access,
+                "Contour_No_Flat_Turns");
+      Register (BD, Output.Put_Continuity_Native'Access,
+                "Put_Continuity");
+      Register (BD, Output.Put_Closure_Native'Access, "Put_Closure");
+      Register (BD, Output.Put_Contour_Orientation_Native'Access,
+                "Put_Contour_Orientation");
+      Register (BD, Output.Put_Bool_Native'Access, "Put_Bool");
    end Register_All;
 
 end TopoScript_API;

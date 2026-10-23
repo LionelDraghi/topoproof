@@ -224,113 +224,148 @@
 
 # Document: [contours.md](../features/contours.md)  
    ### Scenario: [a continuous sequence of two segments](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 0) B C=(1, 1) --draw ../docs/features/images/contour_4.svg`  
+   - OK : Given the file `continuity_chain.topo`  
+   - OK : When I successfully run `../bin/topocli run continuity_chain.topo`  
    - OK : Then the output is `continuity continuous`  
+   - OK : And the file `../docs/features/images/contour_4.svg` contains `#1f6feb`    
    - [X] scenario   [a continuous sequence of two segments](../features/contours.md) pass  
 
    ### Scenario: [a discontinuous sequence](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 0) C=(2, 1) D=(2, 2) --draw ../docs/features/images/contour_5.svg`  
+   - OK : Given the file `continuity_gap.topo`  
+   - OK : When I successfully run `../bin/topocli run continuity_gap.topo`  
    - OK : Then the output is `continuity discontinuous`  
+   - OK : And the file `../docs/features/images/contour_5.svg` contains `#1f6feb`    
    - [X] scenario   [a discontinuous sequence](../features/contours.md) pass  
 
    ### Scenario: [a single segment is trivially continuous](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 1)`  
+   - OK : Given the file `continuity_single.topo`  
+   - OK : When I successfully run `../bin/topocli run continuity_single.topo`  
    - OK : Then the output is `continuity continuous`  
    - [X] scenario   [a single segment is trivially continuous](../features/contours.md) pass  
 
    ### Scenario: [an empty sequence is continuous](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_continuity`  
+   - OK : Given the file `continuity_empty.topo`  
+   - OK : When I successfully run `../bin/topocli run continuity_empty.topo`  
    - OK : Then the output is `continuity continuous`  
    - [X] scenario   [an empty sequence is continuous](../features/contours.md) pass  
 
    ### Scenario: [a closed loop (square)](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_closure A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`  
+   - OK : Given the file `closure_square.topo`  
+   - OK : When I successfully run `../bin/topocli run closure_square.topo`  
    - OK : Then the output is `closure closed`  
+   - OK : And the file `../docs/features/images/contour_1.svg` contains `#1f6feb`    
    - [X] scenario   [a closed loop (square)](../features/contours.md) pass  
 
    ### Scenario: [an open chain](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_closure A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/contour_6.svg`  
+   - OK : Given the file `closure_open.topo`  
+   - OK : When I successfully run `../bin/topocli run closure_open.topo`  
    - OK : Then the output is `closure open`  
+   - OK : And the file `../docs/features/images/contour_6.svg` contains `#1f6feb`    
    - [X] scenario   [an open chain](../features/contours.md) pass  
 
    ### Scenario: [closure with a repeated point](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_closure A=(5, 5) A`  
+   - OK : Given the file `closure_repeat.topo`  
+   - OK : When I successfully run `../bin/topocli run closure_repeat.topo`  
    - OK : Then the output is `closure closed`  
    - [X] scenario   [closure with a repeated point](../features/contours.md) pass  
 
    ### Scenario: [counter-clockwise square](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`  
+   - OK : Given the file `orientation_ccw.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_ccw.topo`  
    - OK : Then the output is `orientation counter_clockwise`  
    - [X] scenario   [counter-clockwise square](../features/contours.md) pass  
 
    ### Scenario: [clockwise square](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(0, 2) C=(2, 2) D=(2, 0) A --draw ../docs/features/images/contour_2.svg`  
+   - OK : Given the file `orientation_cw.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_cw.topo`  
    - OK : Then the output is `orientation clockwise`  
+   - OK : And the file `../docs/features/images/contour_2.svg` contains `#1f6feb`    
    - [X] scenario   [clockwise square](../features/contours.md) pass  
 
    ### Scenario: [degenerate loop of zero area](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`  
+   - OK : Given the file `orientation_bowtie.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_bowtie.topo`  
    - OK : Then the output is `orientation degenerate`  
+   - OK : And the file `../docs/features/images/contour_3.svg` contains `#1f6feb`    
    - [X] scenario   [degenerate loop of zero area](../features/contours.md) pass  
 
    ### Scenario: [counter-clockwise triangle](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 0) C=(1, 2) A --draw ../docs/features/images/contour_7.svg`  
+   - OK : Given the file `orientation_triangle.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_triangle.topo`  
    - OK : Then the output is `orientation counter_clockwise`  
+   - OK : And the file `../docs/features/images/contour_7.svg` contains `#1f6feb`    
    - [X] scenario   [counter-clockwise triangle](../features/contours.md) pass  
 
    ### Scenario: [orientation of a contour with a flat turn](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(1, 0) C=(2, 0) D=(2, 2) E=(0, 2) A --draw ../docs/features/images/contour_13.svg`  
+   - OK : Given the file `orientation_flat.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_flat.topo`  
    - OK : Then the output is `orientation counter_clockwise`  
+   - OK : And the file `../docs/features/images/contour_13.svg` contains `#1f6feb`    
    - [X] scenario   [orientation of a contour with a flat turn](../features/contours.md) pass  
 
    ### Scenario: [a simple loop does not self-intersect](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`  
+   - OK : Given the file `self_square.topo`  
+   - OK : When I successfully run `../bin/topocli run self_square.topo`  
    - OK : Then the output is `false`  
    - [X] scenario   [a simple loop does not self-intersect](../features/contours.md) pass  
 
    ### Scenario: [a bowtie self-intersects](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`  
+   - OK : Given the file `self_bowtie.topo`  
+   - OK : When I successfully run `../bin/topocli run self_bowtie.topo`  
    - OK : Then the output is `true`  
    - [X] scenario   [a bowtie self-intersects](../features/contours.md) pass  
 
    ### Scenario: [three segments meeting at a point is not a self-intersection](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(1, 0) C=(1, 1) B --draw ../docs/features/images/contour_8.svg`  
+   - OK : Given the file `self_junction.topo`  
+   - OK : When I successfully run `../bin/topocli run self_junction.topo`  
    - OK : Then the output is `false`  
+   - OK : And the file `../docs/features/images/contour_8.svg` contains `#1f6feb`    
    - [X] scenario   [three segments meeting at a point is not a self-intersection](../features/contours.md) pass  
 
    ### Scenario: [a single segment does not self-intersect](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(1, 1)`  
+   - OK : Given the file `self_single.topo`  
+   - OK : When I successfully run `../bin/topocli run self_single.topo`  
    - OK : Then the output is `false`  
    - [X] scenario   [a single segment does not self-intersect](../features/contours.md) pass  
 
    ### Scenario: [a valid contour (non-degenerate)](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`  
+   - OK : Given the file `valid_square.topo`  
+   - OK : When I successfully run `../bin/topocli run valid_square.topo`  
    - OK : Then the output is `true`  
    - [X] scenario   [a valid contour (non-degenerate)](../features/contours.md) pass  
 
    ### Scenario: [invalid due to degenerate segment](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_valid A=(0, 0) A B=(1, 0) A --draw ../docs/features/images/contour_9.svg`  
+   - OK : Given the file `valid_degenerate.topo`  
+   - OK : When I successfully run `../bin/topocli run valid_degenerate.topo`  
    - OK : Then the output is `false`  
+   - OK : And the file `../docs/features/images/contour_9.svg` contains `#1f6feb`    
    - [X] scenario   [invalid due to degenerate segment](../features/contours.md) pass  
 
    ### Scenario: [valid with a flat turn](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_valid A=(0, 0) B=(1, 0) C=(2, 0) A --draw ../docs/features/images/contour_10.svg`  
+   - OK : Given the file `valid_flat.topo`  
+   - OK : When I successfully run `../bin/topocli run valid_flat.topo`  
    - OK : Then the output is `true`  
+   - OK : And the file `../docs/features/images/contour_10.svg` contains `#1f6feb`    
    - [X] scenario   [valid with a flat turn](../features/contours.md) pass  
 
    ### Scenario: [a contour with a flat turn is not reduced](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_no_flat_turns A=(0, 0) B=(1, 0) C=(2, 0) A`  
+   - OK : Given the file `flat_not_reduced.topo`  
+   - OK : When I successfully run `../bin/topocli run flat_not_reduced.topo`  
    - OK : Then the output is `false`  
    - [X] scenario   [a contour with a flat turn is not reduced](../features/contours.md) pass  
 
    ### Scenario: [continuity at grid corners](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_continuity A=(1073741823, 1073741823) B=(-1073741823, -1073741823) B C=(1073741823, 1073741823) --draw ../docs/features/images/contour_11.svg --draw-short-labels`  
+   - OK : Given the file `continuity_extreme.topo`  
+   - OK : When I successfully run `../bin/topocli run continuity_extreme.topo`  
    - OK : Then the output is `continuity continuous`  
+   - OK : And the file `../docs/features/images/contour_11.svg` contains `#1f6feb`    
    - [X] scenario   [continuity at grid corners](../features/contours.md) pass  
 
    ### Scenario: [orientation of extreme loop](../features/contours.md): 
-   - OK : When I successfully run `../bin/topocli contour_orientation A=(1073741823, 1073741823) B=(1073741823, -1073741823) C=(-1073741823, -1073741823) D=(-1073741823, 1073741823) A --draw ../docs/features/images/contour_12.svg --draw-short-labels`  
+   - OK : Given the file `orientation_extreme.topo`  
+   - OK : When I successfully run `../bin/topocli run orientation_extreme.topo`  
    - OK : Then the output is `orientation clockwise`  
+   - OK : And the file `../docs/features/images/contour_12.svg` contains `#1f6feb`    
    - [X] scenario   [orientation of extreme loop](../features/contours.md) pass  
 
 

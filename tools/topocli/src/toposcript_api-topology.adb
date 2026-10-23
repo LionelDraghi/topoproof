@@ -36,6 +36,217 @@ package body TopoScript_API.Topology is
         (Chain_Point'(X => P.X, Y => P.Y));
    end Add_Point_Native;
 
+   --  Build the kernel point sequence of the accumulated chain, the
+   --  same support as the contour client operations build from their
+   --  point chain. A chain longer than the kernel sequence bound
+   --  cannot exist on the command line and would require a pathological
+   --  script: the rejection is recorded and Built is False, so no
+   --  callback raises a constraint error.
+   procedure Build_Sequence
+     (Seq   :    out TopoProof.Geometry.Segment_Sequences.
+        Segment_Sequence_2D;
+      Built :    out Boolean)
+   is
+      N : constant Natural :=
+        Natural (Session.Current_Session.Chain.Length);
+
+   begin
+      Built := False;
+      if N > TopoProof.Geometry.Segment_Sequences.Max_Points then
+         Session.Record_Failure
+           ("error: too many points for one contour");
+         return;
+      end if;
+
+      declare
+         S : TopoProof.Geometry.Segment_Sequences.Segment_Sequence_2D
+           (TopoProof.Geometry.Segment_Sequences.Length_Range (N));
+
+      begin
+         for I in 1 .. N loop
+            declare
+               P : constant Chain_Point :=
+                 Session.Current_Session.Chain (I);
+            begin
+               S.Points (I) :=
+                 (X => P.X, Y => P.Y);
+            end;
+         end loop;
+         Seq   := S;
+         Built := True;
+      end;
+   end Build_Sequence;
+
+   procedure Contour_Continuity_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+      N : constant Natural :=
+        Natural (Session.Current_Session.Chain.Length);
+
+   begin
+      --  The segments come by their two endpoints, two chain points
+      --  per segment, as in the contour client operation.
+      if N mod 2 /= 0 then
+         Session.Record_Failure
+           ("error: continuity needs an even number of points");
+         return;
+      end if;
+
+      declare
+         Is_Continuous : Boolean := True;
+
+      begin
+         for I in 1 .. N / 2 - 1 loop
+            if Session.Current_Session.Chain (2 * I)
+              /= Session.Current_Session.Chain (2 * I + 1)
+            then
+               Is_Continuous := False;
+            end if;
+         end loop;
+         Data (1) := Continuity_To_HAC
+           ((if Is_Continuous then Continuous else Discontinuous));
+      end;
+   end Contour_Continuity_Native;
+
+   procedure Contour_Closure_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+
+   begin
+      declare
+         Seq   : TopoProof.Geometry.Segment_Sequences.
+           Segment_Sequence_2D;
+         Built : Boolean;
+
+      begin
+         Build_Sequence (Seq, Built);
+         if not Built then
+            return;
+         end if;
+         Data (1) := Closure_To_HAC
+           ((if TopoProof.Geometry.Segment_Sequences.Is_Closed (Seq)
+            then Closed
+            else Open));
+      end;
+   end Contour_Closure_Native;
+
+   procedure Contour_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+
+   begin
+      --  The pre-checks of the contour client operation, with its
+      --  diagnostics: the orientation is defined for a closed, valid
+      --  sequence of at least three points.
+      declare
+         Seq   : TopoProof.Geometry.Segment_Sequences.
+           Segment_Sequence_2D;
+         Built : Boolean;
+
+      begin
+         Build_Sequence (Seq, Built);
+         if not Built then
+            return;
+         end if;
+         if Seq.Length < 3 then
+            Session.Record_Failure
+              ("error: at least 3 points required for orientation");
+            return;
+
+         elsif not TopoProof.Geometry.Segment_Sequences.Is_Closed (Seq) then
+            Session.Record_Failure ("error: sequence is not closed");
+            return;
+
+         elsif not TopoProof.Geometry.Segment_Sequences.Is_Valid (Seq) then
+            Session.Record_Failure ("error: sequence is not valid");
+            return;
+         end if;
+
+         case TopoProof.Geometry.Segment_Sequences.Orientation (Seq) is
+            when TopoProof.Geometry.Segment_Sequences.Counter_Clockwise =>
+               Data (1) := Contour_Orientation_To_HAC
+                 (Contour_Counter_Clockwise);
+            when TopoProof.Geometry.Segment_Sequences.Clockwise =>
+               Data (1) := Contour_Orientation_To_HAC (Contour_Clockwise);
+            when TopoProof.Geometry.Segment_Sequences.Degenerate =>
+               Data (1) := Contour_Orientation_To_HAC (Contour_Degenerate);
+         end case;
+      end;
+   end Contour_Orientation_Native;
+
+   procedure Contour_Self_Intersects_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+
+   begin
+      declare
+         Seq   : TopoProof.Geometry.Segment_Sequences.
+           Segment_Sequence_2D;
+         Built : Boolean;
+
+      begin
+         Build_Sequence (Seq, Built);
+         if not Built then
+            return;
+         end if;
+         Data (1) := Bool_To_HAC
+           ((if TopoProof.Geometry.Segment_Sequences.Self_Intersects (Seq)
+            then Bool_True
+            else Bool_False));
+      end;
+   end Contour_Self_Intersects_Native;
+
+   procedure Contour_Valid_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+
+   begin
+      declare
+         Seq   : TopoProof.Geometry.Segment_Sequences.
+           Segment_Sequence_2D;
+         Built : Boolean;
+
+      begin
+         Build_Sequence (Seq, Built);
+         if not Built then
+            return;
+         end if;
+         Data (1) := Bool_To_HAC
+           ((if TopoProof.Geometry.Segment_Sequences.Is_Valid (Seq)
+            then Bool_True
+            else Bool_False));
+      end;
+   end Contour_Valid_Native;
+
+   procedure Contour_No_Flat_Turns_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Result at 1.
+
+   begin
+      declare
+         Seq   : TopoProof.Geometry.Segment_Sequences.
+           Segment_Sequence_2D;
+         Built : Boolean;
+
+      begin
+         Build_Sequence (Seq, Built);
+         if not Built then
+            return;
+         end if;
+         Data (1) := Bool_To_HAC
+           ((if TopoProof.Geometry.Segment_Sequences.
+              Has_No_Flat_Turns (Seq)
+            then Bool_True
+            else Bool_False));
+      end;
+   end Contour_No_Flat_Turns_Native;
+
    --  The number of distinct positions of the chain: a repeated
    --  position is one vertex.
    function Distinct_Count

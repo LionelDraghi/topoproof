@@ -54,6 +54,30 @@ package body TopoScript_API.Output is
          when Geometry.Equal_True  => "equal true",
          when Geometry.Equal_False => "equal false");
 
+   function Image (K : Topology.Continuity_Kind) return String is
+     (case K is
+         when Topology.Continuous    => "continuity continuous",
+         when Topology.Discontinuous => "continuity discontinuous");
+
+   function Image (K : Topology.Closure_Kind) return String is
+     (case K is
+         when Topology.Closed => "closure closed",
+         when Topology.Open   => "closure open");
+
+   function Image (K : Topology.Contour_Orientation_Kind) return String is
+     (case K is
+         when Topology.Contour_Counter_Clockwise =>
+            "orientation counter_clockwise",
+         when Topology.Contour_Clockwise =>
+            "orientation clockwise",
+         when Topology.Contour_Degenerate =>
+            "orientation degenerate");
+
+   function Image (K : Topology.Bool_Kind) return String is
+     (case K is
+         when Topology.Bool_True  => "true",
+         when Topology.Bool_False => "false");
+
    function Image
      (K : TopoProof.Geometry.Orientations.Orientation_Kind) return String
    is
@@ -149,6 +173,50 @@ package body TopoScript_API.Output is
    begin
       Put_Line (Image (K));
    end Put_Equal_Native;
+
+   procedure Put_Continuity_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: K at 1.
+      K : constant Topology.Continuity_Kind :=
+        Topology.To_Continuity_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Continuity_Native;
+
+   procedure Put_Closure_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: K at 1.
+      K : constant Topology.Closure_Kind :=
+        Topology.To_Closure_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Closure_Native;
+
+   procedure Put_Contour_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: K at 1.
+      K : constant Topology.Contour_Orientation_Kind :=
+        Topology.To_Contour_Orientation_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Contour_Orientation_Native;
+
+   procedure Put_Bool_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: B at 1.
+      B : constant Topology.Bool_Kind :=
+        Topology.To_Bool_Kind (Data (1));
+
+   begin
+      Put_Line (Image (B));
+   end Put_Bool_Native;
 
    procedure Put_Orientation_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

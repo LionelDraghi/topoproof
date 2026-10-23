@@ -7,9 +7,9 @@
 
 --  The output domain of the scripting API (development plan,
 --  TopoScript consolidation, Increment 2, and the single front-end,
---  Increment 1): the canonical textual results, one implementation
---  per public representation, and the run-owned output destination
---  (DD-004, decision 8).
+--  Increments 1 and 5): the canonical textual results, one
+--  implementation per public representation, and the run-owned output
+--  destination (DD-004, decision 8).
 
 with HAC_Sys.Interfacing;
 with TopoProof.Geometry.Intersections;
@@ -45,6 +45,22 @@ package TopoScript_API.Output is
    --  The canonical image of an equality result: `equal true` or
    --  `equal false`.
    function Image (K : Geometry.Equal_Kind) return String;
+
+   --  The canonical image of a continuity result:
+   --  `continuity continuous` or `continuity discontinuous`.
+   function Image (K : Topology.Continuity_Kind) return String;
+
+   --  The canonical image of a closure result: `closure closed` or
+   --  `closure open`.
+   function Image (K : Topology.Closure_Kind) return String;
+
+   --  The canonical image of a contour orientation result:
+   --  `orientation counter_clockwise`, `orientation clockwise` or
+   --  `orientation degenerate`.
+   function Image (K : Topology.Contour_Orientation_Kind) return String;
+
+   --  The canonical image of a contour boolean: `true` or `false`.
+   function Image (K : Topology.Bool_Kind) return String;
 
    --  The canonical image of an orientation result:
    --  `orientation counter_clockwise`, `orientation clockwise` or
@@ -88,6 +104,26 @@ package TopoScript_API.Output is
    --  Native side of Put_Equal: writes the canonical image of the
    --  equality result.
    procedure Put_Equal_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Continuity: writes the canonical image of
+   --  the continuity result.
+   procedure Put_Continuity_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Closure: writes the canonical image of the
+   --  closure result.
+   procedure Put_Closure_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Contour_Orientation: writes the canonical
+   --  image of the contour orientation result.
+   procedure Put_Contour_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Bool: writes the canonical image of the
+   --  contour boolean.
+   procedure Put_Bool_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Orientation: writes the canonical image of

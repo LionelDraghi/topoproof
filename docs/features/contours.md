@@ -3,7 +3,10 @@
 This feature introduces oriented sequences of 2D segments to form **contours**
 and **loops**, with exact verification of topological properties on the
 discrete grid. The operations classify and validate geometric configurations
-without approximation, tolerance, or floating-point arithmetic.
+without approximation, tolerance, or floating-point arithmetic. The scenarios
+run the six contour predicates through TopoScript, the same proved operations
+as the kernel, and write the canonical result with the explicit `Put` of each
+classification.
 
 ## Contents <!-- omit from toc -->
 
@@ -14,7 +17,7 @@ without approximation, tolerance, or floating-point arithmetic.
   - [Contour Orientation](#contour-orientation)
   - [Self-Intersection](#self-intersection)
   - [Validity and Flat Turns](#validity-and-flat-turns)
-- [Command-Line Interface](#command-line-interface)
+- [Scripting Interface](#scripting-interface)
 - [Scenarios: Continuity](#scenarios-continuity)
   - [Scenario: a continuous sequence of two segments](#scenario-a-continuous-sequence-of-two-segments)
   - [Scenario: a discontinuous sequence](#scenario-a-discontinuous-sequence)
@@ -78,10 +81,10 @@ This property is decidable exactly by integer equality on the grid.
 
 A `Segment_Sequence_2D` stores its points, not duplicated segment
 endpoints, so a sequence built from a point chain is continuous by
-construction. The property is therefore exercised through the
-`contour_continuity` command, which takes the segments by their explicit
-endpoints; the scenarios below show the chaining, and the gap when the
-chain is discontinuous.
+construction. The property is therefore exercised through
+`Contour_Continuity`, which reads the chain accumulated by `Add_Point` as
+segment pairs, each segment given by its two endpoints; the scenarios below
+show the chaining, and the gap when the chain is discontinuous.
 
 ### Closure (Loop)
 
@@ -140,11 +143,11 @@ Two non-consecutive segments that meet exactly at a shared endpoint form a
 valid junction, not a self-intersection. Two segments that properly cross
 at a position that is not on the grid share no grid position: in the
 discrete model they do not cross, and the crossing is reported by the
-`intersect` operation as `off_grid_crossing`.
+`Intersection` operation as `off_grid_crossing`.
 
 Consecutive segments are never compared: they share an endpoint by
-construction. This is checked using the exact `intersect` operation from
-milestone 3.
+construction. This is checked using the exact `Intersection` operation of
+the kernel.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
@@ -160,64 +163,60 @@ with such a point describes exactly the same geometry as the chain
 without it. A chain **has no flat turns** when no three consecutive
 points are collinear, so that every point has a well-defined turning
 direction. The absence of flat turns is a canonical-representation
-property, observable separately with `contour_no_flat_turns`; it never
+property, observable separately with `Contour_No_Flat_Turns`; it never
 invalidates a contour (design decision DD-001).
 
-## Command-Line Interface
+## Scripting Interface
 
-The TopoProof application exposes the following operations for contour
-validation and classification:
+The six contour predicates run on the chain accumulated by `Add_Point`:
+each script declares its points as named constants, appends them to the
+chain in order, then classifies the chain and writes the canonical result
+with the explicit `Put` of the classification. The scripts draw the
+diagrams of this page with `Draw_Point_2D` and `Draw_Edge` or
+`Draw_Segment_2D`:
 
-Points are named: `NAME=(X, Y)` defines and uses a point, and a bare
-`NAME` refers to a point defined earlier in the same command, which makes
-the closure of a chain visible. Each command below generates its own
-documentation diagram with `--draw`:
+```ada
+A : constant Point_2D := (0, 0);
+B : constant Point_2D := (2, 0);
+C : constant Point_2D := (2, 2);
+D : constant Point_2D := (0, 2);
+K : Closure_Kind;
 
-```sh
-topocli contour_continuity A=(0, 0) B=(1, 0) B C=(1, 1)
+Add_Point (A);
+Add_Point (B);
+Add_Point (C);
+Add_Point (D);
+Add_Point (A);
+
+Contour_Closure (K);
+
+Put_Closure (K);
 ```
-Classifies whether the segments, each given by its two endpoints (two point
-tokens per segment), form a continuous sequence: the endpoint of each
-segment must equal the start point of the next. Output is `continuity
-continuous` or `continuity discontinuous`.
 
-```sh
-topocli contour_closure A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
-```
 Classifies whether a sequence of points forms a closed loop (i.e., the
-first and last points coincide). Output is `closure closed` or `closure`
-`open`.
+first and last points coincide). Output is `closure closed` or
+`closure open`, written by `Put_Closure`.
 
-```sh
-topocli contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
-```
-Returns the orientation of a closed, valid sequence of points:
-`orientation counter_clockwise`, `orientation clockwise`, or `orientation`
-`degenerate`. An error is reported when the sequence has less than three
-points, is not closed, or is not valid. A contour with intermediate
-collinear points is orientable: its flat turns are a matter of
-representation, not of validity.
+`Contour_Continuity` classifies whether the segments, each given by its
+two endpoints, form a continuous sequence: the chain is read as segment
+pairs, two points per segment, and the endpoint of each segment must equal
+the start point of the next. Output is `continuity continuous` or
+`continuity discontinuous`, written by `Put_Continuity`.
 
-```sh
-topocli contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A
-```
-Returns `true` if the sequence of points self-intersects, `false`
-otherwise.
+`Contour_Orientation` returns the orientation of a closed, valid sequence
+of points: `orientation counter_clockwise`, `orientation clockwise`, or
+`orientation degenerate`, written by `Put_Contour_Orientation`. A
+diagnostic is reported when the sequence has less than three points, is
+not closed, or is not valid. A contour with intermediate collinear points
+is orientable: its flat turns are a matter of representation, not of
+validity.
 
-```sh
-topocli contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A
-```
-Returns `true` if the sequence is valid (non-degenerate segments),
-`false` otherwise. An intermediate collinear point does not invalidate
+`Contour_Self_Intersects` returns whether the sequence of points
+self-intersects, `Contour_Valid` whether it is valid (non-degenerate
+segments), and `Contour_No_Flat_Turns` whether no three consecutive
+points of the sequence are collinear. Each writes `true` or `false`
+through `Put_Bool`. An intermediate collinear point does not invalidate
 the sequence: validity is geometric, not canonical.
-
-```sh
-topocli contour_no_flat_turns A=(0, 0) B=(1, 0) C=(2, 0) A
-```
-Returns `true` if no three consecutive points of the sequence are
-collinear (every point has a well-defined turning direction), `false`
-otherwise. A sequence with flat turns is still valid: it describes the
-same geometry as the same sequence without its redundant points.
 
 All operations use the same grid domain as the existing operations
 (`Grid_Coordinate` range), and sequences are limited to `Max_Points`
@@ -231,8 +230,38 @@ The endpoint of the first segment equals the start point of the second.
 
 ![Continuous sequence](images/contour_4.svg)
 
-- When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 0) B C=(1, 1) --draw ../docs/features/images/contour_4.svg`
+- Given the file `continuity_chain.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (1, 1);
+  K    : Continuity_Kind;
+  Name : VString := +"../docs/features/images/contour_4.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (B);
+  Add_Point (C);
+
+  Contour_Continuity (K);
+
+  Put_Continuity (K);
+  ```
+- When I successfully run `../bin/topocli run continuity_chain.topo`
 - Then the output is `continuity continuous`
+- And the file `../docs/features/images/contour_4.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the points and segments of the chain are drawn, the two segments
+  chaining at `B`.)
 
 ### Scenario: a discontinuous sequence
 
@@ -241,15 +270,68 @@ The endpoint `(1, 0)` of the first segment differs from the start point
 
 ![Discontinuous sequence](images/contour_5.svg)
 
-- When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 0) C=(2, 1) D=(2, 2) --draw ../docs/features/images/contour_5.svg`
+- Given the file `continuity_gap.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (2, 1);
+  D    : constant Point_2D := (2, 2);
+  K    : Continuity_Kind;
+  Name : VString := +"../docs/features/images/contour_5.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (C, D, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+
+  Contour_Continuity (K);
+
+  Put_Continuity (K);
+  ```
+- When I successfully run `../bin/topocli run continuity_gap.topo`
 - Then the output is `continuity discontinuous`
+- And the file `../docs/features/images/contour_5.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the two segments of the chain are drawn, with the gap between `B`
+  and `C`.)
 
 ### Scenario: a single segment is trivially continuous
-- When I successfully run `../bin/topocli contour_continuity A=(0, 0) B=(1, 1)`
+- Given the file `continuity_single.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (1, 1);
+  K : Continuity_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+
+  Contour_Continuity (K);
+
+  Put_Continuity (K);
+  ```
+- When I successfully run `../bin/topocli run continuity_single.topo`
 - Then the output is `continuity continuous`
 
 ### Scenario: an empty sequence is continuous
-- When I successfully run `../bin/topocli contour_continuity`
+- Given the file `continuity_empty.topo`
+  ```ada
+  K : Continuity_Kind;
+
+  Contour_Continuity (K);
+
+  Put_Continuity (K);
+  ```
+- When I successfully run `../bin/topocli run continuity_empty.topo`
 - Then the output is `continuity continuous`
 
 ## Scenarios: Closure
@@ -260,8 +342,43 @@ The last point equals the first: the square of the orientation definition.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topocli contour_closure A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
+- Given the file `closure_square.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (2, 0);
+  C    : constant Point_2D := (2, 2);
+  D    : constant Point_2D := (0, 2);
+  K    : Closure_Kind;
+  Name : VString := +"../docs/features/images/contour_1.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, D, Blue);
+  Draw_Edge (D, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Closure (K);
+
+  Put_Closure (K);
+  ```
+- When I successfully run `../bin/topocli run closure_square.topo`
 - Then the output is `closure closed`
+- And the file `../docs/features/images/contour_1.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the four points and edges of the loop are drawn, the last edge
+  closing back on `A`.)
 
 ### Scenario: an open chain
 
@@ -270,11 +387,51 @@ the start point.
 
 ![Open chain](images/contour_6.svg)
 
-- When I successfully run `../bin/topocli contour_closure A=(0, 0) B=(1, 0) C=(1, 1) --draw ../docs/features/images/contour_6.svg`
+- Given the file `closure_open.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (1, 1);
+  K    : Closure_Kind;
+  Name : VString := +"../docs/features/images/contour_6.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+
+  Contour_Closure (K);
+
+  Put_Closure (K);
+  ```
+- When I successfully run `../bin/topocli run closure_open.topo`
 - Then the output is `closure open`
+- And the file `../docs/features/images/contour_6.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the points and segments of the chain are drawn, open on `C`.)
 
 ### Scenario: closure with a repeated point
-- When I successfully run `../bin/topocli contour_closure A=(5, 5) A`
+- Given the file `closure_repeat.topo`
+  ```ada
+  A : constant Point_2D := (5, 5);
+  K : Closure_Kind;
+
+  Add_Point (A);
+  Add_Point (A);
+
+  Contour_Closure (K);
+
+  Put_Closure (K);
+  ```
+- When I successfully run `../bin/topocli run closure_repeat.topo`
 - Then the output is `closure closed`
 
 ## Scenarios: Contour Orientation
@@ -286,7 +443,27 @@ The square of the orientation definition, traversed from `(0, 0)` towards
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
+The square and its diagram are the ones of the closure scenario.
+
+- Given the file `orientation_ccw.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (2, 0);
+  C : constant Point_2D := (2, 2);
+  D : constant Point_2D := (0, 2);
+  O : Contour_Orientation_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_ccw.topo`
 - Then the output is `orientation counter_clockwise`
 
 ### Scenario: clockwise square
@@ -296,8 +473,43 @@ on the right.
 
 ![Clockwise square loop](images/contour_2.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(0, 2) C=(2, 2) D=(2, 0) A --draw ../docs/features/images/contour_2.svg`
+- Given the file `orientation_cw.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (0, 2);
+  C    : constant Point_2D := (2, 2);
+  D    : constant Point_2D := (2, 0);
+  O    : Contour_Orientation_Kind;
+  Name : VString := +"../docs/features/images/contour_2.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, D, Blue);
+  Draw_Edge (D, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_cw.topo`
 - Then the output is `orientation clockwise`
+- And the file `../docs/features/images/contour_2.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the four points and edges of the loop are drawn, traversed
+  clockwise.)
 
 ### Scenario: degenerate loop of zero area
 
@@ -306,15 +518,81 @@ same area and opposite orientations, so the shoelace sums to zero.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`
+- Given the file `orientation_bowtie.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (2, 2);
+  C    : constant Point_2D := (2, 0);
+  D    : constant Point_2D := (0, 2);
+  O    : Contour_Orientation_Kind;
+  Name : VString := +"../docs/features/images/contour_3.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, C, Blue);
+  Draw_Segment_2D (C, D, Blue);
+  Draw_Segment_2D (D, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_bowtie.topo`
 - Then the output is `orientation degenerate`
+- And the file `../docs/features/images/contour_3.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the bowtie is drawn, its two diagonals crossing at the centre. The
+  crossing segments are drawn without their vector labels, so the two
+  labels cannot stack at the crossing.)
 
 ### Scenario: counter-clockwise triangle
 
 ![Counter-clockwise triangle loop](images/contour_7.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(2, 0) C=(1, 2) A --draw ../docs/features/images/contour_7.svg`
+- Given the file `orientation_triangle.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (2, 0);
+  C    : constant Point_2D := (1, 2);
+  O    : Contour_Orientation_Kind;
+  Name : VString := +"../docs/features/images/contour_7.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_triangle.topo`
 - Then the output is `orientation counter_clockwise`
+- And the file `../docs/features/images/contour_7.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the three points and edges of the triangle loop are drawn.)
 
 ### Scenario: orientation of a contour with a flat turn
 
@@ -325,8 +603,46 @@ traversed counter-clockwise.
 
 ![Square loop with a flat turn](images/contour_13.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(0, 0) B=(1, 0) C=(2, 0) D=(2, 2) E=(0, 2) A --draw ../docs/features/images/contour_13.svg`
+- Given the file `orientation_flat.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (2, 0);
+  D    : constant Point_2D := (2, 2);
+  E    : constant Point_2D := (0, 2);
+  O    : Contour_Orientation_Kind;
+  Name : VString := +"../docs/features/images/contour_13.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Point_2D (E, Blue);
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (B, C, Blue);
+  Draw_Edge (C, D, Blue);
+  Draw_Edge (D, E, Blue);
+  Draw_Edge (E, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (E);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_flat.topo`
 - Then the output is `orientation counter_clockwise`
+- And the file `../docs/features/images/contour_13.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the loop is drawn, with the flat turn at `B` on the bottom edge.)
 
 ## Scenarios: Self-Intersection
 
@@ -338,7 +654,27 @@ shared endpoint `(0, 0)`.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
+The square and its diagram are the ones of the closure scenario.
+
+- Given the file `self_square.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (2, 0);
+  C : constant Point_2D := (2, 2);
+  D : constant Point_2D := (0, 2);
+  S : Bool_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Self_Intersects (S);
+
+  Put_Bool (S);
+  ```
+- When I successfully run `../bin/topocli run self_square.topo`
 - Then the output is `false`
 
 ### Scenario: a bowtie self-intersects
@@ -348,7 +684,28 @@ segments cross at the grid position `(1, 1)`.
 
 ![Self-intersecting bowtie loop](images/contour_3.svg)
 
-- When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(2, 2) C=(2, 0) D=(0, 2) A --draw ../docs/features/images/contour_3.svg`
+The bowtie and its diagram are the ones of the degenerate orientation
+scenario.
+
+- Given the file `self_bowtie.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (2, 2);
+  C : constant Point_2D := (2, 0);
+  D : constant Point_2D := (0, 2);
+  S : Bool_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Self_Intersects (S);
+
+  Put_Bool (S);
+  ```
+- When I successfully run `../bin/topocli run self_bowtie.topo`
 - Then the output is `true`
 
 ### Scenario: three segments meeting at a point is not a self-intersection
@@ -359,11 +716,56 @@ non-consecutive segments, so it is a valid junction.
 
 ![Three segments meeting at a point](images/contour_8.svg)
 
-- When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(1, 0) C=(1, 1) B --draw ../docs/features/images/contour_8.svg`
+- Given the file `self_junction.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (1, 1);
+  S    : Bool_Kind;
+  Name : VString := +"../docs/features/images/contour_8.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, C, Blue);
+  Draw_Segment_2D (C, B, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (B);
+
+  Contour_Self_Intersects (S);
+
+  Put_Bool (S);
+  ```
+- When I successfully run `../bin/topocli run self_junction.topo`
 - Then the output is `false`
+- And the file `../docs/features/images/contour_8.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the three segments are drawn, meeting at `B`. The second and third
+  segments overlap in opposite directions, so they are drawn without
+  their vector labels, which would stack at the same midpoint.)
 
 ### Scenario: a single segment does not self-intersect
-- When I successfully run `../bin/topocli contour_self_intersects A=(0, 0) B=(1, 1)`
+- Given the file `self_single.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (1, 1);
+  S : Bool_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+
+  Contour_Self_Intersects (S);
+
+  Put_Bool (S);
+  ```
+- When I successfully run `../bin/topocli run self_single.topo`
 - Then the output is `false`
 
 ## Scenarios: Validity and Flat Turns
@@ -374,7 +776,27 @@ The square of the orientation definition.
 
 ![Counter-clockwise square loop](images/contour_1.svg)
 
-- When I successfully run `../bin/topocli contour_valid A=(0, 0) B=(2, 0) C=(2, 2) D=(0, 2) A --draw ../docs/features/images/contour_1.svg`
+The square and its diagram are the ones of the closure scenario.
+
+- Given the file `valid_square.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (2, 0);
+  C : constant Point_2D := (2, 2);
+  D : constant Point_2D := (0, 2);
+  V : Bool_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Valid (V);
+
+  Put_Bool (V);
+  ```
+- When I successfully run `../bin/topocli run valid_square.topo`
 - Then the output is `true`
 
 ### Scenario: invalid due to degenerate segment
@@ -384,8 +806,38 @@ end.
 
 ![Degenerate segment: repeated point](images/contour_9.svg)
 
-- When I successfully run `../bin/topocli contour_valid A=(0, 0) A B=(1, 0) A --draw ../docs/features/images/contour_9.svg`
+- Given the file `valid_degenerate.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  V    : Bool_Kind;
+  Name : VString := +"../docs/features/images/contour_9.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (A);
+
+  Contour_Valid (V);
+
+  Put_Bool (V);
+  ```
+- When I successfully run `../bin/topocli run valid_degenerate.topo`
 - Then the output is `false`
+- And the file `../docs/features/images/contour_9.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the two positions are drawn. The first segment, from `A` back to `A`,
+  has no drawing of its own; the second and third segments overlap in
+  opposite directions, so they are drawn without their vector labels,
+  which would stack at the same midpoint.)
 
 ### Scenario: valid with a flat turn
 
@@ -396,8 +848,40 @@ not canonical.
 
 ![Three collinear consecutive points](images/contour_10.svg)
 
-- When I successfully run `../bin/topocli contour_valid A=(0, 0) B=(1, 0) C=(2, 0) A --draw ../docs/features/images/contour_10.svg`
+- Given the file `valid_flat.topo`
+  ```ada
+  A    : constant Point_2D := (0, 0);
+  B    : constant Point_2D := (1, 0);
+  C    : constant Point_2D := (2, 0);
+  V    : Bool_Kind;
+  Name : VString := +"../docs/features/images/contour_10.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, C, Blue);
+  Draw_Segment_2D (C, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (A);
+
+  Contour_Valid (V);
+
+  Put_Bool (V);
+  ```
+- When I successfully run `../bin/topocli run valid_flat.topo`
 - Then the output is `true`
+- And the file `../docs/features/images/contour_10.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the three points and segments are drawn, the closing segment passing
+  through the flat turn at `B`. The closing segment is drawn without
+  its vector label, which would stack on the label of `B`.)
 
 ### Scenario: a contour with a flat turn is not reduced
 
@@ -407,7 +891,25 @@ the contour itself is valid.
 
 ![Three collinear consecutive points](images/contour_10.svg)
 
-- When I successfully run `../bin/topocli contour_no_flat_turns A=(0, 0) B=(1, 0) C=(2, 0) A`
+The chain and its diagram are the ones of the previous scenario.
+
+- Given the file `flat_not_reduced.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (1, 0);
+  C : constant Point_2D := (2, 0);
+  F : Bool_Kind;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (A);
+
+  Contour_No_Flat_Turns (F);
+
+  Put_Bool (F);
+  ```
+- When I successfully run `../bin/topocli run flat_not_reduced.topo`
 - Then the output is `false`
 
 ## Scenarios: Grid Domain Limits
@@ -420,8 +922,37 @@ extreme positions on both axes.
 
 ![Continuity at grid corners](images/contour_11.svg)
 
-- When I successfully run `../bin/topocli contour_continuity A=(1073741823, 1073741823) B=(-1073741823, -1073741823) B C=(1073741823, 1073741823) --draw ../docs/features/images/contour_11.svg --draw-short-labels`
+- Given the file `continuity_extreme.topo`
+  ```ada
+  A    : constant Point_2D := (1073741823, 1073741823);
+  B    : constant Point_2D := (-1073741823, -1073741823);
+  K    : Continuity_Kind;
+  Name : VString := +"../docs/features/images/contour_11.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (B);
+  Add_Point (A);
+
+  Contour_Continuity (K);
+
+  Put_Continuity (K);
+  ```
+- When I successfully run `../bin/topocli run continuity_extreme.topo`
 - Then the output is `continuity continuous`
+- And the file `../docs/features/images/contour_11.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the two opposite corners are drawn. The two segments overlap in
+  opposite directions along the diagonal, so they are drawn without
+  their vector labels, which would stack at the same midpoint.)
 
 ### Scenario: orientation of extreme loop
 
@@ -432,8 +963,43 @@ clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
 
 ![Extreme loop on the grid corners](images/contour_12.svg)
 
-- When I successfully run `../bin/topocli contour_orientation A=(1073741823, 1073741823) B=(1073741823, -1073741823) C=(-1073741823, -1073741823) D=(-1073741823, 1073741823) A --draw ../docs/features/images/contour_12.svg --draw-short-labels`
+- Given the file `orientation_extreme.topo`
+  ```ada
+  A    : constant Point_2D := (1073741823, 1073741823);
+  B    : constant Point_2D := (1073741823, -1073741823);
+  C    : constant Point_2D := (-1073741823, -1073741823);
+  D    : constant Point_2D := (-1073741823, 1073741823);
+  O    : Contour_Orientation_Kind;
+  Name : VString := +"../docs/features/images/contour_12.svg";
+
+  Begin_Image (Name);
+  Draw_Axes;
+  Draw_Point_2D (A, Blue);
+  Draw_Point_2D (B, Blue);
+  Draw_Point_2D (C, Blue);
+  Draw_Point_2D (D, Blue);
+  Draw_Segment_2D (A, B, Blue);
+  Draw_Segment_2D (B, C, Blue);
+  Draw_Segment_2D (C, D, Blue);
+  Draw_Segment_2D (D, A, Blue);
+  End_Image;
+
+  Add_Point (A);
+  Add_Point (B);
+  Add_Point (C);
+  Add_Point (D);
+  Add_Point (A);
+
+  Contour_Orientation (O);
+
+  Put_Contour_Orientation (O);
+  ```
+- When I successfully run `../bin/topocli run orientation_extreme.topo`
 - Then the output is `orientation clockwise`
+- And the file `../docs/features/images/contour_12.svg` contains `#1f6feb`  
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
+  the four corners of the grid and the edges of the extreme loop are
+  drawn.)
 
 ## Proved Properties
 
@@ -459,8 +1025,8 @@ any sequence up to `Max_Points` points.
   machine width, see Numeric Model).
 
 ### Self-Intersection
-- **`Self_Intersects`**: reuses the exact `intersect` operation proved in
-  milestone 3; only shared grid positions are considered, and a single
+- **`Self_Intersects`**: reuses the exact `Intersection` operation proved
+  in milestone 3; only shared grid positions are considered, and a single
   common position that is an endpoint of both segments is a valid
   junction, not a self-intersection.
 
@@ -506,28 +1072,28 @@ any sequence up to `Max_Points` points.
    characterizes it by its one-term back decomposition and its amplitude
    bound, and it carries the invariance proofs.
 
-3. **Self-Intersection Check**: uses the existing exact `intersect`
+3. **Self-Intersection Check**: uses the existing exact `Intersection`
    operation. For a sequence of `n` points, the check performs `O(n^2)`
    intersection tests, but each test is constant-time and exact.
 
 4. **Sequence Length Bound**: `Max_Points` (2**15) keeps every index
    arithmetic on sequences far from the `Natural` bounds and keeps the
-   shoelace sum within the `Area_Sum` domain. A contour passed on the
-   command line stays far below this bound; raising it later only
-   requires re-proving the index arithmetic, since the `Area_Sum` domain
-   already covers any `Natural` length.
+   shoelace sum within the `Area_Sum` domain. A contour built by a script
+   stays far below this bound; raising it later only requires re-proving
+   the index arithmetic, since the `Area_Sum` domain already covers any
+   `Natural` length.
 
 5. **Terminology Compliance**: this feature distinguishes:
    - `Segment_2D`: a geometric value (two endpoints)
-   - `Edge`: a topological entity (to be introduced in milestone 5)
+   - `Edge`: a topological entity (introduced in milestone 5)
    - `Loop`: a closed sequence of segments forming a boundary
    - `Contour`: a loop with a well-defined orientation
    - `Validity`: a geometric property (no degenerate segment), distinct
      from the absence of flat turns, a canonical-representation property
      (decision DD-001)
 
-6. **Future Extensions**: the `Segment_Sequence_2D` type will serve as
-   the geometric support for topological `Edge` and `Loop` entities in
+6. **Future Extensions**: the `Segment_Sequence_2D` type serves as
+   the geometric support for the topological `Edge` and `Loop` entities of
    milestone 5. The invariance lemmas delivered with this feature
    (rotation of the starting point, reversal) are the milestone 4
    algebraic invariants; invariance under representable translation
