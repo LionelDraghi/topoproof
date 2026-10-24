@@ -20,6 +20,14 @@ procedure TopoCLI is
    Usage_Error : exception;
    Output_Path : Unbounded_String;
 
+   --  The argument index after the --output pair headed at J, or 0
+   --  when J is not the head of a pair: the flag and its file travel
+   --  together on the command line of run and run_code.
+   function Output_Pair (J : Positive) return Natural is
+     ((if J < Argument_Count and then Argument (J) = "--output"
+       then J + 2
+       else 0));
+
    --  TopoScript (development plan, Milestone 6): the fragment
    --  execution, shared by the file entry and the inline entry. The
    --  verdict keeps the topocli conventions: the canonical result goes
@@ -145,15 +153,14 @@ begin
             J : Positive := 3;
          begin
             while J <= Argument_Count loop
-               if Argument (J) = "--output" and then J < Argument_Count then
+               if Output_Pair (J) /= 0 then
                   Output_Path := To_Unbounded_String (Argument (J + 1));
-                  J := J + 1;
+                  J := J + 2;
 
                else
                   raise Usage_Error;
 
                end if;
-               J := J + 1;
             end loop;
          end;
          Run_Script (Argument (2));
@@ -170,18 +177,18 @@ begin
             Fragment : Unbounded_String;
          begin
             while J <= Argument_Count loop
-               if Argument (J) = "--output" and then J < Argument_Count then
+               if Output_Pair (J) /= 0 then
                   Output_Path := To_Unbounded_String (Argument (J + 1));
-                  J := J + 1;
+                  J := J + 2;
 
                else
                   if Length (Fragment) > 0 then
                      Append (Fragment, " ");
                   end if;
                   Append (Fragment, Argument (J));
+                  J := J + 1;
 
                end if;
-               J := J + 1;
             end loop;
             if Length (Fragment) = 0 then
                raise Usage_Error;

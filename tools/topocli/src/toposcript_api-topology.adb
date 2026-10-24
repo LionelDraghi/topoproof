@@ -29,7 +29,7 @@ package body TopoScript_API.Topology is
       P : TopoProof.Geometry.Points.Point_2D;
    begin
       if not Conversions.Read_Point_2D (Data, 1, P) then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
       Session.Current_Session.Chain.Append
@@ -256,7 +256,7 @@ package body TopoScript_API.Topology is
 
    begin
       if not Conversions.Read_Point_2D (Data, 1, P) then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
       --  The store of the run is at the kernel maximum capacity, so
@@ -534,6 +534,27 @@ package body TopoScript_API.Topology is
       end;
    end Make_Loop_From_Edges_Native;
 
+   --  The chain guards shared by Make_Loop and Make_Face: a chain
+   --  needs at least two points, and one loop length of edges at
+   --  most. False means the guard failed and the failure is already
+   --  recorded; the caller answers with its own default kind.
+   function Chain_Accepted return Boolean is
+      N : constant Natural :=
+        Natural (Session.Current_Session.Chain.Length);
+   begin
+      if N < 2 then
+         Session.Record_Failure
+           (TopoDiagnostics.Loop_Diagnostic
+              (TopoProof.Topology.Loops.Open_Chain));
+         return False;
+      end if;
+      if N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
+         Session.Record_Failure ("error: too many edges for one loop");
+         return False;
+      end if;
+      return True;
+   end Chain_Accepted;
+
    procedure Make_Loop_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
@@ -542,14 +563,7 @@ package body TopoScript_API.Topology is
       Kind : Loop_Kind := Open_Chain;
 
    begin
-      if N < 2 then
-         Session.Record_Failure
-           (TopoDiagnostics.Loop_Diagnostic
-              (TopoProof.Topology.Loops.Open_Chain));
-         Data (1) := Loop_To_HAC (Kind);
-         return;
-      elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
-         Session.Record_Failure ("error: too many edges for one loop");
+      if not Chain_Accepted then
          Data (1) := Loop_To_HAC (Kind);
          return;
       end if;
@@ -587,14 +601,7 @@ package body TopoScript_API.Topology is
       Kind : Face_Kind := Face_Invalid_Boundary;
 
    begin
-      if N < 2 then
-         Session.Record_Failure
-           (TopoDiagnostics.Loop_Diagnostic
-              (TopoProof.Topology.Loops.Open_Chain));
-         Data (1) := Face_To_HAC (Kind);
-         return;
-      elsif N - 1 > TopoProof.Topology.Loops.Max_Loop_Length then
-         Session.Record_Failure ("error: too many edges for one loop");
+      if not Chain_Accepted then
          Data (1) := Face_To_HAC (Kind);
          return;
       end if;

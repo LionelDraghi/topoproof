@@ -11,6 +11,7 @@ with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
+with TopoDiagnostics;
 with TopoScript_API.Conversions;
 with TopoScript_API.Session;
 
@@ -112,7 +113,7 @@ package body TopoScript_API.Drawing is
       pragma Unreferenced (Data);
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       --  The same axes configuration as the client scenes: automatic
@@ -128,11 +129,11 @@ package body TopoScript_API.Drawing is
       P : TopoProof.Geometry.Points.Point_3D;
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       if not Conversions.Read_Point_3D (Data, 1, P) then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -148,7 +149,7 @@ package body TopoScript_API.Drawing is
       V : TopoProof.Geometry.Vectors.Vector_3D;
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       if not Conversions.Read_Point_3D (Data, 1, O)
@@ -191,11 +192,11 @@ package body TopoScript_API.Drawing is
       P : TopoProof.Geometry.Points.Point_2D;
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       if not Conversions.Read_Point_2D (Data, 1, P) then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -204,6 +205,27 @@ package body TopoScript_API.Drawing is
          To_Unbounded_String (Hex_Of (To_Color (Data (3)))));
    end Draw_Point_2D_Native;
 
+   --  One drawn segment between two grid points: the vector record
+   --  appended to the scene, with the anchor names of its ends and
+   --  the color of the drawing operation. The label is empty for a
+   --  plain segment.
+   procedure Append_Segment
+     (P, Q : TopoProof.Geometry.Points.Point_2D;
+      Color : HAC_Sys.Interfacing.HAC_Element;
+      Label : String)
+   is
+   begin
+      Session.Current_Session.The_Scene.Vectors.Append
+        (Vector_Rec'
+           (From_Name =>
+              Anchor_Name (Integer (P.X), Integer (P.Y), 0),
+            To_Name   =>
+              Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
+            Label     => To_Unbounded_String (Label),
+            Color     =>
+              To_Unbounded_String (Hex_Of (To_Color (Color)))));
+   end Append_Segment;
+
    procedure Draw_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
@@ -211,13 +233,13 @@ package body TopoScript_API.Drawing is
       Q : TopoProof.Geometry.Points.Point_2D;
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       if not Conversions.Read_Point_2D (Data, 1, P)
         or else not Conversions.Read_Point_2D (Data, 3, Q)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
       if P.X = Q.X and then P.Y = Q.Y then
@@ -228,20 +250,12 @@ package body TopoScript_API.Drawing is
          DX : constant Integer := Integer (Q.X) - Integer (P.X);
          DY : constant Integer := Integer (Q.Y) - Integer (P.Y);
       begin
-         Session.Current_Session.The_Scene.Vectors.Append
-           (Vector_Rec'
-              (From_Name =>
-                 Anchor_Name (Integer (P.X), Integer (P.Y), 0),
-               To_Name   =>
-                 Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
-               Label     =>
-                 To_Unbounded_String
-                   ("(" & Ada.Strings.Fixed.Trim
-                        (DX'Image, Ada.Strings.Both)
-                    & ", " & Ada.Strings.Fixed.Trim
-                        (DY'Image, Ada.Strings.Both) & ")"),
-               Color     =>
-                 To_Unbounded_String (Hex_Of (To_Color (Data (5))))));
+         Append_Segment
+           (P, Q, Data (5),
+            "(" & Ada.Strings.Fixed.Trim
+                 (DX'Image, Ada.Strings.Both)
+             & ", " & Ada.Strings.Fixed.Trim
+                 (DY'Image, Ada.Strings.Both) & ")");
       end;
    end Draw_Edge_Native;
 
@@ -254,28 +268,20 @@ package body TopoScript_API.Drawing is
 
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       if not Conversions.Read_Point_2D (Data, 1, P)
         or else not Conversions.Read_Point_2D (Data, 3, Q)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
       if P.X = Q.X and then P.Y = Q.Y then
          return;
       end if;
 
-      Session.Current_Session.The_Scene.Vectors.Append
-        (Vector_Rec'
-           (From_Name =>
-              Anchor_Name (Integer (P.X), Integer (P.Y), 0),
-            To_Name   =>
-              Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
-            Label     => Null_Unbounded_String,
-            Color     =>
-              To_Unbounded_String (Hex_Of (To_Color (Data (5))))));
+      Append_Segment (P, Q, Data (5), "");
    end Draw_Segment_2D_Native;
 
    procedure End_Image_Native
@@ -284,7 +290,7 @@ package body TopoScript_API.Drawing is
       pragma Unreferenced (Data);
    begin
       if not Session.Current_Session.Image_Open then
-         Session.Record_Failure ("error: no open image");
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
          return;
       end if;
       Session.Current_Session.Image_Open := False;
