@@ -20,15 +20,20 @@ with TopoProof.Topology.Loops;
 
 package body TopoScript_API.Output is
 
-   --  The trimmed decimal image of one grid coordinate: the canonical
-   --  form of every coordinate in a result line.
-   function Img (C : TopoProof.Numerics.Grid_Coordinate) return String is
-     (Ada.Strings.Fixed.Trim (C'Image, Ada.Strings.Both));
+   --  The trimmed decimal image of one discrete value: the canonical
+   --  form of every numeric field in a result line, whatever its
+   --  domain type.
+   generic
+      type T is (<>);
+   function Trimmed_Image (V : T) return String;
 
-   --  The trimmed decimal image of one component difference: the
-   --  canonical form of every vector component in a result line.
-   function Img (C : TopoProof.Numerics.Vector_Component) return String is
-     (Ada.Strings.Fixed.Trim (C'Image, Ada.Strings.Both));
+   function Trimmed_Image (V : T) return String is
+     (Ada.Strings.Fixed.Trim (V'Image, Ada.Strings.Both));
+
+   function Img is new Trimmed_Image (TopoProof.Numerics.Grid_Coordinate);
+   function Img is new Trimmed_Image (TopoProof.Numerics.Vector_Component);
+   function Img is new Trimmed_Image (TopoProof.Numerics.Cross_Component);
+   function Img is new Trimmed_Image (TopoProof.Numerics.Dot_Product);
 
    function Image (P : TopoProof.Geometry.Points.Point_3D) return String is
      ("point " & Img (P.X) & " " & Img (P.Y) & " " & Img (P.Z));
@@ -37,6 +42,14 @@ package body TopoScript_API.Output is
      (V : TopoProof.Geometry.Vectors.Vector_3D) return String
    is
      ("vector " & Img (V.DX) & " " & Img (V.DY) & " " & Img (V.DZ));
+
+   function Image
+     (V : TopoProof.Geometry.Vectors.Cross_Vector_3D) return String
+   is
+     ("cross " & Img (V.DX) & " " & Img (V.DY) & " " & Img (V.DZ));
+
+   function Image (D : TopoProof.Numerics.Dot_Product) return String is
+     ("dot " & Img (D));
 
    function Image (K : Loop_Result) return String is
      (case K is
@@ -80,10 +93,9 @@ package body TopoScript_API.Output is
 
    --  The trimmed decimal image of one topology handle: the canonical
    --  form of a vertex or edge handle in a construction trace. Both
-   --  handle types are subtypes of Positive, so one implementation
+   --  handle types are subtypes of Positive, so one instantiation
    --  covers them.
-   function Img (H : Positive) return String
-   is (Ada.Strings.Fixed.Trim (H'Image, Ada.Strings.Both));
+   function Img is new Trimmed_Image (Positive);
 
    function Image
      (H : TopoProof.Topology.Vertices.Vertex_Handle;
@@ -162,7 +174,7 @@ package body TopoScript_API.Output is
 
    begin
       if not Conversions.Read_Point_3D (Data, 1, P) then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -183,6 +195,33 @@ package body TopoScript_API.Output is
 
       Put_Line (Image (V));
    end Put_Vector_Native;
+
+   procedure Put_Dot_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: D at 1.
+      D : constant TopoProof.Numerics.Dot_Product :=
+        Conversions.Dot_From_HAC (Data (1));
+
+   begin
+      Put_Line (Image (D));
+   end Put_Dot_Native;
+
+   procedure Put_Cross_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: DX at 1, DY at 2, DZ at 3.
+      V : TopoProof.Geometry.Vectors.Cross_Vector_3D;
+
+   begin
+      if not Conversions.Read_Cross_Vector_3D (Data, 1, V) then
+         Session.Record_Failure
+           ("error: cross component outside the component domain");
+         return;
+      end if;
+
+      Put_Line (Image (V));
+   end Put_Cross_Vector_Native;
 
    procedure Put_Equal_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
@@ -319,7 +358,7 @@ package body TopoScript_API.Output is
               or else not Conversions.Grid_In_Range (PY)
             then
                Session.Record_Failure
-                 ("error: coordinate outside the grid");
+                 (TopoDiagnostics.Outside_Grid_Diagnostic);
                return;
             end if;
             Put_Line
@@ -335,7 +374,7 @@ package body TopoScript_API.Output is
               or else not Conversions.Grid_In_Range (QY)
             then
                Session.Record_Failure
-                 ("error: coordinate outside the grid");
+                 (TopoDiagnostics.Outside_Grid_Diagnostic);
                return;
             end if;
             Put_Line

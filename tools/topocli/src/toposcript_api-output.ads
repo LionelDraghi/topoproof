@@ -31,6 +31,12 @@ package TopoScript_API.Output is
    function Image
      (V : TopoProof.Geometry.Vectors.Vector_3D) return String;
 
+   --  The canonical image of an exact dot product: `dot D`.
+   function Image (D : TopoProof.Numerics.Dot_Product) return String;
+
+   --  The canonical image of an exact cross vector: `cross DX DY DZ`.
+   function Image (V : TopoProof.Geometry.Vectors.Cross_Vector_3D) return String;
+
    --  The valid results of the loop and face classifications.
    subtype Loop_Result is Topology.Loop_Kind
      range Topology.Counter_Clockwise .. Topology.Degenerate;
@@ -114,6 +120,16 @@ package TopoScript_API.Output is
    --  Native side of Put_Vector: writes the canonical image of the
    --  vector.
    procedure Put_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Dot: writes the canonical image of the
+   --  exact dot product.
+   procedure Put_Dot_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Cross_Vector: writes the canonical image of
+   --  the cross vector.
+   procedure Put_Cross_Vector_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Equal: writes the canonical image of the

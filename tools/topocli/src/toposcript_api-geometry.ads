@@ -56,6 +56,19 @@ package TopoScript_API.Geometry is
    procedure Displacement_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Dot_Product: the script passes the two vectors;
+   --  the callback runs the proved Dot_Product and writes the exact
+   --  result into the out parameter, or records the diagnostic when
+   --  the exact result leaves the 64-bit script integers.
+   procedure Dot_Product_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Cross_Product: the callback runs the proved
+   --  Cross_Product and writes the exact cross vector into the out
+   --  parameter.
+   procedure Cross_Product_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Equal: the callback runs the exact point
    --  equality of the kernel and writes the result into the out
    --  parameter.

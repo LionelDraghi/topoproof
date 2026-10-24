@@ -36,6 +36,24 @@ package TopoScript_API.Conversions is
    function Vector_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
      (TopoProof.Numerics.Vector_Component);
 
+   --  The exact cross components and dot products are wider than the
+   --  64-bit script integers: every cross component fits it, while a
+   --  dot result is written only after the caller checked the 64-bit
+   --  range (Dot_In_HAC_Range).
+   function Cross_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
+     (TopoProof.Numerics.Cross_Component);
+
+   function Dot_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
+     (TopoProof.Numerics.Dot_Product);
+
+   function Dot_From_HAC is new HAC_Sys.Interfacing.To_Native_Any_Integer
+     (TopoProof.Numerics.Dot_Product);
+
+   --  The exact dot product is wider than the 64-bit script integers:
+   --  False means the exact result cannot be carried by the scripting
+   --  layer, and the caller records its own diagnostic.
+   function Dot_In_HAC_Range (V : TopoProof.Numerics.Dot_Product) return Boolean;
+
    function Vertex_Handle_To_HAC is
      new HAC_Sys.Interfacing.To_HAC_Any_Integer
        (TopoProof.Topology.Vertices.Vertex_Handle);
@@ -87,6 +105,16 @@ package TopoScript_API.Conversions is
       From : Positive;
       V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean;
 
+   --  Read one script cross vector from the HAC elements at From: the
+   --  components are checked against the Cross_Component domain, which
+   --  is slightly narrower than the 64-bit script integers. False
+   --  means at least one component is outside the domain: V is then
+   --  left unassigned, and the caller records its own diagnostic.
+   function Read_Cross_Vector_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      V    : out TopoProof.Geometry.Vectors.Cross_Vector_3D) return Boolean;
+
    --  Write one point into the HAC elements at From.
    procedure Write_Point_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
@@ -98,6 +126,13 @@ package TopoScript_API.Conversions is
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
       From :        Positive;
       V    :        TopoProof.Geometry.Vectors.Vector_3D);
+
+   --  Write one cross vector into the HAC elements at From: every
+   --  cross component fits the 64-bit script integers.
+   procedure Write_Cross_Vector_3D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      V    :        TopoProof.Geometry.Vectors.Cross_Vector_3D);
 
    --  Read one script vertex handle from the HAC element at From: the
    --  value is read on the widest native integer, then checked against

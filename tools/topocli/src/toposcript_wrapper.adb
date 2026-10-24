@@ -388,6 +388,24 @@ package body TopoScript_Wrapper is
          "Result : out Vector_3D)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   procedure Dot_Product");
+      Append_Line
+        ("      (A : in Vector_3D; B : in Vector_3D; " &
+         "Result : out Integer)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Cross_Product");
+      Append_Line
+        ("      (A : in Vector_3D; B : in Vector_3D; " &
+         "Result : out Vector_3D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Dot (D : in Integer)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Cross_Vector (V : in Vector_3D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   procedure Equal");
       Append_Line
         ("      (A : in Point_3D; B : in Point_3D; " &

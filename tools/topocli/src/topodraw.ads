@@ -10,9 +10,6 @@ with Ada.Strings.Unbounded;
 
 package Topodraw is
 
-   package Point_Vectors is new Ada.Containers.Indefinite_Vectors
-     (Positive, String);
-
    type Point_Rec is record
       Name : Ada.Strings.Unbounded.Unbounded_String;
       X, Y, Z : Integer;
@@ -48,17 +45,7 @@ package Topodraw is
 
    Scene_Error : exception;
 
-   --  Parse one scene source into a Scene value. Raise Scene_Error with a
-   --  message prefixed by the source line number on any invalid statement.
-   function Parse_Scene (Source : String) return Scene;
-
    --  Render a scene as a deterministic isometric SVG image.
    function Render (S : Scene) return String;
-
-   --  Scan one Markdown file for scene comments (<!-- topodraw <file>),
-   --  render each scene to its declared SVG file, and return the number of
-   --  diagrams generated. Raise Scene_Error if a scene source contains
-   --  '--', or if a generated file is not referenced elsewhere in the page.
-   function Process (Markdown_Path : String) return Natural;
 
 end Topodraw;

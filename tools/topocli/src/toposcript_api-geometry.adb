@@ -5,6 +5,7 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
+with TopoDiagnostics;
 with TopoScript_API.Conversions;
 with TopoScript_API.Session;
 
@@ -29,7 +30,7 @@ package body TopoScript_API.Geometry is
       if not Conversions.Read_Point_3D (Data, 1, P)
         or else not Conversions.Read_Vector_3D (Data, 4, V)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -55,12 +56,57 @@ package body TopoScript_API.Geometry is
       if not Conversions.Read_Point_3D (Data, 1, A)
         or else not Conversions.Read_Point_3D (Data, 4, B)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
       Conversions.Write_Vector_3D (Data, 7, Displacement (A, B));
    end Displacement_Native;
+
+   procedure Dot_Product_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, Result at 7.
+      A, B : TopoProof.Geometry.Vectors.Vector_3D;
+
+   begin
+      if not Conversions.Read_Vector_3D (Data, 1, A)
+        or else not Conversions.Read_Vector_3D (Data, 4, B)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      declare
+         D : constant TopoProof.Numerics.Dot_Product :=
+           TopoProof.Geometry.Vectors.Dot_Product (A, B);
+      begin
+         if Conversions.Dot_In_HAC_Range (D) then
+            Data (7) := Conversions.Dot_To_HAC (D);
+         else
+            Session.Record_Failure
+              ("error: dot product outside the 64-bit scripting range");
+         end if;
+      end;
+   end Dot_Product_Native;
+
+   procedure Cross_Product_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, Result at 7..9.
+      A, B : TopoProof.Geometry.Vectors.Vector_3D;
+
+   begin
+      if not Conversions.Read_Vector_3D (Data, 1, A)
+        or else not Conversions.Read_Vector_3D (Data, 4, B)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      Conversions.Write_Cross_Vector_3D
+        (Data, 7, TopoProof.Geometry.Vectors.Cross_Product (A, B));
+   end Cross_Product_Native;
 
    procedure Equal_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
@@ -72,7 +118,7 @@ package body TopoScript_API.Geometry is
       if not Conversions.Read_Point_3D (Data, 1, A)
         or else not Conversions.Read_Point_3D (Data, 4, B)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -91,7 +137,7 @@ package body TopoScript_API.Geometry is
         or else not Conversions.Read_Point_2D (Data, 3, B)
         or else not Conversions.Read_Point_2D (Data, 5, C)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 
@@ -111,7 +157,7 @@ package body TopoScript_API.Geometry is
         or else not Conversions.Read_Point_2D (Data, 5, C)
         or else not Conversions.Read_Point_2D (Data, 7, D)
       then
-         Session.Record_Failure ("error: coordinate outside the grid");
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
          return;
       end if;
 

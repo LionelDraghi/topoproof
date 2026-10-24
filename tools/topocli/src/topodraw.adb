@@ -5,7 +5,6 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
-with Ada.Directories;
 with Ada.Numerics.Long_Elementary_Functions;
 with Ada.Strings;
 with Ada.Strings.Fixed;
@@ -22,7 +21,20 @@ package body Topodraw is
 
    W : constant := 640;
    H : constant := 400;
+
+   --  The font size of the diagram text, in pixels: every label
+   --  metric derives from it, so a font change moves the whole
+   --  label layout along.
+   Font_Size : constant := 13;
+
    Margin : constant Long_Float := 48.0;
+
+   --  The smallest positive divisor of the fitting and tick
+   --  divisions: only the non-zero division matters, the value
+   --  itself is arbitrary smallness. A guard, not an epsilon: two
+   --  positions are never compared to it.
+   Min_Divisor : constant Long_Float := 0.000_000_001;
+
    Cos30 : constant Long_Float := 0.866_025_403_784_438_6;
    Sin30 : constant Long_Float := 0.5;
 
@@ -32,7 +44,8 @@ package body Topodraw is
    Axis_Col : constant String := "#8b949e";
    Path_Col : constant String := "#6e7781";
    Font_Attr : constant String :=
-     "font-family=""sans-serif"" font-size=""13""";
+     "font-family=""sans-serif"" font-size=""" &
+     Trim (Font_Size'Image, Both) & """";
 
    type Coord3 is record
       X, Y, Z : Integer;
@@ -45,16 +58,6 @@ package body Topodraw is
       X, Y : Long_Float;
    end record;
 
-   type Scene_Span is record
-      Target     : Unbounded_String;
-      Scene_Body : Unbounded_String;
-      Start      : Natural;
-      Finish     : Natural;
-   end record;
-
-   package Scene_Span_Vectors is new Ada.Containers.Indefinite_Vectors
-     (Positive, Scene_Span);
-
    type Axis_Def is record
       Tip    : Coord3;
       Letter : String (1 .. 1);
@@ -66,30 +69,18 @@ package body Topodraw is
       Perp : Coord3;
    end record;
 
-   procedure Head
-     (S : String; Word : out Unbounded_String;
-      Rest : out Unbounded_String);
-
-   procedure Head
-     (S : String; Word : out Unbounded_String; Rest : out Unbounded_String)
-   is
-      Sp : constant Natural := Index (S, " ");
-   begin
-
-      if Sp = 0 then
-         Word := To_Unbounded_String (S);
-         Rest := Null_Unbounded_String;
-      else
-         Word := To_Unbounded_String (S (S'First .. Sp - 1));
-         Rest := To_Unbounded_String (Trim (S (Sp + 1 .. S'Last), Both));
-      end if;
-   end Head;
-
    function Int_Image (V : Integer) return String is
      (Trim (Integer'Image (V), Both));
 
    function Same_Position (A, B : Point_Rec) return Boolean is
      (A.X = B.X and then A.Y = B.Y and then A.Z = B.Z);
+
+   --  The color of one scene item: the color given by the scene, or
+   --  the default of the rendered diagrams when the scene left it
+   --  empty.
+   function Effective_Color
+     (Color : Unbounded_String; Default : String) return String is
+     (if Color = "" then Default else To_String (Color));
 
    function Find_Point (S : Scene; Name : String) return Point_Rec;
 
@@ -103,115 +94,6 @@ package body Topodraw is
       end loop;
       raise Scene_Error with "unknown point '" & Name & "'";
    end Find_Point;
-
-   function Parse_Scene (Source : String) return Scene is
-      S : Scene;
-      Pos : Natural := Source'First;
-      Line_No : Natural := 0;
-
-   begin
-      while Pos <= Source'Last loop
-         declare
-            Line_End : constant Natural :=
-              Index (Source, [1 => ASCII.LF], Pos);
-            Raw_Line : constant String :=
-              (if Line_End = 0 then Source (Pos .. Source'Last)
-               else Source (Pos .. Line_End - 1));
-            Hash : constant Natural := Index (Raw_Line, "#");
-            Line : constant String :=
-              (if Hash = 0 then Raw_Line
-               else Trim (Raw_Line (Raw_Line'First .. Hash - 1), Both));
-            Word, Rest : Unbounded_String;
-
-         begin
-            Line_No := Line_No + 1;
-            if Line /= "" then
-               Head (Line, Word, Rest);
-               if To_String (Word) = "axes" then
-                  if Rest /= "" then
-                     raise Scene_Error
-                       with "line" & Integer'Image (Line_No)
-                            & ": 'axes' takes no argument";
-                  end if;
-                  S.Draw_Axes := True;
-
-               elsif To_String (Word) = "ticks" then
-                  if Rest = "" then
-                     S.Tick_Step := 0;
-                  else
-                     S.Tick_Step := Integer'Value (To_String (Rest));
-                  end if;
-                  if S.Tick_Step < 0 then
-                     raise Scene_Error
-                       with "line" & Integer'Image (Line_No)
-                            & ": STEP must not be negative";
-                  end if;
-                  S.Draw_Axes := True;
-
-               elsif To_String (Word) = "anchors" then
-                  if Rest /= "" then
-                     raise Scene_Error
-                       with "line" & Integer'Image (Line_No)
-                            & ": 'anchors' takes no argument";
-                  end if;
-                  S.Anchors := True;
-
-               elsif To_String (Word) = "point" then
-                  declare
-                     Name, Coords : Unbounded_String;
-                     Cx, Cy, Cz : Unbounded_String;
-
-                  begin
-                     Head (To_String (Rest), Name, Coords);
-                     Head (To_String (Coords), Cx, Coords);
-                     Head (To_String (Coords), Cy, Coords);
-                     Cz := Coords;
-                     S.Points.Append
-                       (Point_Rec'(Name     => Name,
-                         X         => Integer'Value (To_String (Cx)),
-                         Y         => Integer'Value (To_String (Cy)),
-                         Z         => Integer'Value (To_String (Cz)),
-                         others    => <>));
-                  exception
-                     when Constraint_Error =>
-                        raise Scene_Error
-                          with "line" & Integer'Image (Line_No)
-                               & ": 'point NAME X Y Z' expected";
-                  end;
-
-               elsif To_String (Word) = "vector" then
-                  declare
-                     From_Name, To_Name, Rest_Label : Unbounded_String;
-
-                  begin
-                     Head (To_String (Rest), From_Name, To_Name);
-                     Head (To_String (To_Name), To_Name, Rest_Label);
-                     S.Vectors.Append (Vector_Rec'(From_Name => From_Name,
-                                    To_Name   => To_Name,
-                                    Label     => Rest_Label,
-                                    others    => <>));
-                  end;
-
-               else
-                  raise Scene_Error
-                    with "line" & Integer'Image (Line_No)
-                         & ": unknown statement '"
-                         & To_String (Word) & "'";
-               end if;
-            end if;
-            if Line_End = 0 then
-               Pos := Source'Last + 1;
-            else
-               Pos := Line_End + 1;
-            end if;
-         end;
-      end loop;
-
-      if Natural (S.Points.Length) = 0 and then not S.Draw_Axes then
-         raise Scene_Error with "empty scene";
-      end if;
-      return S;
-   end Parse_Scene;
 
    --  Wide arithmetic for the automatic tick step: the intermediate
    --  products (8 * B * 5, 8 * B * K) may leave Integer, so they are
@@ -284,9 +166,9 @@ package body Topodraw is
 
       declare
          Dx : constant Long_Float :=
-           Long_Float'Max (0.000_000_001, Max_X - Min_X);
+           Long_Float'Max (Min_Divisor, Max_X - Min_X);
          Dy : constant Long_Float :=
-           Long_Float'Max (0.000_000_001, Max_Y - Min_Y);
+           Long_Float'Max (Min_Divisor, Max_Y - Min_Y);
          Scale : constant Long_Float :=
            Long_Float'Min
              ((Long_Float (W) - 2.0 * Margin) / Dx,
@@ -307,12 +189,41 @@ package body Topodraw is
    --  SVG emission
    ---------------------------------------------------------------------------
 
+   --  The bounding box of one placed label, in screen coordinates: the
+   --  width is the label length times the character width of the
+   --  diagram font, the height is one label line.
+   type Label_Box is record
+      Left, Top, Right, Bottom : Long_Float;
+   end record;
+
+   --  The bound of the placed label boxes: one box per scene point
+   --  label and one per labeled vector, far above the largest
+   --  documentation scene; beyond it the placement raises
+   --  Scene_Error instead of overflowing the array.
+   Max_Placed_Labels : constant := 256;
+
+   type Placed_Labels is array (1 .. Max_Placed_Labels) of Label_Box;
+
+   --  The label metrics, derived from the font size so a font
+   --  change moves the label layout along: the average character
+   --  width was measured at font size 13 and scales linearly, one
+   --  label line is two characters high, and the stacking shift is
+   --  the font size plus a little air between two stacked lines.
+   Char_Width           : constant Long_Float :=
+     Long_Float (Font_Size) * 7.0 / 13.0;
+   Line_Height          : constant Long_Float := 2.0 * Char_Width;
+   Label_Vertical_Shift : constant Long_Float :=
+     Long_Float (Font_Size) + 2.0;
+
    --  The SVG document under construction: the fitted projection of
-   --  the scene, and the text emitted so far. The primitives append
-   --  to the buffer; nothing is written to a file here.
+   --  the scene, the text emitted so far, and the placed label boxes.
+   --  The primitives append to the buffer; nothing is written to a
+   --  file here.
    type SVG_Document is record
-      Proj   : Projection;
-      Buffer : Unbounded_String;
+      Proj        : Projection;
+      Buffer      : Unbounded_String;
+      Labels      : Placed_Labels;
+      Labels_Last : Natural := 0;
    end record;
 
    procedure Append_F (Doc : in out SVG_Document; V : Long_Float) is
@@ -390,6 +301,50 @@ package body Topodraw is
       Append (Doc.Buffer, """ fill=""" & Color & """ " & Font_Attr);
       Append (Doc.Buffer, ">" & Content & "</text>" & ASCII.LF);
    end Text_At;
+
+   --  True when no already placed label box overlaps the candidate.
+   --  The deconfliction is decided in screen coordinates: two distinct
+   --  scene positions can project to the same screen position, and the
+   --  3D equality of the scene points would leave their labels stacked.
+   function Label_Free (Doc : SVG_Document; B : Label_Box) return Boolean is
+   begin
+      for K in 1 .. Doc.Labels_Last loop
+         if B.Left < Doc.Labels (K).Right
+           and then Doc.Labels (K).Left < B.Right
+           and then B.Top < Doc.Labels (K).Bottom
+           and then Doc.Labels (K).Top < B.Bottom
+         then
+            return False;
+         end if;
+      end loop;
+      return True;
+   end Label_Free;
+
+   --  Place one label, shifted down in screen coordinates while its
+   --  box overlaps an already placed label box. The box width is the
+   --  label length times the character width of the diagram font, its
+   --  height is one label line.
+   procedure Place_Label
+     (Doc : in out SVG_Document; X, Y : Long_Float;
+      Content, Color : String)
+   is
+      Left   : constant Long_Float := X;
+      Right  : constant Long_Float :=
+        X + Long_Float (Content'Length) * Char_Width;
+      Top    : Long_Float := Y - Line_Height;
+      Bottom : Long_Float := Y;
+   begin
+      while not Label_Free (Doc, (Left, Top, Right, Bottom)) loop
+         Top    := Top + Label_Vertical_Shift;
+         Bottom := Bottom + Label_Vertical_Shift;
+      end loop;
+      Text_At (Doc, Left, Bottom, Content, Color);
+      if Doc.Labels_Last = Doc.Labels'Last then
+         raise Scene_Error with "too many labels";
+      end if;
+      Doc.Labels_Last := Doc.Labels_Last + 1;
+      Doc.Labels (Doc.Labels_Last) := (Left, Top, Right, Bottom);
+   end Place_Label;
 
    ---------------------------------------------------------------------------
    --  The phases of one diagram
@@ -548,7 +503,7 @@ package body Topodraw is
                         Vy : constant Long_Float := B.Y - A.Y;
                         Norm : constant Long_Float :=
                           Long_Float'Max
-                            (0.000_000_001, Sqrt (Vx * Vx + Vy * Vy));
+                            (Min_Divisor, Sqrt (Vx * Vx + Vy * Vy));
                         Dx : constant Long_Float := 5.0 * Vx / Norm;
                         Dy : constant Long_Float := 5.0 * Vy / Norm;
                      begin
@@ -587,13 +542,11 @@ package body Topodraw is
             end loop;
             if Dup = 0 then
                Circle (Doc, Pos, 5.0,
-                       (if Pt.Color = "" then Pt_Fill
-                        else To_String (Pt.Color)),
+                       Effective_Color (Pt.Color, Pt_Fill),
                        "#ffffff", 1.5);
             else
                Circle (Doc, Pos, Long_Float (5 + 4 * Dup), "none",
-                       (if Pt.Color = "" then Pt_Fill
-                        else To_String (Pt.Color)),
+                       Effective_Color (Pt.Color, Pt_Fill),
                        1.5, "3 2");
             end if;
             declare
@@ -602,107 +555,113 @@ package body Topodraw is
                  & ", " & Int_Image (Pt.Y) & ", "
                  & Int_Image (Pt.Z) & ")";
             begin
-               Text_At (Doc, Pos.X + 10.0,
-                        Pos.Y - 10.0 + Long_Float (30 * Dup),
-                        Label, Pt_Text);
+               Place_Label (Doc, Pos.X + 10.0,
+                            Pos.Y - 10.0 + Label_Vertical_Shift
+                              * Long_Float (Dup),
+                            Label, Pt_Text);
             end;
          end;
       end loop;
    end Emit_Points;
 
    --  The arrow markers of the vector colors, then one arrow per
-   --  vector, with its label at the middle.
+   --  vector, with its label at the middle. A label that would overlap
+   --  an already placed one is shifted down until its box is free,
+   --  through the shared Place_Label of the document.
    procedure Emit_Vectors (Doc : in out SVG_Document; S : Scene) is
-   begin
-      declare
-         --  One arrow marker per distinct vector color: the
-         --  default color keeps the plain arrow marker, so the
-         --  CLI scenes render exactly as before.
-         Max_Colors : constant := 8;
-         Colors : array (1 .. Max_Colors) of Unbounded_String;
-         Count  : Natural := 0;
 
-         procedure Register_Color (Color : Unbounded_String) is
-            Found : Boolean := False;
-         begin
-            if Color /= "" then
-               for K in 1 .. Count loop
-                  if Colors (K) = Color then
-                     Found := True;
-                  end if;
-               end loop;
-               if not Found then
-                  if Count = Max_Colors then
-                     raise Scene_Error with "too many vector colors";
-                  end if;
-                  Count := Count + 1;
-                  Colors (Count) := Color;
-               end if;
-            end if;
-         end Register_Color;
+      --  The bound of the arrow marker colors: one marker per distinct
+      --  vector color, far above the largest documentation scene;
+      --  beyond it the registration raises Scene_Error instead of
+      --  overflowing the array.
+      Max_Colors : constant := 8;
+      Colors     : array (1 .. Max_Colors) of Unbounded_String;
+      Count      : Natural := 0;
 
-         function Id_Of (Color : Unbounded_String) return String is
-         begin
-            if Color = "" then
-               return "arrow";
-            end if;
+      procedure Register_Color (Color : Unbounded_String) is
+         Found : Boolean := False;
+      begin
+         if Color /= "" then
             for K in 1 .. Count loop
                if Colors (K) = Color then
-                  return "arrow" & Trim (K'Image, Both);
+                  Found := True;
                end if;
             end loop;
-            return "arrow";
-         end Id_Of;
+            if not Found then
+               if Count = Max_Colors then
+                  raise Scene_Error with "too many vector colors";
+               end if;
+               Count := Count + 1;
+               Colors (Count) := Color;
+            end if;
+         end if;
+      end Register_Color;
 
+      function Id_Of (Color : Unbounded_String) return String is
       begin
-         for V of S.Vectors loop
-            Register_Color (V.Color);
+         if Color = "" then
+            return "arrow";
+         end if;
+         for K in 1 .. Count loop
+            if Colors (K) = Color then
+               return "arrow" & Trim (K'Image, Both);
+            end if;
          end loop;
+         return "arrow";
+      end Id_Of;
 
-         Append (Doc.Buffer, "<defs><marker id=""arrow"" markerWidth=""10"" "
+      --  One arrow marker: a small filled triangle, in the color of
+      --  the vectors it points.
+      procedure Emit_Marker (Id : String; Color : String) is
+      begin
+         Append (Doc.Buffer, "<marker id=""" & Id
+                 & """ markerWidth=""10"" "
                  & "markerHeight=""10"" refX=""8"" refY=""3"" "
                  & "orient=""auto""><path d=""M0,0 L8,3 L0,6 z"" fill="""
-                 & Vec_Col & """/></marker>");
-         for K in 1 .. Count loop
-            Append (Doc.Buffer, "<marker id=""arrow" & Trim (K'Image, Both)
-                    & """ markerWidth=""10"" "
-                    & "markerHeight=""10"" refX=""8"" refY=""3"" "
-                    & "orient=""auto""><path d=""M0,0 L8,3 L0,6 z"""
-                    & " fill=""" & To_String (Colors (K))
-                    & """/></marker>");
-         end loop;
-         Append (Doc.Buffer, "</defs>" & ASCII.LF);
+                 & Color & """/></marker>");
+      end Emit_Marker;
 
-         for V of S.Vectors loop
-            declare
-               From : constant Point_Rec :=
-                 Find_Point (S, To_String (V.From_Name));
-               To   : constant Point_Rec :=
-                 Find_Point (S, To_String (V.To_Name));
-               A : constant Screen2 :=
-                 To_Screen (Doc.Proj, (From.X, From.Y, From.Z));
-               B : constant Screen2 := To_Screen (Doc.Proj, (To.X, To.Y, To.Z));
-               Line_Color : constant String :=
-                 (if V.Color = "" then Vec_Col
-                  else To_String (V.Color));
-            begin
+   begin
+      for V of S.Vectors loop
+         Register_Color (V.Color);
+      end loop;
 
-               if Same_Position (From, To) then
-                  raise Scene_Error
-                    with "vector " & To_String (V.From_Name) & " -> "
-                         & To_String (V.To_Name)
-                         & ": coincident points";
-               end if;
-               Line (Doc, A, B, Line_Color, 2.0, "",
-                     "url(#" & Id_Of (V.Color) & ")");
-               if To_String (V.Label) /= "" then
-                  Text_At (Doc, (A.X + B.X) / 2.0,
-                           (A.Y + B.Y) / 2.0 - 8.0,
-                           To_String (V.Label), Line_Color);
-               end if;
-            end;
-         end loop;
-      end;
+      Append (Doc.Buffer, "<defs>");
+      Emit_Marker ("arrow", Vec_Col);
+      for K in 1 .. Count loop
+         Emit_Marker ("arrow" & Trim (K'Image, Both),
+                      To_String (Colors (K)));
+      end loop;
+      Append (Doc.Buffer, "</defs>" & ASCII.LF);
+
+      for V of S.Vectors loop
+         declare
+            From : constant Point_Rec :=
+              Find_Point (S, To_String (V.From_Name));
+            To   : constant Point_Rec :=
+              Find_Point (S, To_String (V.To_Name));
+            A : constant Screen2 :=
+              To_Screen (Doc.Proj, (From.X, From.Y, From.Z));
+            B : constant Screen2 := To_Screen (Doc.Proj, (To.X, To.Y, To.Z));
+            Line_Color : constant String :=
+              Effective_Color (V.Color, Vec_Col);
+         begin
+
+            if Same_Position (From, To) then
+               raise Scene_Error
+                 with "vector " & To_String (V.From_Name) & " -> "
+                      & To_String (V.To_Name)
+                      & ": coincident points";
+            end if;
+            Line (Doc, A, B, Line_Color, 2.0, "",
+                  "url(#" & Id_Of (V.Color) & ")");
+            if To_String (V.Label) /= "" then
+               Place_Label (Doc, (A.X + B.X) / 2.0,
+                            (A.Y + B.Y) / 2.0 - 8.0,
+                            To_String (V.Label), Line_Color);
+            end if;
+         end;
+      end loop;
    end Emit_Vectors;
 
    function Render (S : Scene) return String is
@@ -710,9 +669,10 @@ package body Topodraw is
       Anchors : constant Coord_Vectors.Vector :=
         Collect_Anchors (S, Unit);
       Doc     : SVG_Document :=
-        (Proj   => Fit (Anchors),
-         Buffer => Null_Unbounded_String);
-
+        (Proj        => Fit (Anchors),
+         Buffer      => Null_Unbounded_String,
+         Labels      => [others => (0.0, 0.0, 0.0, 0.0)],
+         Labels_Last => 0);
    begin
       Emit_Background (Doc);
       Emit_Anchor_Paths (Doc, S);
@@ -723,182 +683,5 @@ package body Topodraw is
       Append (Doc.Buffer, "</svg>");
       return To_String (Doc.Buffer);
    end Render;
-
-   function Directory_Of (Path : String) return String;
-
-   function Directory_Of (Path : String) return String is
-   begin
-
-      for I in reverse Path'Range loop
-         if Path (I) = '/' then
-            return Path (Path'First .. I - 1);
-         end if;
-      end loop;
-      return ".";
-   end Directory_Of;
-
-   --  The scene comments of one Markdown page: every
-   --  <!-- topodraw TARGET ... --> comment, with its target file and
-   --  its scene source. Raise Scene_Error on an unterminated comment,
-   --  or on a scene source that contains '--', which would close the
-   --  HTML comment early.
-   function Scan_Scenes
-      (Markdown_Path : String; T : String)
-      return Scene_Span_Vectors.Vector
-   is
-      Scenes : Scene_Span_Vectors.Vector;
-      I : Natural := Index (T, "<!--");
-
-   begin
-      while I /= 0 loop
-         declare
-            J : Natural := I + 4;
-            Target, Scene_Body : Unbounded_String;
-            Finish : Natural;
-         begin
-            while J <= T'Last
-              and then (T (J) = ' ' or else T (J) = ASCII.HT
-                        or else T (J) = ASCII.LF or else T (J) = ASCII.CR)
-            loop
-               J := J + 1;
-            end loop;
-            if J + 7 <= T'Last
-              and then T (J .. J + 7) = "topodraw"
-              and then J + 8 <= T'Last
-              and then (T (J + 8) = ' ' or else T (J + 8) = ASCII.HT)
-            then
-               declare
-                  K : Natural := J + 9;
-                  Target_Start : Natural;
-                  Body_Start, Body_End : Natural;
-
-                  --  The first position at or after From that is
-                  --  neither a space nor a tab.
-                  function Skip_Blanks (From : Natural) return Natural is
-                     P : Natural := From;
-                  begin
-                     while P <= T'Last
-                       and then (T (P) = ' ' or else T (P) = ASCII.HT)
-                     loop
-                        P := P + 1;
-                     end loop;
-                     return P;
-                  end Skip_Blanks;
-
-               begin
-                  K := Skip_Blanks (K);
-                  Target_Start := K;
-                  while K <= T'Last
-                    and then T (K) /= ' ' and then T (K) /= ASCII.HT
-                    and then T (K) /= ASCII.LF and then T (K) /= ASCII.CR
-                  loop
-                     K := K + 1;
-                  end loop;
-                  Target := To_Unbounded_String
-                    (T (Target_Start .. K - 1));
-                  K := Skip_Blanks (K);
-                  if K <= T'Last and then T (K) = ASCII.LF then
-                     Body_Start := K + 1;
-                     Body_End := Index (T, "-->", Body_Start);
-                     if Body_End = 0 then
-                        raise Scene_Error
-                          with Markdown_Path
-                               & ": unterminated scene comment";
-                     end if;
-                     Scene_Body := To_Unbounded_String
-                       (T (Body_Start .. Body_End - 1));
-                     Finish := Body_End + 2;
-                     if Index (To_String (Scene_Body), "--") /= 0 then
-                        raise Scene_Error
-                          with "scene sources must not contain '--' "
-                               & "(it would close the HTML comment)";
-                     end if;
-                     Scenes.Append
-                       (Scene_Span'(Target     => Target,
-                         Scene_Body => Scene_Body,
-                         Start      => I,
-                         Finish     => Finish));
-                  end if;
-               end;
-            end if;
-         end;
-         I := Index (T, "<!--", I + 4);
-      end loop;
-      return Scenes;
-   end Scan_Scenes;
-
-   --  The page with its scene comments removed: the scenes are
-   --  rendered into their own files, not into the page.
-   function Stripped_Of
-      (T : String; Scenes : Scene_Span_Vectors.Vector) return String
-   is
-      Stripped : Unbounded_String;
-      Last_Copied : Natural := T'First - 1;
-
-   begin
-      for Scene_Item of Scenes loop
-         Append (Stripped, T (Last_Copied + 1 .. Scene_Item.Start - 1));
-         Last_Copied := Scene_Item.Finish;
-      end loop;
-      Append (Stripped, T (Last_Copied + 1 .. T'Last));
-      return To_String (Stripped);
-   end Stripped_Of;
-
-   function Process (Markdown_Path : String) return Natural is
-      File : File_Type;
-      Text : Unbounded_String;
-
-   begin
-      Open (File, In_File, Markdown_Path);
-      while not End_Of_File (File) loop
-         Append (Text, Get_Line (File));
-         Append (Text, [1 => ASCII.LF]);
-      end loop;
-      Close (File);
-
-      declare
-         T : constant String := To_String (Text);
-         Scenes : constant Scene_Span_Vectors.Vector :=
-            Scan_Scenes (Markdown_Path, T);
-         Stripped : constant String := Stripped_Of (T, Scenes);
-      begin
-
-         for Scene_Item of Scenes loop
-            declare
-               Target : constant String :=
-                 To_String (Scene_Item.Target);
-            begin
-               if Index (Stripped, Target) = 0 then
-                  raise Scene_Error
-                    with Target & " is generated by a scene comment "
-                         & "but not referenced in " & Markdown_Path;
-               end if;
-               declare
-                  Output_Path : constant String :=
-                    (if Directory_Of (Markdown_Path) = "."
-                     then Target
-                     else Directory_Of (Markdown_Path) & "/" & Target);
-                  Directory : constant String :=
-                    Directory_Of (Output_Path);
-                  S : constant Scene :=
-                    Parse_Scene (To_String (Scene_Item.Scene_Body));
-                  Svg : constant String := Render (S);
-                  Svg_File : File_Type;
-               begin
-                  if Directory /= "."
-                    and then not Ada.Directories.Exists (Directory)
-                  then
-                     Ada.Directories.Create_Path (Directory);
-                  end if;
-                  Create (Svg_File, Out_File, Output_Path);
-                  Put (Svg_File, Svg);
-                  Close (Svg_File);
-                  Put_Line ("  " & Output_Path);
-               end;
-            end;
-         end loop;
-         return Natural (Scenes.Length);
-      end;
-   end Process;
 
 end Topodraw;

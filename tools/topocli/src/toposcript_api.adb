@@ -19,11 +19,16 @@ package body TopoScript_API is
    begin
       Register (BD, Geometry.Translate_Native'Access, "Translate");
       Register (BD, Geometry.Displacement_Native'Access, "Displacement");
+      Register (BD, Geometry.Dot_Product_Native'Access, "Dot_Product");
+      Register (BD, Geometry.Cross_Product_Native'Access, "Cross_Product");
       Register (BD, Geometry.Equal_Native'Access, "Equal");
       Register (BD, Geometry.Orientation_Native'Access, "Orientation");
       Register (BD, Geometry.Intersection_Native'Access, "Intersection");
       Register (BD, Output.Put_Native'Access, "Put");
       Register (BD, Output.Put_Vector_Native'Access, "Put_Vector");
+      Register (BD, Output.Put_Dot_Native'Access, "Put_Dot");
+      Register (BD, Output.Put_Cross_Vector_Native'Access,
+                "Put_Cross_Vector");
       Register (BD, Output.Put_Equal_Native'Access, "Put_Equal");
       Register (BD, Output.Put_Orientation_Native'Access,
                 "Put_Orientation");

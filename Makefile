@@ -13,6 +13,7 @@ SHELL := bash
 SCENARII := ../docs/features/command-line.md \
             ../docs/features/translation.md \
             ../docs/features/displacement.md \
+            ../docs/features/vectors.md \
             ../docs/features/equality.md \
             ../docs/features/orientation.md \
             ../docs/features/intersection.md \

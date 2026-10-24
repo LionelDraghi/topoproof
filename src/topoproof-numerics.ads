@@ -36,12 +36,28 @@ is
    type Extended_Component is
       range -(Grid_Coordinate'Last + Grid_Amplitude) .. Grid_Coordinate'Last + Grid_Amplitude;
 
+   --  True when an extended component value stays in the grid
+   --  coordinate domain: the exact sums of the translations and the
+   --  intermediate orientation values must be representable on the
+   --  grid.
+   function In_Range (V : Extended_Component) return Boolean is
+     (V >= Extended_Component (Grid_Coordinate'First)
+        and then V <= Extended_Component (Grid_Coordinate'Last));
+
    --  The amplitude of a product of two component differences: the square of
    --  the difference amplitude.
    Product_Amplitude : constant := Vector_Component'Last * Vector_Component'Last;
 
    --  Exact product of two component differences.
    type Product_Component is range -Product_Amplitude .. Product_Amplitude;
+
+   --  The exact product of two component differences: each factor
+   --  belongs to the Vector_Component domain, so the product is
+   --  bounded by the difference amplitude square, exactly the
+   --  Product_Component domain.
+   function Component_Product
+     (U, V : Vector_Component) return Product_Component is
+     (Product_Component (U) * Product_Component (V));
 
    --  Exact difference of two products, so its amplitude is the sum of two
    --  product amplitudes.
@@ -53,6 +69,22 @@ is
    Cubic_Amplitude : constant := Determinant'Last * Grid_Amplitude;
 
    type Cubic_Product is range -Cubic_Amplitude .. Cubic_Amplitude;
+
+   --  The amplitude of one cross-product component: the difference of two
+   --  component products, the same degree as the orientation determinant.
+   Cross_Amplitude : constant := 2 * Product_Amplitude;
+
+   --  Exact component of a cross product.
+   type Cross_Component is range -Cross_Amplitude .. Cross_Amplitude;
+
+   --  The amplitude of an exact dot product of two component vectors: the
+   --  sum of the three component products. About 1.4E19, just beyond the
+   --  64-bit determinant domain, so on the same 128-bit machine width as
+   --  the cubic products.
+   Dot_Amplitude : constant := 3 * Product_Amplitude;
+
+   --  Exact dot product of two component vectors.
+   type Dot_Product is range -Dot_Amplitude .. Dot_Amplitude;
 
    --  The signed-area sum of a contour, by the shoelace formula: one
    --  determinant per vertex, so the amplitude is the determinant

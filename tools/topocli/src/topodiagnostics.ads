@@ -33,4 +33,14 @@ package TopoDiagnostics is
    --  The client diagnostic of a rejected face classification.
    function Face_Diagnostic (Status : Rejected_Face) return String;
 
+   --  The client diagnostic of a script coordinate outside the grid:
+   --  the conversion layer rejects it on every operation reading a
+   --  position from the script.
+   Outside_Grid_Diagnostic : constant String :=
+     "error: coordinate outside the grid";
+
+   --  The client diagnostic of a drawing operation with no open
+   --  image: the image must be opened first.
+   No_Image_Diagnostic : constant String := "error: no open image";
+
 end TopoDiagnostics;

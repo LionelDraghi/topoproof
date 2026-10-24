@@ -8,6 +8,7 @@
 - [Coordinates](#coordinates)
 - [Vector components](#vector-components)
 - [Intermediate arithmetic](#intermediate-arithmetic)
+  - [Vector products](#vector-products)
 - [Signed-area sums](#signed-area-sums)
 - [Representability](#representability)
 - [External conversion](#external-conversion)
@@ -119,6 +120,29 @@ type Cubic_Product is range
 The crossing point is accepted only when both exact quotients are integers
 whose coordinates stay in the grid domain; otherwise the crossing is
 reported as off-grid, never approximated. The initial implementation may restrict the input domain or use a sufficiently wide intermediate type. Adaptive 64-bit, 128-bit, or arbitrary-precision computation is a later concern unless required by the current milestone.
+
+### Vector products
+
+The exact dot product of two component vectors is the sum of three exact
+products, so its amplitude is three product amplitudes:
+
+```ada
+Dot_Amplitude : constant := 3 * Product_Amplitude;
+
+type Dot_Product is range -Dot_Amplitude .. Dot_Amplitude;
+```
+
+The exact cross product components are differences of two exact products,
+the same degree as the orientation determinant:
+
+```ada
+Cross_Amplitude : constant := 2 * Product_Amplitude;
+
+type Cross_Component is range -Cross_Amplitude .. Cross_Amplitude;
+```
+
+Both stay exact for any grid input; no rejection and no rounding are
+involved.
 
 ## Signed-area sums
 

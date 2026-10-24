@@ -15,6 +15,12 @@ package body TopoScript_API.Conversions is
         and then Value <= Long_Long_Integer (Grid_Coordinate'Last);
    end Grid_In_Range;
 
+   function Dot_In_HAC_Range (V : Dot_Product) return Boolean is
+   begin
+      return V >= Dot_Product (Long_Long_Integer'First)
+        and then V <= Dot_Product (Long_Long_Integer'Last);
+   end Dot_In_HAC_Range;
+
    function Read_Point_2D
      (Data : HAC_Sys.Interfacing.HAC_Element_Array;
       From : Positive;
@@ -78,31 +84,65 @@ package body TopoScript_API.Conversions is
       return True;
    end Read_Vector_3D;
 
+   --  Read three script integers from the HAC elements at From,
+   --  each checked against the component domain: False means at
+   --  least one component is outside the domain, and the components
+   --  are then left unassigned, the caller recording its own
+   --  diagnostic.
+   generic
+      type Component is range <>;
+   function Read_Domain_Vector
+     (Data    : HAC_Sys.Interfacing.HAC_Element_Array;
+      From    :        Positive;
+      X, Y, Z :    out Component) return Boolean;
+
+   function Read_Domain_Vector
+     (Data    : HAC_Sys.Interfacing.HAC_Element_Array;
+      From    :        Positive;
+      X, Y, Z :    out Component) return Boolean
+   is
+      VX, VY, VZ : Long_Long_Integer;
+   begin
+      VX := To_Long (Data (From));
+      VY := To_Long (Data (From + 1));
+      VZ := To_Long (Data (From + 2));
+      if VX < Long_Long_Integer (Component'First)
+        or else VX > Long_Long_Integer (Component'Last)
+        or else VY < Long_Long_Integer (Component'First)
+        or else VY > Long_Long_Integer (Component'Last)
+        or else VZ < Long_Long_Integer (Component'First)
+        or else VZ > Long_Long_Integer (Component'Last)
+      then
+         return False;
+      end if;
+      X := Component (VX);
+      Y := Component (VY);
+      Z := Component (VZ);
+      return True;
+   end Read_Domain_Vector;
+
+   function Read_Grid_Vector_3D is new Read_Domain_Vector
+     (TopoProof.Numerics.Vector_Component);
+   function Read_Cross_Components is new Read_Domain_Vector
+     (TopoProof.Numerics.Cross_Component);
+
    function Read_Vector_Result_3D
      (Data : HAC_Sys.Interfacing.HAC_Element_Array;
       From : Positive;
       V    : out TopoProof.Geometry.Vectors.Vector_3D) return Boolean
    is
-      DX, DY, DZ : Long_Long_Integer;
-
    begin
-      DX := To_Long (Data (From));
-      DY := To_Long (Data (From + 1));
-      DZ := To_Long (Data (From + 2));
-      if DX < Long_Long_Integer (Vector_Component'First)
-        or else DX > Long_Long_Integer (Vector_Component'Last)
-        or else DY < Long_Long_Integer (Vector_Component'First)
-        or else DY > Long_Long_Integer (Vector_Component'Last)
-        or else DZ < Long_Long_Integer (Vector_Component'First)
-        or else DZ > Long_Long_Integer (Vector_Component'Last)
-      then
-         return False;
-      end if;
-      V := (DX => Vector_Component (DX),
-            DY => Vector_Component (DY),
-            DZ => Vector_Component (DZ));
-      return True;
+      return Read_Grid_Vector_3D (Data, From, V.DX, V.DY, V.DZ);
    end Read_Vector_Result_3D;
+
+   function Read_Cross_Vector_3D
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      V    : out TopoProof.Geometry.Vectors.Cross_Vector_3D) return Boolean
+   is
+   begin
+      return Read_Cross_Components (Data, From, V.DX, V.DY, V.DZ);
+   end Read_Cross_Vector_3D;
 
    procedure Write_Point_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
@@ -125,6 +165,17 @@ package body TopoScript_API.Conversions is
       Data (From + 1) := Vector_To_HAC (V.DY);
       Data (From + 2) := Vector_To_HAC (V.DZ);
    end Write_Vector_3D;
+
+   procedure Write_Cross_Vector_3D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      V    :        TopoProof.Geometry.Vectors.Cross_Vector_3D)
+   is
+   begin
+      Data (From)     := Cross_To_HAC (V.DX);
+      Data (From + 1) := Cross_To_HAC (V.DY);
+      Data (From + 2) := Cross_To_HAC (V.DZ);
+   end Write_Cross_Vector_3D;
 
    function Read_Vertex_Handle
      (Data : HAC_Sys.Interfacing.HAC_Element_Array;

@@ -70,6 +70,27 @@
    - [X] scenario   [the result of a script run goes to the output file](../features/displacement.md) pass  
 
 
+# Document: [vectors.md](../features/vectors.md)  
+   ### Scenario: [the dot product of two vectors](../features/vectors.md): 
+   - OK : Given the file `dot_product.topo`  
+   - OK : When I successfully run `../bin/topocli run dot_product.topo`  
+   - OK : Then the output is `dot 56`  
+   - [X] scenario   [the dot product of two vectors](../features/vectors.md) pass  
+
+   ### Scenario: [the cross product of two vectors](../features/vectors.md): 
+   - OK : Given the file `cross_product.topo`  
+   - OK : When I successfully run `../bin/topocli run cross_product.topo`  
+   - OK : Then the output is `cross -3 6 -3`  
+   - OK : And the file `../docs/features/images/cross_product_1.svg` contains `#cf222e`  
+   - [X] scenario   [the cross product of two vectors](../features/vectors.md) pass  
+
+   ### Scenario: [the exact results leave the grid amplitude](../features/vectors.md): 
+   - OK : Given the file `cross_amplitude.topo`  
+   - OK : When I successfully run `../bin/topocli run cross_amplitude.topo`  
+   - OK : Then the output is `cross 0 0 2500000000`  
+   - [X] scenario   [the exact results leave the grid amplitude](../features/vectors.md) pass  
+
+
 # Document: [equality.md](../features/equality.md)  
    ### Scenario: [identical points are equal](../features/equality.md): 
    - OK : Given the file `equal_true.topo`  
@@ -603,12 +624,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 89 scenarios OK
+## Summary : **Success**, 92 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 89    |
+| Successful | 92    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

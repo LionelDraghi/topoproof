@@ -89,6 +89,31 @@ The vector from point `A` to point `B`:
 Displacement (A, B) = B - A
 ```
 
+### `Dot_Product`
+
+The exact scalar product of two vectors:
+
+```text
+Dot_Product (A, B) = A.DX * B.DX + A.DY * B.DY + A.DZ * B.DZ
+```
+
+The result is exact and may exceed the component domain; it is never
+rounded.
+
+### `Cross_Product`
+
+The exact vector product of two vectors. Its result is an exact
+mathematical vector whose components are the three product differences:
+
+```text
+Cross_Product (A, B) = (A.DY * B.DZ - A.DZ * B.DY,
+                        A.DZ * B.DX - A.DX * B.DZ,
+                        A.DX * B.DY - A.DY * B.DX)
+```
+
+The result is exact and may leave the component domain; it is never
+rounded. A cross result is a derived quantity, never a grid position.
+
 ### `Translate`
 
 Applies a vector to a point and returns a point. The operation is defined only when each resulting coordinate is representable.
