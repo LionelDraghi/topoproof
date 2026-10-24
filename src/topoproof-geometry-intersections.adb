@@ -205,7 +205,7 @@ is
          and then
            Q * (Q - Numerics.Cubic_Product (D)) <= 0,
       Post =>
-         Orientations.Component_Product
+         Numerics.Component_Product
            (Numerics.Vector_Component
               (Numerics.Extended_Component (P)
                - Numerics.Extended_Component (F)),
@@ -303,12 +303,8 @@ is
       TN : constant Numerics.Determinant := T_Numerator (X, Y);
       TD : constant Numerics.Determinant := T_Denominator (X, Y);
       P  : constant Points.Point_2D := Crossing_Point_Via (X, Y);
-      QX : constant Numerics.Cubic_Product :=
-        (Numerics.Cubic_Product (TN) * Numerics.Cubic_Product (Segments.Delta_X (X)))
-        / Numerics.Cubic_Product (TD);
-      QY : constant Numerics.Cubic_Product :=
-        (Numerics.Cubic_Product (TN) * Numerics.Cubic_Product (Segments.Delta_Y (X)))
-        / Numerics.Cubic_Product (TD);
+      QX : constant Numerics.Cubic_Product := Crossing_Step_X (X, Y);
+      QY : constant Numerics.Cubic_Product := Crossing_Step_Y (X, Y);
       TCD : constant Numerics.Determinant :=
         Orientations.Cross_Determinant
           (Segments.Delta_X (X), Segments.Delta_Y (X),
@@ -566,7 +562,7 @@ is
                pragma Assert
                  (Other.To_Point.X <= P.X and then P.X <= Other.From_Point.X);
             end if;
-            pragma Assert (Orientations.Component_Product (DXF, DXT) <= 0);
+            pragma Assert (Numerics.Component_Product (DXF, DXT) <= 0);
          else
             if Other.From_Point.Y <= Other.To_Point.Y then
                pragma Assert
@@ -575,7 +571,7 @@ is
                pragma Assert
                  (Other.To_Point.Y <= P.Y and then P.Y <= Other.From_Point.Y);
             end if;
-            pragma Assert (Orientations.Component_Product (DYF, DYT) <= 0);
+            pragma Assert (Numerics.Component_Product (DYF, DYT) <= 0);
          end if;
          Segments.Lemma_Collinear_Between (P, Other);
       end On_Other;

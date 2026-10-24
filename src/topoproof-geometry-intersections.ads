@@ -122,42 +122,61 @@ is
          (Segments.Delta_X (Y), Segments.Delta_Y (Y),
           Segments.Delta_X (X), Segments.Delta_Y (X)));
 
+   --  The exact crossing offset along one axis of the first segment:
+   --  the crossing numerator times the axis direction of the first
+   --  segment, before the division by the crossing denominator.
+   function Crossing_Offset_X (X, Y : Segments.Segment_2D)
+      return Numerics.Cubic_Product is
+     (Numerics.Cubic_Product (T_Numerator (X, Y))
+      * Numerics.Cubic_Product (Segments.Delta_X (X)));
+
+   function Crossing_Offset_Y (X, Y : Segments.Segment_2D)
+      return Numerics.Cubic_Product is
+     (Numerics.Cubic_Product (T_Numerator (X, Y))
+      * Numerics.Cubic_Product (Segments.Delta_Y (X)));
+
+   --  The exact crossing step along one axis: the crossing offset
+   --  divided by the crossing denominator, an exact grid distance
+   --  when the crossing falls on a grid position. The properly
+   --  crossing precondition keeps the denominator away from zero.
+   function Crossing_Step_X (X, Y : Segments.Segment_2D)
+      return Numerics.Cubic_Product is
+     (Crossing_Offset_X (X, Y)
+      / Numerics.Cubic_Product (T_Denominator (X, Y)))
+   with Pre => Properly_Crossing (X, Y);
+
+   function Crossing_Step_Y (X, Y : Segments.Segment_2D)
+      return Numerics.Cubic_Product is
+     (Crossing_Offset_Y (X, Y)
+      / Numerics.Cubic_Product (T_Denominator (X, Y)))
+   with Pre => Properly_Crossing (X, Y);
+
    --  States whether the exact crossing of the supporting lines of X and Y
    --  falls on a grid position: both exact quotients are integers and both
    --  coordinates remain representable.
    function Crossing_On_Grid_Via (X, Y : Segments.Segment_2D) return Boolean is
      (Properly_Crossing (X, Y)
       and then
-        (Numerics.Cubic_Product (T_Numerator (X, Y))
-         * Numerics.Cubic_Product (Segments.Delta_X (X)))
+        Crossing_Offset_X (X, Y)
         rem Numerics.Cubic_Product (T_Denominator (X, Y)) = 0
       and then
-        (Numerics.Cubic_Product (T_Numerator (X, Y))
-         * Numerics.Cubic_Product (Segments.Delta_Y (X)))
+        Crossing_Offset_Y (X, Y)
         rem Numerics.Cubic_Product (T_Denominator (X, Y)) = 0
       and then
         Numerics.Cubic_Product (X.From_Point.X)
-          + (Numerics.Cubic_Product (T_Numerator (X, Y))
-             * Numerics.Cubic_Product (Segments.Delta_X (X)))
-            / Numerics.Cubic_Product (T_Denominator (X, Y))
+          + Crossing_Step_X (X, Y)
         <= Numerics.Cubic_Product (Numerics.Grid_Coordinate'Last)
       and then
         Numerics.Cubic_Product (X.From_Point.X)
-          + (Numerics.Cubic_Product (T_Numerator (X, Y))
-             * Numerics.Cubic_Product (Segments.Delta_X (X)))
-            / Numerics.Cubic_Product (T_Denominator (X, Y))
+          + Crossing_Step_X (X, Y)
         >= Numerics.Cubic_Product (Numerics.Grid_Coordinate'First)
       and then
         Numerics.Cubic_Product (X.From_Point.Y)
-          + (Numerics.Cubic_Product (T_Numerator (X, Y))
-             * Numerics.Cubic_Product (Segments.Delta_Y (X)))
-            / Numerics.Cubic_Product (T_Denominator (X, Y))
+          + Crossing_Step_Y (X, Y)
         <= Numerics.Cubic_Product (Numerics.Grid_Coordinate'Last)
       and then
         Numerics.Cubic_Product (X.From_Point.Y)
-          + (Numerics.Cubic_Product (T_Numerator (X, Y))
-             * Numerics.Cubic_Product (Segments.Delta_Y (X)))
-            / Numerics.Cubic_Product (T_Denominator (X, Y))
+          + Crossing_Step_Y (X, Y)
         >= Numerics.Cubic_Product (Numerics.Grid_Coordinate'First));
 
    --  The exact crossing point of the supporting lines of X and Y, when
@@ -176,17 +195,13 @@ is
                  (Numerics.Extended_Component (X.From_Point.X)
                   + Numerics.Extended_Component
                       (Numerics.Vector_Component
-                         (Numerics.Cubic_Product (T_Numerator (X, Y))
-                          * Numerics.Cubic_Product (Segments.Delta_X (X))
-                          / Numerics.Cubic_Product (T_Denominator (X, Y))))),
+                         (Crossing_Step_X (X, Y)))),
             Y =>
                Numerics.Grid_Coordinate
                  (Numerics.Extended_Component (X.From_Point.Y)
                   + Numerics.Extended_Component
                       (Numerics.Vector_Component
-                         (Numerics.Cubic_Product (T_Numerator (X, Y))
-                          * Numerics.Cubic_Product (Segments.Delta_Y (X))
-                          / Numerics.Cubic_Product (T_Denominator (X, Y))))));
+                         (Crossing_Step_Y (X, Y)))));
 
    --  The crossing helpers refer to the canonically ordered segment pair.
    function Crossing_On_Grid (S1, S2 : Segments.Segment_2D) return Boolean is

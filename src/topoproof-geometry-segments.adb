@@ -30,10 +30,10 @@ is
       Ghost,
       Pre =>
          DX /= 0
-         and then Orientations.Component_Product (DX, FY) = Orientations.Component_Product (DY, FX)
-         and then Orientations.Component_Product (DX, TY) = Orientations.Component_Product (DY, TX)
-         and then Orientations.Component_Product (FX, TX) <= 0,
-      Post => Orientations.Component_Product (FY, TY) <= 0
+         and then Numerics.Component_Product (DX, FY) = Numerics.Component_Product (DY, FX)
+         and then Numerics.Component_Product (DX, TY) = Numerics.Component_Product (DY, TX)
+         and then Numerics.Component_Product (FX, TX) <= 0,
+      Post => Numerics.Component_Product (FY, TY) <= 0
    is
    begin
       null;
@@ -65,12 +65,12 @@ is
    begin
       if DX /= 0 then
          --  Collinearity, cross-multiplied on the axis of extent.
-         pragma Assert (Orientations.Component_Product (DX, FY)
-                         = Orientations.Component_Product (DY, FX));
-         pragma Assert (Orientations.Component_Product (DX, TY)
-                         = Orientations.Component_Product (DY, TX));
+         pragma Assert (Numerics.Component_Product (DX, FY)
+                         = Numerics.Component_Product (DY, FX));
+         pragma Assert (Numerics.Component_Product (DX, TY)
+                         = Numerics.Component_Product (DY, TX));
          Lemma_Crossed_Signs (DX, DY, FX, TX, FY, TY);
-         pragma Assert (Orientations.Component_Product (FY, TY) <= 0);
+         pragma Assert (Numerics.Component_Product (FY, TY) <= 0);
 
       else
          --  Vertical segment: collinearity forces the X factors to zero.

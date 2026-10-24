@@ -9,14 +9,10 @@ package body TopoProof.Geometry.Orientations
    with SPARK_Mode
 is
 
-   function In_Range (V : Numerics.Extended_Component) return Boolean
-   is (V >= Numerics.Extended_Component (Numerics.Grid_Coordinate'First)
-       and then V <= Numerics.Extended_Component (Numerics.Grid_Coordinate'Last));
-
    function Translation_Is_Representable_2D
       (P : Points.Point_2D; DX, DY : Numerics.Vector_Component) return Boolean
-   is (In_Range (Numerics.Extended_Component (P.X) + Numerics.Extended_Component (DX))
-       and then In_Range (Numerics.Extended_Component (P.Y) + Numerics.Extended_Component (DY)));
+   is (Numerics.In_Range (Numerics.Extended_Component (P.X) + Numerics.Extended_Component (DX))
+       and then Numerics.In_Range (Numerics.Extended_Component (P.Y) + Numerics.Extended_Component (DY)));
 
    function Translate_2D
       (P : Points.Point_2D; DX, DY : Numerics.Vector_Component) return Points.Point_2D is

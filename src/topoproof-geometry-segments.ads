@@ -47,7 +47,7 @@ is
    function Is_On_Segment (P : Points.Point_2D; S : Segment_2D) return Boolean is
      (Orientations.Are_Collinear (S.From_Point, S.To_Point, P)
       and then
-        Orientations.Component_Product
+        Numerics.Component_Product
           (Numerics.Vector_Component
               (Numerics.Extended_Component (P.X)
                - Numerics.Extended_Component (S.From_Point.X)),
@@ -56,7 +56,7 @@ is
                - Numerics.Extended_Component (S.To_Point.X)))
         <= 0
       and then
-        Orientations.Component_Product
+        Numerics.Component_Product
           (Numerics.Vector_Component
               (Numerics.Extended_Component (P.Y)
                - Numerics.Extended_Component (S.From_Point.Y)),
@@ -83,7 +83,7 @@ is
          and then Orientations.Are_Collinear (S.From_Point, S.To_Point, P)
          and then
            (if Delta_X (S) /= 0 then
-               Orientations.Component_Product
+               Numerics.Component_Product
                   (Numerics.Vector_Component
                       (Numerics.Extended_Component (P.X)
                        - Numerics.Extended_Component (S.From_Point.X)),
@@ -92,7 +92,7 @@ is
                        - Numerics.Extended_Component (S.To_Point.X)))
                <= 0
             else
-               Orientations.Component_Product
+               Numerics.Component_Product
                   (Numerics.Vector_Component
                       (Numerics.Extended_Component (P.Y)
                        - Numerics.Extended_Component (S.From_Point.Y)),

@@ -18,12 +18,6 @@ package TopoProof.Geometry.Orientations
 is
    type Orientation_Kind is (Collinear, Counter_Clockwise, Clockwise);
 
-   --  Exact product of two component differences. Each factor belongs to
-   --  the Vector_Component domain, so the product is bounded by 2E9 * 2E9,
-   --  exactly the Product_Component domain.
-   function Component_Product (U, V : Numerics.Vector_Component) return Numerics.Product_Component
-   is (Numerics.Product_Component (U) * Numerics.Product_Component (V));
-
    --  Exact determinant of two direction vectors U and V, that is
    --  U.X * V.Y - U.Y * V.X: positive when V turns counter-clockwise
    --  from U. Both operands are component differences, so the result is
@@ -31,8 +25,8 @@ is
    function Cross_Determinant (UX, UY, VX, VY : Numerics.Vector_Component)
       return Numerics.Determinant
    is
-     (Numerics.Determinant (Component_Product (UX, VY))
-      - Numerics.Determinant (Component_Product (UY, VX)));
+     (Numerics.Determinant (Numerics.Component_Product (UX, VY))
+      - Numerics.Determinant (Numerics.Component_Product (UY, VX)));
 
    --  Antisymmetry: exchanging the two directions negates the determinant.
    procedure Lemma_Cross_Antisymmetry (U1X, U1Y, U2X, U2Y : Numerics.Vector_Component)
@@ -45,13 +39,13 @@ is
    --  difference of two exact products in the Determinant domain.
    function Determinant (A, B, C : Points.Point_2D) return Numerics.Determinant
    is (Numerics.Determinant
-          (Component_Product
+          (Numerics.Component_Product
               (Numerics.Vector_Component
                   (Numerics.Extended_Component (B.X) - Numerics.Extended_Component (A.X)),
                Numerics.Vector_Component
                   (Numerics.Extended_Component (C.Y) - Numerics.Extended_Component (A.Y))))
        - Numerics.Determinant
-            (Component_Product
+            (Numerics.Component_Product
                 (Numerics.Vector_Component
                     (Numerics.Extended_Component (B.Y) - Numerics.Extended_Component (A.Y)),
                  Numerics.Vector_Component
