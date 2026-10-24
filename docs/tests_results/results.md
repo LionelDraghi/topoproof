@@ -505,6 +505,12 @@
    - OK : Then the output is `point 1 2 3`  
    - [X] scenario   [a declaration split across several lines runs](../features/toposcript.md) pass  
 
+   ### Scenario: [a semicolon inside a string literal does not end a declaration](../features/toposcript.md): 
+   - OK : Given the file `string_semicolon.topo`  
+   - OK : When I successfully run `../bin/topocli run string_semicolon.topo`  
+   - OK : Then the output is `;`  
+   - [X] scenario   [a semicolon inside a string literal does not end a declaration](../features/toposcript.md) pass  
+
    ### Scenario: [a declaration form beyond the former subset runs](../features/toposcript.md): 
    - OK : Given the file `local_type.topo`  
    - OK : When I successfully run `../bin/topocli run local_type.topo`  
@@ -597,12 +603,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 88 scenarios OK
+## Summary : **Success**, 89 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 88    |
+| Successful | 89    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

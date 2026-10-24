@@ -33,6 +33,7 @@ and its Ada subset are presented in
 - [Scenario: a fragment of declarations only executes silently](#scenario-a-fragment-of-declarations-only-executes-silently)
 - [Scenario: a compilation diagnostic points at the declaration line](#scenario-a-compilation-diagnostic-points-at-the-declaration-line)
 - [Scenario: a declaration split across several lines runs](#scenario-a-declaration-split-across-several-lines-runs)
+- [Scenario: a semicolon inside a string literal does not end a declaration](#scenario-a-semicolon-inside-a-string-literal-does-not-end-a-declaration)
 - [Scenario: a declaration form beyond the former subset runs](#scenario-a-declaration-form-beyond-the-former-subset-runs)
 - [Scenario: a control structure runs through HAC](#scenario-a-control-structure-runs-through-hac)
 - [Scenario: a local procedure body runs through HAC](#scenario-a-local-procedure-body-runs-through-hac)
@@ -235,7 +236,9 @@ the way. The fragment is split into lines at every semicolon:
 the wrapper line rules apply unchanged, the declarations precede the
 statements, and the diagnostics point at the inline lines under the
 `<inline>` name. A fragment comment may not carry a semicolon, since
-the split does not look inside comments.
+the split does not look inside comments, and a string literal may not
+carry one either: `run_code` is for fragments without a `;` in a
+literal; a script with such a literal runs from a file.
 
 ## Scenarios
 
@@ -297,6 +300,25 @@ the construct stays in the declarative part, and HAC compiles it.
   ```
 - When I successfully run `../bin/topocli run split_declaration.topo`
 - Then the output is `point 1 2 3`
+
+## Scenario: a semicolon inside a string literal does not end a declaration
+
+The placement looks at the construct, not at the bare characters: the
+`;` inside the string literal does not close the declaration, and the
+`;` alone on the last line does. The verdict controls the wrapper
+placement, not a proved operation: the script writes the declared
+constant through HAT's `Put_Line`.
+
+- Given the file `string_semicolon.topo`
+  ```ada
+  S :
+     constant VString := +";"
+     ;
+
+  Put_Line (S);
+  ```
+- When I successfully run `../bin/topocli run string_semicolon.topo`
+- Then the output is `;`
 
 ## Scenario: a declaration form beyond the former subset runs
 
