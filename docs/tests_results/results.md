@@ -2,23 +2,25 @@
 # Document: [command-line.md](../features/command-line.md)  
    ### Scenario: [display help](../features/command-line.md): 
    - OK : When I successfully run `../bin/topocli --help`  
-   - OK : Then the output contains `usage: topocli run FILE.topo`  
-   - OK : And the output contains `topocli run_code FRAGMENT`  
+   - OK : Then the output is  
    - [X] scenario   [display help](../features/command-line.md) pass  
 
    ### Scenario: [a command-line operation is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9)`  
-   - OK : Then there is an error  
+   - OK : Then the error output is  
+   - OK : And there is an error  
    - [X] scenario   [a command-line operation is rejected](../features/command-line.md) pass  
 
    ### Scenario: [an entry without its operand is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli run`  
-   - OK : Then there is an error  
+   - OK : Then the error output is  
+   - OK : And there is an error  
    - [X] scenario   [an entry without its operand is rejected](../features/command-line.md) pass  
 
    ### Scenario: [a script file that does not exist is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli run no_such_file.topo`  
-   - OK : Then there is an error  
+   - OK : Then the error output is `error: file not found: no_such_file.topo`  
+   - OK : And there is an error  
    - [X] scenario   [a script file that does not exist is rejected](../features/command-line.md) pass  
 
 
@@ -500,7 +502,7 @@
    ### Scenario: [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `split_declaration.topo`  
    - OK : When I run `../bin/topocli run split_declaration.topo`  
-   - OK : Then the error output contains `split_declaration.topo:2:8: error: missing a semicolon: ";"`  
+   - OK : Then the error output is  
    - OK : And there is an error  
    - [X] scenario   [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md) pass  
 
@@ -560,7 +562,7 @@
    ### Scenario: [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `late_declaration.topo`  
    - OK : When I run `../bin/topocli run late_declaration.topo`  
-   - OK : Then the error output contains `late_declaration.topo:5:7: error: missing a semicolon: ";"`  
+   - OK : Then the error output is  
    - OK : And there is an error  
    - [X] scenario   [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md) pass  
 
@@ -585,7 +587,7 @@
 
    ### Scenario: [an inline rejection points at the inline line](../features/toposcript.md): 
    - OK : When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`  
-   - OK : Then the error output contains `<inline>:3:6: error: missing a semicolon: ";"`  
+   - OK : Then the error output is  
    - OK : And there is an error  
    - [X] scenario   [an inline rejection points at the inline line](../features/toposcript.md) pass  
 

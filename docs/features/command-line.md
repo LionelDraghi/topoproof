@@ -29,8 +29,16 @@ the runner contract itself.
 ## Scenario: display help
 
 - When I successfully run `../bin/topocli --help`
-- Then the output contains `usage: topocli run FILE.topo`
-- And the output contains `topocli run_code FRAGMENT`
+- Then the output is
+  ```text
+  usage: topocli run FILE.topo [--output FILE]
+         topocli run_code FRAGMENT [--output FILE]
+  run executes a TopoScript source file;
+  run_code executes an inline fragment, split into
+  lines at every semicolon;
+  --output receives every canonical result line of the
+  run, in order
+  ```
 
 ## Scenario: a command-line operation is rejected
 
@@ -38,14 +46,25 @@ The retired command form no longer exists: an operation name on the
 command line is a usage error, with the help hint on the standard error.
 
 - When I run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9)`
-- Then there is an error
+- Then the error output is
+  ```text
+  error: invalid command line
+  try 'topocli --help'
+  ```
+- And there is an error
 
 ## Scenario: an entry without its operand is rejected
 
 - When I run `../bin/topocli run`
-- Then there is an error
+- Then the error output is
+  ```text
+  error: invalid command line
+  try 'topocli --help'
+  ```
+- And there is an error
 
 ## Scenario: a script file that does not exist is rejected
 
 - When I run `../bin/topocli run no_such_file.topo`
-- Then there is an error
+- Then the error output is `error: file not found: no_such_file.topo`
+- And there is an error

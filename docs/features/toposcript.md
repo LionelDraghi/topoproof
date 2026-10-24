@@ -293,7 +293,13 @@ mapped back to the fragment line and the HAC message passed through.
      : constant Point_3D := (1, 2, 3);
   ```
 - When I run `../bin/topocli run split_declaration.topo`
-- Then the error output contains `split_declaration.topo:2:8: error: missing a semicolon: ";"`
+- Then the error output is
+  ```text
+  split_declaration.topo:2:8: error: syntax error
+  split_declaration.topo:2:8: error: missing a semicolon: ";"
+  split_declaration.topo:2:8: error: incorrectly used symbol [Found: CONSTANT_SYMBOL; expected: IDENT, ACCEPT_SYMBOL, BEGIN_SYMBOL, CASE_SYMBOL, DECLARE_SYMBOL, DELAY_SYMBOL, END_SYMBOL, EXIT_SYMBOL, FOR_SYMBOL, IF_SYMBOL, LOOP_SYMBOL, NULL_SYMBOL, RETURN_SYMBOL, SELECT_SYMBOL, WHILE_SYMBOL]
+  split_declaration.topo:2:29: error: end of file is expected here, found extra symbol
+  ```
 - And there is an error
 
 ## Scenario: a declaration form beyond the former subset runs
@@ -466,7 +472,12 @@ passed through.
   Q : Point_3D;
   ```
 - When I run `../bin/topocli run late_declaration.topo`
-- Then the error output contains `late_declaration.topo:5:7: error: missing a semicolon: ";"`
+- Then the error output is
+  ```text
+  late_declaration.topo:5:7: error: syntax error
+  late_declaration.topo:5:7: error: missing a semicolon: ";"
+  late_declaration.topo:5:15: error: end of file is expected here, found extra symbol
+  ```
 - And there is an error
 
 ## Scenario: draw the diagnostic image of the translation
@@ -540,7 +551,12 @@ third one, lands in the statement region, and the HAC diagnostic
 carries the `<inline>` name, its line and the HAC message.
 
 - When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`
-- Then the error output contains `<inline>:3:6: error: missing a semicolon: ";"`
+- Then the error output is
+  ```text
+  <inline>:3:6: error: syntax error
+  <inline>:3:6: error: missing a semicolon: ";"
+  <inline>:3:14: error: end of file is expected here, found extra symbol
+  ```
 - And there is an error
 
 ## Scenario: an inline run writes to the output file
