@@ -74,21 +74,69 @@
    ### Scenario: [the dot product of two vectors](../features/vectors.md): 
    - OK : Given the file `dot_product.topo`  
    - OK : When I successfully run `../bin/topocli run dot_product.topo`  
-   - OK : Then the output is `dot 56`  
+   - OK : Then the output is `dot -2`  
    - [X] scenario   [the dot product of two vectors](../features/vectors.md) pass  
 
    ### Scenario: [the cross product of two vectors](../features/vectors.md): 
    - OK : Given the file `cross_product.topo`  
    - OK : When I successfully run `../bin/topocli run cross_product.topo`  
-   - OK : Then the output is `cross -3 6 -3`  
+   - OK : Then the output is `cross -1 6 5`  
    - OK : And the file `../docs/features/images/cross_product_1.svg` contains `#cf222e`  
    - [X] scenario   [the cross product of two vectors](../features/vectors.md) pass  
+
+   ### Scenario: [the cross product is orthogonal to both operands](../features/vectors.md): 
+   - OK : Given the file `cross_orthogonality.topo`  
+   - OK : When I successfully run `../bin/topocli run cross_orthogonality.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [the cross product is orthogonal to both operands](../features/vectors.md) pass  
 
    ### Scenario: [the exact results leave the grid amplitude](../features/vectors.md): 
    - OK : Given the file `cross_amplitude.topo`  
    - OK : When I successfully run `../bin/topocli run cross_amplitude.topo`  
    - OK : Then the output is `cross 0 0 2500000000`  
    - [X] scenario   [the exact results leave the grid amplitude](../features/vectors.md) pass  
+
+   ### Scenario: [a vector operand outside the grid input contract is rejected](../features/vectors.md): 
+   - OK : Given the file `vector_contract.topo`  
+   - OK : When I run `../bin/topocli run vector_contract.topo`  
+   - OK : Then there is no output  
+   - OK : And the error output is `error: coordinate outside the grid`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [a vector operand outside the grid input contract is rejected](../features/vectors.md) pass  
+
+
+# Document: [planes.md](../features/planes.md)  
+   ### Scenario: [the coordinate plane classifies its points](../features/planes.md): 
+   - OK : Given the file `coordinate_plane.topo`  
+   - OK : When I successfully run `../bin/topocli run coordinate_plane.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/planes_1.svg` contains `#1a7f37`  
+   - [X] scenario   [the coordinate plane classifies its points](../features/planes.md) pass  
+
+   ### Scenario: [coplanar points classify as on the plane](../features/planes.md): 
+   - OK : Given the file `coplanar_points.topo`  
+   - OK : When I successfully run `../bin/topocli run coplanar_points.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/planes_2.svg` contains `#cf222e`  
+   - [X] scenario   [coplanar points classify as on the plane](../features/planes.md) pass  
+
+   ### Scenario: [a collinear definition is rejected](../features/planes.md): 
+   - OK : Given the file `collinear_plane.topo`  
+   - OK : When I successfully run `../bin/topocli run collinear_plane.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [a collinear definition is rejected](../features/planes.md) pass  
+
+   ### Scenario: [the classification is translation invariant](../features/planes.md): 
+   - OK : Given the file `translated_plane.topo`  
+   - OK : When I successfully run `../bin/topocli run translated_plane.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [the classification is translation invariant](../features/planes.md) pass  
+
+   ### Scenario: [the grid boundary classifies exactly](../features/planes.md): 
+   - OK : Given the file `boundary_plane.topo`  
+   - OK : When I successfully run `../bin/topocli run boundary_plane.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [the grid boundary classifies exactly](../features/planes.md) pass  
 
 
 # Document: [equality.md](../features/equality.md)  
@@ -624,12 +672,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 92 scenarios OK
+## Summary : **Success**, 99 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 92    |
+| Successful | 99    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

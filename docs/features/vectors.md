@@ -25,14 +25,15 @@ canonical result.
 - Given the file `dot_product.topo`
   ```ada
   O : constant Point_3D := (0, 0, 0);
-  A : constant Vector_3D := (2, 3, 4);
-  B : constant Vector_3D := (5, 6, 7);
+  A : constant Vector_3D := (3, -2, 3);
+  B : constant Vector_3D := (1, 1, -1);
   D : Integer;
 
   Begin_Image (+"../docs/features/images/vectors_1.svg");
   Draw_Axes;
-  Draw_Vector (O, A, Blue);
-  Draw_Vector (O, B, Green);
+  Draw_Named_Point (O, +"O", Blue);
+  Draw_Named_Vector (O, A, +"A", Blue);
+  Draw_Named_Vector (O, B, +"B", Green);
   End_Image;
 
   Dot_Product (A, B, D);
@@ -40,7 +41,7 @@ canonical result.
   Put_Dot (D);
   ```
 - When I successfully run `../bin/topocli run dot_product.topo`
-- Then the output is `dot 56`
+- Then the output is `dot -2`
 
 ![Vectors diagram](images/vectors_1.svg)
 
@@ -56,23 +57,24 @@ and the cross vector, the actual result of the operation, drawn in red.
 - Given the file `cross_product.topo`
   ```ada
   O : constant Point_3D := (0, 0, 0);
-  A : constant Vector_3D := (2, 3, 4);
-  B : constant Vector_3D := (5, 6, 7);
+  A : constant Vector_3D := (3, -2, 3);
+  B : constant Vector_3D := (1, 1, -1);
   V : Vector_3D;
 
   Cross_Product (A, B, V);
 
   Begin_Image (+"../docs/features/images/cross_product_1.svg");
   Draw_Axes;
-  Draw_Vector (O, A, Blue);
-  Draw_Vector (O, B, Green);
-  Draw_Vector (O, V, Red);
+  Draw_Named_Point (O, +"O", Blue);
+  Draw_Named_Vector (O, A, +"A", Blue);
+  Draw_Named_Vector (O, B, +"B", Green);
+  Draw_Named_Vector (O, V, +"V", Red);
   End_Image;
 
   Put_Cross_Vector (V);
   ```
 - When I successfully run `../bin/topocli run cross_product.topo`
-- Then the output is `cross -3 6 -3`
+- Then the output is `cross -1 6 5`
 - And the file `../docs/features/images/cross_product_1.svg` contains `#cf222e`
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   cross vector, the actual result of the scenario, is drawn red.)
