@@ -45,8 +45,8 @@ and its Ada subset are presented in
 
 ## Source form
 
-A TopoScript contains object declarations followed by executable
-statements, without compilation-unit boilerplate:
+A TopoScript contains declarations and executable statements, without
+compilation-unit boilerplate:
 
 ```ada
 P      : constant Point_3D := (10, -20, 30);
