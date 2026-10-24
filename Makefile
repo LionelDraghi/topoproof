@@ -36,6 +36,17 @@ KERNEL := -P topoproof.gpr -U
 # Common analysis switches: all checks, full report, warnings as errors.
 ANALYSIS := --mode=all --report=all --warnings=error
 
+# The proof-result cache: gnatprove saves every successful proof result
+# in this folder (--memcached-server=file:..., no server involved), and
+# reuses it on later runs, even after a source change, so only the
+# checks touched by the change are proved again. On a CI runner, the
+# folder is saved by the workflow and restored by the next run. It
+# holds no evidence: make clean removes it with obj/. The path must be
+# absolute: gnatprove rejects a relative one ("no such directory"),
+# whatever the working directory.
+PROOF_CACHE := $(CURDIR)/obj/gnatprove-cache
+PROOF_CACHE_SWITCH := --memcached-server=file:$(PROOF_CACHE)
+
 # SARIF evidence for code scanning. GNATprove >= 26 takes these switches;
 # the Alire index offers 16.1.0, which rejects them, so they stay here,
 # ready for the toolchain upgrade.
@@ -115,7 +126,7 @@ test: build evidence-dirs
 	curl -s -o docs/tests_results/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)" 
 
 evidence-dirs:
-	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS)
+	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS) $(PROOF_CACHE)
 
 # The -U switch analyses every kernel unit, including units not reachable
 # from a main. --checks-as-errors makes an unproved check fail the command.
@@ -125,16 +136,18 @@ evidence-dirs:
 # in the Alire index, and copy $(SARIF_FILE) next to the other evidence.
 proof-evidence: evidence-dirs
 	$(GNATPROVE) --version > $(PROOF_ARTIFACTS)/version.txt
-	printf '%s\n' 'gnatprove $(KERNEL) $(ANALYSIS) --level=2 --checks-as-errors=on --assumptions --output-header' > $(PROOF_ARTIFACTS)/command.txt
+	printf '%s\n' 'gnatprove $(KERNEL) $(ANALYSIS) --level=2 --checks-as-errors=on --assumptions --output-header $(PROOF_CACHE_SWITCH)' > $(PROOF_ARTIFACTS)/command.txt
 	set -o pipefail; \
 	$(GNATPROVE) $(KERNEL) $(ANALYSIS) \
 	  --level=2 \
 	  --checks-as-errors=on \
 	  --assumptions \
 	  --output-header \
+	  $(PROOF_CACHE_SWITCH) \
 	  2>&1 | tee $(PROOF_ARTIFACTS)/results.log
 	cp obj/gnatprove/gnatprove.out $(PROOF_ARTIFACTS)/gnatprove.out
 	$(GNATPROVE) $(KERNEL) --output-msg-only --assumptions \
+	  $(PROOF_CACHE_SWITCH) \
 	  > $(PROOF_ARTIFACTS)/assumptions.log
 
 # The evidence gate itself is an Ada program, built with the same
@@ -175,8 +188,11 @@ prove+:
 	echo
 	echo === running GNATprove, escalation level
 
+# The escalation reuses the level-2 results saved in the cache.
+	mkdir -p $(PROOF_CACHE)
 	$(GNATPROVE) $(KERNEL) $(ANALYSIS) \
-	  --level=4
+	  --level=4 \
+	  $(PROOF_CACHE_SWITCH)
 
 # Proof statistics: the same analysis as `make prove`, with
 # --report=statistics, so every proved check reports the number of
@@ -189,7 +205,7 @@ prove-stats: evidence-dirs
 	echo
 	echo === collecting the proof statistics
 
-	$(ALR) exec -- bash -c 'set -o pipefail; gnatprove $(KERNEL) --mode=all --report=statistics --warnings=error --level=2 --output-header --subdirs=stats 2>&1 | tee $(PROOF_ARTIFACTS)/prove-stats.log'
+	$(ALR) exec -- bash -c 'set -o pipefail; gnatprove $(KERNEL) --mode=all --report=statistics --warnings=error --level=2 --output-header --subdirs=stats $(PROOF_CACHE_SWITCH) 2>&1 | tee $(PROOF_ARTIFACTS)/prove-stats.log'
 	cp obj/stats/gnatprove/gnatprove.out $(PROOF_ARTIFACTS)/gnatprove-stats.out
 	echo
 	echo The most difficult proved checks:

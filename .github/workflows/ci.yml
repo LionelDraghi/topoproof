@@ -150,6 +150,23 @@ jobs:
         if: runner.os == 'macOS'
         run: sudo ln -sfn MacOSX26.sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
+      # Proof results cache: gnatprove saves every successful proof in
+      # obj/gnatprove-cache (the --memcached-server=file: switch of the
+      # Makefile recipes), and reuses them on the next run, so a run
+      # redoes only the checks its change touched. The key changes at
+      # each commit: the run saves its fresh results under the new key,
+      # and restore-keys recovers the most recent previous entry, which
+      # is the proof of everything the commit did not touch. The cache
+      # is per platform: proof results are not guaranteed to transfer
+      # between runtimes and predefined type sizes.
+      - name: Cache GNATprove proof results
+        uses: actions/cache@v4
+        with:
+          path: obj/gnatprove-cache
+          key: ${{ matrix.os }}-gnatprove-${{ github.sha }}
+          restore-keys: |
+            ${{ matrix.os }}-gnatprove-
+
       - run: make prove
         shell: bash
 
