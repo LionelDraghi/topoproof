@@ -499,12 +499,11 @@
    - OK : And there is an error  
    - [X] scenario   [a compilation diagnostic points at the declaration line](../features/toposcript.md) pass  
 
-   ### Scenario: [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md): 
+   ### Scenario: [a declaration split across several lines runs](../features/toposcript.md): 
    - OK : Given the file `split_declaration.topo`  
-   - OK : When I run `../bin/topocli run split_declaration.topo`  
-   - OK : Then the error output is  
-   - OK : And there is an error  
-   - [X] scenario   [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md) pass  
+   - OK : When I successfully run `../bin/topocli run split_declaration.topo`  
+   - OK : Then the output is `point 1 2 3`  
+   - [X] scenario   [a declaration split across several lines runs](../features/toposcript.md) pass  
 
    ### Scenario: [a declaration form beyond the former subset runs](../features/toposcript.md): 
    - OK : Given the file `local_type.topo`  

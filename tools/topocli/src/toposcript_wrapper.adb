@@ -182,6 +182,41 @@ package body TopoScript_Wrapper is
       return False;
    end Has_Object_Declaration_Form;
 
+   --  True when the text from the given line to the first line ending
+   --  with ';' assembles into an object declaration form: a
+   --  declaration split across several lines stays in the declarative
+   --  part, and HAC judges the assembled declaration.
+   function Is_Split_Declaration
+     (Fragment : String;
+      From     : Positive) return Boolean
+   is
+      Joined : Unbounded_String;
+      Start  : Positive := From;
+      Finish : Natural;
+   begin
+      while Start <= Fragment'Last loop
+         Finish := Start;
+         while Finish <= Fragment'Last
+           and then Fragment (Finish) /= ASCII.LF
+         loop
+            Finish := Finish + 1;
+         end loop;
+         declare
+            Raw  : constant String := Fragment (Start .. Finish - 1);
+            Text : constant String := Trimmed (Comment_Stripped (Raw));
+         begin
+            if Text'Length > 0 then
+               Append (Joined, Text);
+               if Text (Text'Last) = ';' then
+                  return Has_Object_Declaration_Form (To_String (Joined));
+               end if;
+            end if;
+         end;
+         Start := Finish + 1;
+      end loop;
+      return False;
+   end Is_Split_Declaration;
+
    --  The placement classifier: the wrapper is not an Ada analyser, it
    --  never judges the fragment (DD-003, 2026-10-24). It only decides,
    --  line by line, whether the line belongs to the declaration region
@@ -286,7 +321,19 @@ package body TopoScript_Wrapper is
                      Depth := Depth + 1;
                   end if;
                else
-                  First_Statement := Line_Count;
+                  --  An unrecognised line: the first line of a
+                  --  construct. When the text from this line to its
+                  --  first ';' assembles into an object declaration
+                  --  form, the construct is a declaration split
+                  --  across lines: it stays in the declarative part,
+                  --  and the continuation branch consumes its lines
+                  --  up to the ';'. Otherwise the line starts the
+                  --  statement region, and HAC owns the diagnostic.
+                  if Is_Split_Declaration (Fragment, Start) then
+                     In_Continuation := True;
+                  else
+                     First_Statement := Line_Count;
+                  end if;
                end if;
             end if;
          end;

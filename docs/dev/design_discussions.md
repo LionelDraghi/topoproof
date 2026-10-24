@@ -242,9 +242,12 @@ question 1 below.
 - The wrapper keeps exactly one placement job: locating where the
   declarations end and the statements start, because Ada requires object
   declarations in the declarative part of the generated unit. This
-  classification never rejects: it only places. An unrecognised line goes
-  to the statement region, and a misplacement surfaces as a HAC diagnostic
-  mapped back to the fragment line by the existing diagnostic kit.
+  classification never rejects: it only places. An unrecognised line
+  goes to the statement region, unless the text from that line to its
+  first `;` assembles into an object declaration form — a declaration
+  split across lines stays in the declarative part —, and a misplacement
+  surfaces as a HAC diagnostic mapped back to the fragment line by the
+  existing diagnostic kit.
 - The pre-compilation rejections of the initial subset are removed: a
   declaration after the first statement, and the declaration forms outside
   the subset (`type`, `procedure`, `use`, ...), reach HAC and are rejected

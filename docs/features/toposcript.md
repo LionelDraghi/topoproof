@@ -32,7 +32,7 @@ and its Ada subset are presented in
 - [Scenario: an empty fragment executes silently](#scenario-an-empty-fragment-executes-silently)
 - [Scenario: a fragment of declarations only executes silently](#scenario-a-fragment-of-declarations-only-executes-silently)
 - [Scenario: a compilation diagnostic points at the declaration line](#scenario-a-compilation-diagnostic-points-at-the-declaration-line)
-- [Scenario: a declaration split across several lines is a HAC diagnostic](#scenario-a-declaration-split-across-several-lines-is-a-hac-diagnostic)
+- [Scenario: a declaration split across several lines runs](#scenario-a-declaration-split-across-several-lines-runs)
 - [Scenario: a declaration form beyond the former subset runs](#scenario-a-declaration-form-beyond-the-former-subset-runs)
 - [Scenario: a control structure runs through HAC](#scenario-a-control-structure-runs-through-hac)
 - [Scenario: a local procedure body runs through HAC](#scenario-a-local-procedure-body-runs-through-hac)
@@ -95,8 +95,10 @@ diagnostics. The accepted subset is everything HAC handles: the
 declaration forms (`type`, local procedures, `use`, ...), the control
 structures, and the nested unit bodies run like any Ada code. A line
 the wrapper does not recognise as a declaration goes to the statement
-region, and a misplaced declaration surfaces as a HAC diagnostic, with
-the location mapped back to the fragment line.
+region, unless the text from that line to its first `;` assembles into
+a declaration form: a declaration split across lines stays in the
+declarative part. A misplaced declaration surfaces as a HAC
+diagnostic, with the location mapped back to the fragment line.
 
 ## Observable result and verdict
 
@@ -280,27 +282,21 @@ fragment line 1, with the HAC message, not on a wrapper line.
 - Then the error output is `bad_declaration.topo:1:29: error: undefined identifier: Q`
 - And there is an error
 
-## Scenario: a declaration split across several lines is a HAC diagnostic
+## Scenario: a declaration split across several lines runs
 
-The wrapper places the fragment, it does not judge it: the bare
-identifier is not recognised as a declaration, the line goes to the
-statement region, and HAC owns the diagnostic, with the location
-mapped back to the fragment line and the HAC message passed through.
+The wrapper places the fragment, it does not judge it: the text from
+the identifier to its first `;` assembles into a declaration form, so
+the construct stays in the declarative part, and HAC compiles it.
 
 - Given the file `split_declaration.topo`
   ```ada
   P
      : constant Point_3D := (1, 2, 3);
+
+  Put (P);
   ```
-- When I run `../bin/topocli run split_declaration.topo`
-- Then the error output is
-  ```text
-  split_declaration.topo:2:8: error: syntax error
-  split_declaration.topo:2:8: error: missing a semicolon: ";"
-  split_declaration.topo:2:8: error: incorrectly used symbol [Found: CONSTANT_SYMBOL; expected: IDENT, ACCEPT_SYMBOL, BEGIN_SYMBOL, CASE_SYMBOL, DECLARE_SYMBOL, DELAY_SYMBOL, END_SYMBOL, EXIT_SYMBOL, FOR_SYMBOL, IF_SYMBOL, LOOP_SYMBOL, NULL_SYMBOL, RETURN_SYMBOL, SELECT_SYMBOL, WHILE_SYMBOL]
-  split_declaration.topo:2:29: error: end of file is expected here, found extra symbol
-  ```
-- And there is an error
+- When I successfully run `../bin/topocli run split_declaration.topo`
+- Then the output is `point 1 2 3`
 
 ## Scenario: a declaration form beyond the former subset runs
 

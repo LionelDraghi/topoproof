@@ -30,9 +30,11 @@
 --  it never rejects a fragment. The accepted subset is everything HAC
 --  handles: the wrapper only locates the boundary between the
 --  declarations and the statements, and a line it does not recognise
---  as a declaration goes to the statement region. A misplacement
---  surfaces as a HAC diagnostic, mapped back to the fragment line by
---  TopoScript_Diagnostics.
+--  as a declaration goes to the statement region, unless the text
+--  from that line to its first ';' assembles into a declaration form
+--  (a declaration split across lines stays in the declarative part).
+--  A misplacement surfaces as a HAC diagnostic, mapped back to the
+--  fragment line by TopoScript_Diagnostics.
 
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
@@ -61,11 +63,12 @@ package TopoScript_Wrapper is
    --  Split the fragment into a declaration region and a statement
    --  region, and build the wrapped compilation unit. The wrapper
    --  places the fragment and never rejects it: the recognised
-   --  declaration forms go to the declarative part, the content of a
-   --  nested unit body stays in the declarative part, and everything
-   --  from the first unrecognised line on goes to the body (DD-003,
-   --  2026-10-24). The fragment path is not Generate's concern: the
-   --  diagnostics pipe takes it through Set_Mapping.
+   --  declaration forms, their continuations, the constructs that
+   --  assemble into a declaration form up to their first ';', and the
+   --  content of a nested unit body go to the declarative part, and
+   --  everything else goes to the body (DD-003, 2026-10-24). The
+   --  fragment path is not Generate's concern: the diagnostics pipe
+   --  takes it through Set_Mapping.
 
    --  In-memory source stream, consumed by HAC through the standard
    --  Ada stream interface: an empty read reports the end of the
