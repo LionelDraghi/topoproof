@@ -5,6 +5,7 @@
 --  SPDX-FileCopyrightText: 2026, Lionel Draghi
 -- -----------------------------------------------------------------------------
 
+with Ada.Numerics;
 with Ada.Numerics.Long_Elementary_Functions;
 with Ada.Strings;
 with Ada.Strings.Fixed;
@@ -35,8 +36,28 @@ package body Topodraw is
    --  positions are never compared to it.
    Min_Divisor : constant Long_Float := 0.000_000_001;
 
-   Cos30 : constant Long_Float := 0.866_025_403_784_438_6;
-   Sin30 : constant Long_Float := 0.5;
+   --  The dip of each horizontal axis under the horizon, in degrees:
+   --  the X axis dips toward the lower right, the Y axis toward the
+   --  lower left, and the Z axis stays vertical at full length. The
+   --  dips are unequal and lower than the classic 30-30 isometry: the
+   --  viewpoint is lower and off the (1, 1) diagonal, so the main
+   --  diagonal of the grid, the exact blind direction of the 30-30
+   --  view, projects apart.
+   X_Dip : constant Long_Float := 22.0;
+   Y_Dip : constant Long_Float := 17.0;
+
+   X_Cos : constant Long_Float :=
+     Ada.Numerics.Long_Elementary_Functions.Cos
+       (X_Dip * Ada.Numerics.Pi / 180.0);
+   X_Sin : constant Long_Float :=
+     Ada.Numerics.Long_Elementary_Functions.Sin
+       (X_Dip * Ada.Numerics.Pi / 180.0);
+   Y_Cos : constant Long_Float :=
+     Ada.Numerics.Long_Elementary_Functions.Cos
+       (Y_Dip * Ada.Numerics.Pi / 180.0);
+   Y_Sin : constant Long_Float :=
+     Ada.Numerics.Long_Elementary_Functions.Sin
+       (Y_Dip * Ada.Numerics.Pi / 180.0);
 
    Pt_Fill  : constant String := "#1f6feb";
    Pt_Text  : constant String := "#0d2b3e";
@@ -125,16 +146,17 @@ package body Topodraw is
    end Nice_Step;
 
    ---------------------------------------------------------------------------
-   --  Isometric projection
+   --  Axonometric projection
    ---------------------------------------------------------------------------
 
-   --  The raw isometric coordinates of one grid position, before the
-   --  scene is fitted onto the canvas.
+   --  The raw screen coordinates of one grid position, before the
+   --  scene is fitted onto the canvas: X and Y dip under the horizon
+   --  by their axis dip, Z stays vertical.
    function Raw_X (C : Coord3) return Long_Float is
-     ((Long_Float (C.X) - Long_Float (C.Y)) * Cos30);
+     (Long_Float (C.X) * X_Cos - Long_Float (C.Y) * Y_Cos);
 
    function Raw_Y (C : Coord3) return Long_Float is
-     ((Long_Float (C.X) + Long_Float (C.Y)) * Sin30
+     (Long_Float (C.X) * X_Sin + Long_Float (C.Y) * Y_Sin
       - Long_Float (C.Z));
 
    --  The fitted projection of a scene: the scale and the origin that
@@ -440,7 +462,10 @@ package body Topodraw is
       end if;
    end Emit_Anchor_Paths;
 
-   --  The three axes with their letters, and the origin circle.
+   --  The three axes with their letters, and the origin circle. The
+   --  axis letters are placed labels: emitted before the scene labels,
+   --  they take part in the label deconfliction, so a point label
+   --  shifts down rather than covering an axis letter.
    procedure Emit_Axes (Doc : in out SVG_Document; S : Scene) is
    begin
       if S.Draw_Axes then
@@ -457,8 +482,8 @@ package body Topodraw is
                   Tip : constant Screen2 := To_Screen (Doc.Proj, A.Tip);
                begin
                   Line (Doc, O, Tip, Axis_Col, 1.0, "4 3");
-                  Text_At (Doc, Tip.X + A.Off.X, Tip.Y + A.Off.Y,
-                           A.Letter, Axis_Col);
+                  Place_Label (Doc, Tip.X + A.Off.X, Tip.Y + A.Off.Y,
+                              A.Letter, Axis_Col);
                end;
             end loop;
             Circle (Doc, O, 2.5, Axis_Col);

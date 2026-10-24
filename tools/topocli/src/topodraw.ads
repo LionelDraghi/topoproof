@@ -45,7 +45,7 @@ package Topodraw is
 
    Scene_Error : exception;
 
-   --  Render a scene as a deterministic isometric SVG image.
+   --  Render a scene as a deterministic axonometric SVG image.
    function Render (S : Scene) return String;
 
 end Topodraw;
