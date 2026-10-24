@@ -6,7 +6,6 @@
 -- -----------------------------------------------------------------------------
 
 with Ada.Command_Line;      use Ada.Command_Line;
-with Ada.Exceptions;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO;           use Ada.Text_IO;
 with HAC_Sys.Builder;
@@ -42,7 +41,7 @@ procedure TopoCLI is
       declare
          Wrapped : TopoScript_Wrapper.Wrapped_Source;
       begin
-         TopoScript_Wrapper.Generate (Fragment, Path, Wrapped);
+         TopoScript_Wrapper.Generate (Fragment, Wrapped);
          declare
             BD : HAC_Sys.Builder.Build_Data;
          begin
@@ -90,12 +89,6 @@ procedure TopoCLI is
          end;
 
          TopoScript_API.Output.Close_Output;
-
-      exception
-         when E : TopoScript_Wrapper.Wrapper_Error =>
-            TopoScript_API.Output.Close_Output;
-            Put_Line (Standard_Error, Ada.Exceptions.Exception_Message (E));
-            Set_Exit_Status (Failure);
       end;
    end Execute_Fragment;
 

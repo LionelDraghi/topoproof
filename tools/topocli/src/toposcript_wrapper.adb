@@ -32,96 +32,188 @@ package body TopoScript_Wrapper is
                  and then T (T'First .. T'First + 1) = "--");
    end Is_Neutral;
 
-   --  An object declaration starts with an identifier directly
-   --  followed by ':' (not ':=').
+   --  The line cut at the first comment marker outside a string
+   --  literal, so a trailing comment does not hide the final ';'.
+   function Comment_Stripped (Line : String) return String is
+      In_String : Boolean := False;
+   begin
+      for I in Line'Range loop
+         if In_String then
+            In_String := Line (I) /= '"';
+         elsif Line (I) = '"' then
+            In_String := True;
+         elsif Line (I) = '-'
+           and then I < Line'Last
+           and then Line (I + 1) = '-'
+         then
+            return Line (Line'First .. I - 1);
+         end if;
+      end loop;
+      return Line;
+   end Comment_Stripped;
+
+   function Is_Word_Char (C : Character) return Boolean is
+      package CH renames Ada.Characters.Handling;
+   begin
+      return CH.Is_Alphanumeric (C) or else C = '_';
+   end Is_Word_Char;
+
+   --  The Rank'th word of the line, lowercased, after the trailing
+   --  comment is stripped; "" when there is no such word.
+   function Word (Line : String; Rank : Positive) return String is
+      package CH renames Ada.Characters.Handling;
+      T : constant String := Trimmed (Comment_Stripped (Line));
+      I : Natural := T'First;
+   begin
+      for R in 1 .. Rank loop
+         while I <= T'Last
+           and then (T (I) = ' ' or else T (I) = ASCII.HT)
+         loop
+            I := I + 1;
+         end loop;
+         if I > T'Last or else not CH.Is_Letter (T (I)) then
+            return "";
+         end if;
+         declare
+            First : constant Natural := I;
+         begin
+            while I <= T'Last and then Is_Word_Char (T (I)) loop
+               I := I + 1;
+            end loop;
+            if R = Rank then
+               return CH.To_Lower (T (First .. I - 1));
+            end if;
+         end;
+      end loop;
+      return "";
+   end Word;
+
+   function First_Word (Line : String) return String is
+   begin
+      return Word (Line, 1);
+   end First_Word;
+
+   function Second_Word (Line : String) return String is
+   begin
+      return Word (Line, 2);
+   end Second_Word;
+
+   --  A line ending with ';': the terminator of a single-line
+   --  declaration, of a continuation, or of a unit closer.
+   function Ends_With_Semicolon (Line : String) return Boolean is
+      T : constant String := Trimmed (Comment_Stripped (Line));
+   begin
+      return T'Length > 0 and then T (T'Last) = ';';
+   end Ends_With_Semicolon;
+
+   --  A line ending with the bare word 'is', the opener of a nested
+   --  unit body: its content, statements included, belongs to the
+   --  declarative part of the generated unit.
+   function Ends_In_Body_Opener (Line : String) return Boolean is
+      package CH renames Ada.Characters.Handling;
+      T : constant String :=
+        CH.To_Lower (Trimmed (Comment_Stripped (Line)));
+   begin
+      return T'Length >= 2
+        and then T (T'Last - 1 .. T'Last) = "is"
+        and then (T'Length = 2
+                  or else not Is_Word_Char (T (T'Last - 2)));
+   end Ends_In_Body_Opener;
+
+   function Opens_A_Body (W : String) return Boolean is
+   begin
+      return W = "procedure"
+        or else W = "function"
+        or else W = "package"
+        or else W = "separate"
+        or else W = "overriding";
+   end Opens_A_Body;
+
+   function Is_Declaration_Word (W : String) return Boolean is
+   begin
+      return W = "type"
+        or else W = "subtype"
+        or else W = "procedure"
+        or else W = "function"
+        or else W = "package"
+        or else W = "generic"
+        or else W = "separate"
+        or else W = "use"
+        or else W = "with"
+        or else W = "overriding";
+   end Is_Declaration_Word;
+
+   --  An object declaration starts with one or more identifiers
+   --  separated by commas, directly followed by ':' (not ':=').
+   function Has_Object_Declaration_Form (Line : String) return Boolean is
+      package CH renames Ada.Characters.Handling;
+      T : constant String := Trimmed (Line);
+      I : Natural := T'First;
+   begin
+      if T'Length = 0 or else not CH.Is_Letter (T (T'First)) then
+         return False;
+      end if;
+      loop
+         while I <= T'Last
+           and then (CH.Is_Alphanumeric (T (I)) or else T (I) = '_')
+         loop
+            I := I + 1;
+         end loop;
+         while I <= T'Last and then T (I) = ' ' loop
+            I := I + 1;
+         end loop;
+         exit when I > T'Last;
+         if T (I) = ',' then
+            I := I + 1;
+            while I <= T'Last and then T (I) = ' ' loop
+               I := I + 1;
+            end loop;
+            if I > T'Last or else not CH.Is_Letter (T (I)) then
+               return False;
+            end if;
+         elsif T (I) = ':'
+           and then (I = T'Last or else T (I + 1) /= '=')
+         then
+            return True;
+         else
+            return False;
+         end if;
+      end loop;
+      return False;
+   end Has_Object_Declaration_Form;
+
+   --  The placement classifier: the wrapper is not an Ada analyser, it
+   --  never judges the fragment (DD-003, 2026-10-24). It only decides,
+   --  line by line, whether the line belongs to the declaration region
+   --  or to the statement region of the generated unit: a recognised
+   --  declaration form, or the continuation of one, goes to the
+   --  declarative part, and a line it does not recognise goes to the
+   --  statement region. A misplacement surfaces as a HAC diagnostic,
+   --  mapped back to the fragment by TopoScript_Diagnostics.
    function Is_Declaration (Line : String) return Boolean is
-      package CH renames Ada.Characters.Handling;
-      T : constant String := Trimmed (Line);
-      I : Natural := T'First;
    begin
-      if T'Length = 0 or else not CH.Is_Letter (T (T'First)) then
-         return False;
-      end if;
-      while I <= T'Last
-        and then (CH.Is_Alphanumeric (T (I)) or else T (I) = '_')
-      loop
-         I := I + 1;
-      end loop;
-      while I <= T'Last and then T (I) = ' ' loop
-         I := I + 1;
-      end loop;
-      return I <= T'Last
-        and then T (I) = ':'
-        and then (I = T'Last or else T (I + 1) /= '=');
+      return Is_Declaration_Word (First_Word (Line))
+        or else Has_Object_Declaration_Form (Line);
    end Is_Declaration;
-
-   --  Keywords that open a declaration form the initial subset does
-   --  not cover; they would end up in the statement region and produce
-   --  a confusing HAC message, so they are rejected up front.
-   function Is_Out_Of_Subset (Line : String) return Boolean is
-      package CH renames Ada.Characters.Handling;
-      T : constant String := Trimmed (Line);
-      I : Natural := T'First;
-   begin
-      if T'Length = 0 or else not CH.Is_Letter (T (T'First)) then
-         return False;
-      end if;
-      while I <= T'Last
-        and then (CH.Is_Alphanumeric (T (I)) or else T (I) = '_')
-      loop
-         I := I + 1;
-      end loop;
-      declare
-         Keyword : constant String := CH.To_Lower (T (T'First .. I - 1));
-      begin
-         return Keyword = "type"
-           or else Keyword = "subtype"
-           or else Keyword = "procedure"
-           or else Keyword = "function"
-           or else Keyword = "package"
-           or else Keyword = "use"
-           or else Keyword = "with"
-           or else Keyword = "pragma"
-           or else Keyword = "generic"
-           or else Keyword = "separate";
-      end;
-   end Is_Out_Of_Subset;
-
-   --  A line reduced to one bare identifier: neither a complete
-   --  object declaration nor a statement of the subset (a statement
-   --  is a call or an assignment, both of which carry more than the
-   --  identifier). A declaration split across several lines leaves
-   --  such a line, so it is rejected here, with the fragment
-   --  location, instead of reaching the HAC compilation with a
-   --  confusing message.
-   function Is_Identifier_Only (Line : String) return Boolean is
-      package CH renames Ada.Characters.Handling;
-      T : constant String := Trimmed (Line);
-      I : Natural := T'First;
-   begin
-      if T'Length = 0 or else not CH.Is_Letter (T (T'First)) then
-         return False;
-      end if;
-      while I <= T'Last
-        and then (CH.Is_Alphanumeric (T (I)) or else T (I) = '_')
-      loop
-         I := I + 1;
-      end loop;
-      return I > T'Last;
-   end Is_Identifier_Only;
 
    procedure Generate
      (Fragment :     String;
-      Path     :     String;
       Result   : out Wrapped_Source)
    is
       Source : Unbounded_String;
       Count  : Natural := 0;
 
-      First_Statement : Natural := 0;
-      Line_Count      : Natural := 0;
+      First_Statement  : Natural := 0;
+      Line_Count       : Natural := 0;
       Declaration_Skip : Positive;
-      Begin_Line      : Natural;
+      Begin_Line       : Natural;
+
+      --  The placement state: inside a multi-line declaration, inside
+      --  a nested unit body, and the block nesting inside it.
+      In_Continuation : Boolean := False;
+      Depth           : Natural := 0;
+      Unit_Begin_Seen : Boolean := False;
+      Block_Depth     : Natural := 0;
 
       Start, Finish : Positive;
 
@@ -132,19 +224,14 @@ package body TopoScript_Wrapper is
          Count := Count + 1;
       end Append_Line;
 
-      procedure Reject
-        (Line : Positive;
-         What : String) is
-      begin
-         raise Wrapper_Error with
-           "error: " & Path & ":" &
-           Ada.Strings.Fixed.Trim (Line'Image, Ada.Strings.Both) & ": " &
-           What;
-      end Reject;
-
    begin
-      --  Pass 1: locate the first executable statement, and reject the
-      --  constructs outside the initial subset.
+      --  Pass 1: locate the first statement line. The wrapper places
+      --  the fragment, it never judges it (DD-003, 2026-10-24): the
+      --  recognised declaration forms go to the declarative part,
+      --  everything from the first unrecognised line on goes to the
+      --  body. Nothing is rejected: HAC owns the diagnostics, and a
+      --  misplacement surfaces as a HAC diagnostic mapped back to the
+      --  fragment by TopoScript_Diagnostics.
       Start := Fragment'First;
       while Start <= Fragment'Last loop
          Finish := Start;
@@ -157,24 +244,49 @@ package body TopoScript_Wrapper is
          declare
             Line : constant String := Fragment (Start .. Finish - 1);
          begin
-            if not Is_Neutral (Line) then
-               if Is_Out_Of_Subset (Line) then
-                  Reject (Line_Count,
-                          "the initial TopoScript subset accepts " &
-                          "object declarations and statements only");
-               elsif Is_Identifier_Only (Line) then
-                  Reject (Line_Count,
-                          "a bare identifier is neither a complete " &
-                          "object declaration nor a statement: the " &
-                          "initial subset rejects a declaration " &
-                          "split across several lines");
-               elsif First_Statement = 0 then
-                  if not Is_Declaration (Line) then
-                     First_Statement := Line_Count;
+            if First_Statement = 0 and then not Is_Neutral (Line) then
+               if In_Continuation then
+                  --  A multi-line declaration continues.
+                  if Ends_With_Semicolon (Line) then
+                     In_Continuation := False;
+                  end if;
+               elsif Depth > 0 then
+                  --  The content of a nested unit, its declarations
+                  --  and its body, stays in the declarative part
+                  --  until the unit's final end. The unit's own begin
+                  --  is not a block; a block statement inside the
+                  --  body pairs with its own end.
+                  if First_Word (Line) = "begin" then
+                     if Unit_Begin_Seen then
+                        Block_Depth := Block_Depth + 1;
+                     else
+                        Unit_Begin_Seen := True;
+                     end if;
+                  elsif Ends_With_Semicolon (Line)
+                    and then First_Word (Line) = "end"
+                    and then Second_Word (Line) /= "if"
+                    and then Second_Word (Line) /= "loop"
+                    and then Second_Word (Line) /= "case"
+                    and then Second_Word (Line) /= "record"
+                  then
+                     if Block_Depth > 0 then
+                        Block_Depth := Block_Depth - 1;
+                     else
+                        Depth := Depth - 1;
+                        Unit_Begin_Seen := False;
+                     end if;
                   end if;
                elsif Is_Declaration (Line) then
-                  Reject (Line_Count,
-                          "declaration after the first executable statement");
+                  In_Continuation := not Ends_With_Semicolon (Line);
+                  if In_Continuation
+                    and then Ends_In_Body_Opener (Line)
+                    and then Opens_A_Body (First_Word (Line))
+                  then
+                     In_Continuation := False;
+                     Depth := Depth + 1;
+                  end if;
+               else
+                  First_Statement := Line_Count;
                end if;
             end if;
          end;

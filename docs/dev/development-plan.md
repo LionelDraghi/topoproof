@@ -300,6 +300,13 @@ bbt scenario
 > next section instead), and the deferred items (external prelude,
 > single API description, scanner strengthening, drawing identifiers)
 > rise in priority once the scripting API is the single interface.
+>
+> **Amended by the DD-003 decision of 2026-10-24:** the wrapper stops
+> rejecting fragments, and the scanner strengthening of Increment 8 is
+> superseded: the wrapper neither analyses nor rejects the fragment, it
+> places it and generates the boilerplate, and HAC owns the diagnostics;
+> the pre-compilation rejection scenarios of this subject become HAC
+> diagnostics mapped to the fragment (`TDL-IMPROVE-009`).
 
 ### Goal
 

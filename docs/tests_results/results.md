@@ -497,19 +497,30 @@
    - OK : And there is an error  
    - [X] scenario   [a compilation diagnostic points at the declaration line](../features/toposcript.md) pass  
 
-   ### Scenario: [a declaration split across several lines is rejected cleanly](../features/toposcript.md): 
+   ### Scenario: [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `split_declaration.topo`  
    - OK : When I run `../bin/topocli run split_declaration.topo`  
-   - OK : Then the error output is  
+   - OK : Then the error output contains `split_declaration.topo:2:`  
    - OK : And there is an error  
-   - [X] scenario   [a declaration split across several lines is rejected cleanly](../features/toposcript.md) pass  
+   - [X] scenario   [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md) pass  
 
-   ### Scenario: [a declaration form outside the subset is rejected before compilation](../features/toposcript.md): 
-   - OK : Given the file `out_of_subset.topo`  
-   - OK : When I run `../bin/topocli run out_of_subset.topo`  
-   - OK : Then the error output is  
-   - OK : And there is an error  
-   - [X] scenario   [a declaration form outside the subset is rejected before compilation](../features/toposcript.md) pass  
+   ### Scenario: [a declaration form beyond the former subset runs](../features/toposcript.md): 
+   - OK : Given the file `local_type.topo`  
+   - OK : When I successfully run `../bin/topocli run local_type.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [a declaration form beyond the former subset runs](../features/toposcript.md) pass  
+
+   ### Scenario: [a control structure runs through HAC](../features/toposcript.md): 
+   - OK : Given the file `control.topo`  
+   - OK : When I successfully run `../bin/topocli run control.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [a control structure runs through HAC](../features/toposcript.md) pass  
+
+   ### Scenario: [a local procedure body runs through HAC](../features/toposcript.md): 
+   - OK : Given the file `local_procedure.topo`  
+   - OK : When I successfully run `../bin/topocli run local_procedure.topo`  
+   - OK : Then the output is `point 15 -13 21`  
+   - [X] scenario   [a local procedure body runs through HAC](../features/toposcript.md) pass  
 
    ### Scenario: [two consecutive image sessions produce two images](../features/toposcript.md): 
    - OK : Given the file `two_images.topo`  
@@ -546,12 +557,12 @@
    - OK : And there is an error  
    - [X] scenario   [reject an unrepresentable translation](../features/toposcript.md) pass  
 
-   ### Scenario: [reject a declaration after the first statement](../features/toposcript.md): 
+   ### Scenario: [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `late_declaration.topo`  
    - OK : When I run `../bin/topocli run late_declaration.topo`  
-   - OK : Then the error output is  
+   - OK : Then the error output contains `late_declaration.topo:5:`  
    - OK : And there is an error  
-   - [X] scenario   [reject a declaration after the first statement](../features/toposcript.md) pass  
+   - [X] scenario   [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md) pass  
 
    ### Scenario: [draw the diagnostic image of the translation](../features/toposcript.md): 
    - OK : Given the file `translate_draw.topo`  
@@ -574,7 +585,7 @@
 
    ### Scenario: [an inline rejection points at the inline line](../features/toposcript.md): 
    - OK : When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`  
-   - OK : Then the error output is `error: <inline>:3: declaration after the first executable statement`  
+   - OK : Then the error output contains `<inline>:3:`  
    - OK : And there is an error  
    - [X] scenario   [an inline rejection points at the inline line](../features/toposcript.md) pass  
 
@@ -585,12 +596,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 86 scenarios OK
+## Summary : **Success**, 88 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 86    |
+| Successful | 88    |
 | Empty      | 0     |
 | Not Run    | 0     |
 

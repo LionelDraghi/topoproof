@@ -23,7 +23,7 @@ and its Ada subset are presented in
 - [Scenarios](#scenarios)
 - [Scenario: translate a point and a vector](#scenario-translate-a-point-and-a-vector)
 - [Scenario: reject an unrepresentable translation](#scenario-reject-an-unrepresentable-translation)
-- [Scenario: reject a declaration after the first statement](#scenario-reject-a-declaration-after-the-first-statement)
+- [Scenario: a declaration after the first statement is a HAC diagnostic](#scenario-a-declaration-after-the-first-statement-is-a-hac-diagnostic)
 - [Scenario: draw the diagnostic image of the translation](#scenario-draw-the-diagnostic-image-of-the-translation)
 - [Scenario: --output receives the canonical result of a script](#scenario---output-receives-the-canonical-result-of-a-script)
 - [Scenario: an inline fragment runs without a file](#scenario-an-inline-fragment-runs-without-a-file)
@@ -32,8 +32,10 @@ and its Ada subset are presented in
 - [Scenario: an empty fragment executes silently](#scenario-an-empty-fragment-executes-silently)
 - [Scenario: a fragment of declarations only executes silently](#scenario-a-fragment-of-declarations-only-executes-silently)
 - [Scenario: a compilation diagnostic points at the declaration line](#scenario-a-compilation-diagnostic-points-at-the-declaration-line)
-- [Scenario: a declaration split across several lines is rejected cleanly](#scenario-a-declaration-split-across-several-lines-is-rejected-cleanly)
-- [Scenario: a declaration form outside the subset is rejected before compilation](#scenario-a-declaration-form-outside-the-subset-is-rejected-before-compilation)
+- [Scenario: a declaration split across several lines is a HAC diagnostic](#scenario-a-declaration-split-across-several-lines-is-a-hac-diagnostic)
+- [Scenario: a declaration form beyond the former subset runs](#scenario-a-declaration-form-beyond-the-former-subset-runs)
+- [Scenario: a control structure runs through HAC](#scenario-a-control-structure-runs-through-hac)
+- [Scenario: a local procedure body runs through HAC](#scenario-a-local-procedure-body-runs-through-hac)
 - [Scenario: two consecutive image sessions produce two images](#scenario-two-consecutive-image-sessions-produce-two-images)
 - [Scenario: End_Image without Begin_Image records the rejection](#scenario-end_image-without-begin_image-records-the-rejection)
 - [Scenario: a chain continues after a rejected operation, the first failure is retained](#scenario-a-chain-continues-after-a-rejected-operation-the-first-failure-is-retained)
@@ -85,9 +87,16 @@ TopoScript preserves ordinary Ada notation, including:
 - explicit types and constants;
 - the control structures supported by the selected HAC subset.
 
-Declarations must precede executable statements: a declaration appearing
-after the first executable statement is rejected before any compilation,
-and so are the declaration forms the initial subset does not cover.
+The wrapper places the fragment, it does not judge it (DD-003,
+2026-10-24): it neither analyses the syntax nor the semantics, and it
+never rejects a fragment. It generates the boilerplate and locates the
+boundary between the declarations and the statements; HAC owns the
+diagnostics. The accepted subset is everything HAC handles: the
+declaration forms (`type`, local procedures, `use`, ...), the control
+structures, and the nested unit bodies run like any Ada code. A line
+the wrapper does not recognise as a declaration goes to the statement
+region, and a misplaced declaration surfaces as a HAC diagnostic, with
+the location mapped back to the fragment line.
 
 ## Observable result and verdict
 
@@ -275,11 +284,12 @@ fragment line 1, not on a wrapper line.
 - Then the error output contains `bad_declaration.topo:1:`
 - And there is an error
 
-## Scenario: a declaration split across several lines is rejected cleanly
+## Scenario: a declaration split across several lines is a HAC diagnostic
 
-The line-based classifier of the wrapper rejects the bare identifier
-with the fragment location, instead of letting the fragment reach the
-compilation with a confusing message.
+The wrapper places the fragment, it does not judge it: the bare
+identifier is not recognised as a declaration, the line goes to the
+statement region, and HAC owns the diagnostic, with the location
+mapped back to the fragment line.
 
 - Given the file `split_declaration.topo`
   ```ada
@@ -287,24 +297,71 @@ compilation with a confusing message.
      : constant Point_3D := (1, 2, 3);
   ```
 - When I run `../bin/topocli run split_declaration.topo`
-- Then the error output is
-  ```text
-  error: split_declaration.topo:1: a bare identifier is neither a complete object declaration nor a statement: the initial subset rejects a declaration split across several lines
-  ```
+- Then the error output contains `split_declaration.topo:2:`
 - And there is an error
 
-## Scenario: a declaration form outside the subset is rejected before compilation
+## Scenario: a declaration form beyond the former subset runs
 
-- Given the file `out_of_subset.topo`
+The wrapper never rejects: a `type` declaration, like any form HAC
+handles, reaches the compilation and runs.
+
+- Given the file `local_type.topo`
   ```ada
-  type Color is (Red);
+  type Tint is (Dark, Light);
+  C : constant Tint := Dark;
   ```
-- When I run `../bin/topocli run out_of_subset.topo`
-- Then the error output is
+- When I successfully run `../bin/topocli run local_type.topo`
+- Then the output is
   ```text
-  error: out_of_subset.topo:1: the initial TopoScript subset accepts object declarations and statements only
   ```
-- And there is an error
+
+## Scenario: a control structure runs through HAC
+
+The wrapper only locates the boundary between the declarations and the
+statements: the `for` loop is a statement, and everything from it on
+stays in the generated body.
+
+- Given the file `control.topo`
+  ```ada
+  P : constant Point_3D := (10, -20, 30);
+  D : constant Vector_3D := (5, 7, -9);
+  R : Point_3D;
+  I : Integer;
+
+  for I in 1 .. 2 loop
+     Translate (P, D, R);
+     Put (R);
+  end loop;
+  ```
+- When I successfully run `../bin/topocli run control.topo`
+- Then the output is
+  ```text
+  point 15 -13 21
+  point 15 -13 21
+  ```
+
+## Scenario: a local procedure body runs through HAC
+
+A nested unit keeps its whole body in the declarative part of the
+generated wrapper: its own statements belong there, and the top-level
+statements resume after its final end.
+
+- Given the file `local_procedure.topo`
+  ```ada
+  P : constant Point_3D := (10, -20, 30);
+  D : constant Vector_3D := (5, 7, -9);
+
+  procedure Show is
+     Q : Point_3D;
+  begin
+     Translate (P, D, Q);
+     Put (Q);
+  end Show;
+
+  Show;
+  ```
+- When I successfully run `../bin/topocli run local_procedure.topo`
+- Then the output is `point 15 -13 21`
 
 ## Scenario: two consecutive image sessions produce two images
 
@@ -399,10 +456,11 @@ it one unit beyond the largest representable position.
 - Then the error output is `error: translation is not representable`
 - And there is an error
 
-## Scenario: reject a declaration after the first statement
+## Scenario: a declaration after the first statement is a HAC diagnostic
 
-The wrapper rejects the fragment before any compilation: declarations
-must precede the executable statements.
+The wrapper places the fragment, it does not judge it: the late
+declaration lands in the statement region, and HAC rejects it, with
+the location mapped back to the fragment line.
 
 - Given the file `late_declaration.topo`
   ```ada
@@ -413,10 +471,7 @@ must precede the executable statements.
   Q : Point_3D;
   ```
 - When I run `../bin/topocli run late_declaration.topo`
-- Then the error output is
-  ```text
-  error: late_declaration.topo:5: declaration after the first executable statement
-  ```
+- Then the error output contains `late_declaration.topo:5:`
 - And there is an error
 
 ## Scenario: draw the diagnostic image of the translation
@@ -488,11 +543,11 @@ on every runner.
 ## Scenario: an inline rejection points at the inline line
 
 Each semicolon ends an inline line: the late declaration sits on the
-third one, and the diagnostic carries the `<inline>` name and its
-line.
+third one, lands in the statement region, and the HAC diagnostic
+carries the `<inline>` name and its line.
 
 - When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`
-- Then the error output is `error: <inline>:3: declaration after the first executable statement`
+- Then the error output contains `<inline>:3:`
 - And there is an error
 
 ## Scenario: an inline run writes to the output file

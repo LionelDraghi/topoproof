@@ -8,8 +8,8 @@
 --  Generation of the hidden Ada compilation-unit wrapper around a
 --  TopoScript source (development plan, Milestone 6, Increment 2).
 --
---  A TopoScript fragment contains object declarations followed by
---  executable statements, without compilation-unit boilerplate:
+--  A TopoScript fragment contains declarations and executable
+--  statements, without compilation-unit boilerplate:
 --
 --     P      : constant Point_3D := (10, -20, 30);
 --     D      : constant Vector_3D := (5, 7, -9);
@@ -24,16 +24,21 @@
 --  the injected scripting API and the closing end. The line offsets of
 --  the two regions are returned with the source, so that compilation
 --  diagnostics can be mapped back to the fragment.
+--
+--  The wrapper places the fragment, it does not judge it (DD-003,
+--  2026-10-24): it neither analyses the syntax nor the semantics, and
+--  it never rejects a fragment. The accepted subset is everything HAC
+--  handles: the wrapper only locates the boundary between the
+--  declarations and the statements, and a line it does not recognise
+--  as a declaration goes to the statement region. A misplacement
+--  surfaces as a HAC diagnostic, mapped back to the fragment line by
+--  TopoScript_Diagnostics.
 
 with Ada.Streams;
 with Ada.Streams.Stream_IO;
 with Ada.Strings.Unbounded;
 
 package TopoScript_Wrapper is
-
-   Wrapper_Error : exception;
-   --  Raised by Generate, with a message of the form
-   --  "error: FILE:LINE: ...", already ready for standard error.
 
    type Wrapped_Source is record
       Source           : Ada.Strings.Unbounded.Unbounded_String;
@@ -52,13 +57,15 @@ package TopoScript_Wrapper is
 
    procedure Generate
      (Fragment :     String;
-      Path     :     String;
       Result   : out Wrapped_Source);
    --  Split the fragment into a declaration region and a statement
-   --  region, and build the wrapped compilation unit. Declarations
-   --  must precede the first executable statement, and the initial
-   --  subset accepts object declarations only: anything else raises
-   --  Wrapper_Error.
+   --  region, and build the wrapped compilation unit. The wrapper
+   --  places the fragment and never rejects it: the recognised
+   --  declaration forms go to the declarative part, the content of a
+   --  nested unit body stays in the declarative part, and everything
+   --  from the first unrecognised line on goes to the body (DD-003,
+   --  2026-10-24). The fragment path is not Generate's concern: the
+   --  diagnostics pipe takes it through Set_Mapping.
 
    --  In-memory source stream, consumed by HAC through the standard
    --  Ada stream interface: an empty read reports the end of the

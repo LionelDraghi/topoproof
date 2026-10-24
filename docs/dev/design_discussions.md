@@ -152,8 +152,9 @@ d) Face: valid loop, orientation consistency
 
 ## DD-003: TopoScript source form and bbt integration
 
-- **Status:** partly decided; the source form, the bbt wording and the
-  initial scripting API are settled, the follow-up questions below stay open
+- **Status:** partly decided; the source form, the bbt wording, the
+  initial scripting API and the subset question (2026-10-24, decision
+  below) are settled, the follow-up questions below stay open
 - **Related task:** `TDL-DESIGN-004`
 - **Scope:** TopoScript source form, bbt scenario embedding, HAC execution, scripting API security
 - **Reference:** [Ada and a mini-Ada interpreter, FOSDEM 2025](https://github.com/zertovitch/hac/blob/master/doc/ada_mini_ada_fosdem_2025.pdf),
@@ -229,6 +230,39 @@ command-execution steps: the embedded block is materialised as a scenario-local
 must be selected from syntax already supported by bbt. Introducing shorter or
 TopoScript-specific bbt wording is out of scope.
 
+### Decision: the wrapper is a non-rejecting boilerplate generator (2026-10-24)
+
+Recorded following the `TDL-DESIGN-004` arbitration; it decides the
+question 1 below.
+
+- The wrapper neither analyses the fragment's syntax nor its semantics. It
+  accepts everything HAC is able to handle, and generates only the
+  boilerplate: the context clause and the scripting-API prelude, the
+  declarative part, the `begin` and the `end`. HAC owns the diagnostics.
+- The wrapper keeps exactly one placement job: locating where the
+  declarations end and the statements start, because Ada requires object
+  declarations in the declarative part of the generated unit. This
+  classification never rejects: it only places. An unrecognised line goes
+  to the statement region, and a misplacement surfaces as a HAC diagnostic
+  mapped back to the fragment line by the existing diagnostic kit.
+- The pre-compilation rejections of the initial subset are removed: a
+  declaration after the first statement, and the declaration forms outside
+  the subset (`type`, `procedure`, `use`, ...), reach HAC and are rejected
+  by HAC, with the fragment location recovered through the source mapping.
+- Consequences tracked: `TDL-IMPROVE-009` becomes the non-rejecting
+  placement work and supersedes the former scanner strengthening (the
+  consolidation Increment 8); the rejection scenarios of
+  `docs/features/toposcript.md` will expect HAC diagnostics; the security
+  question stays decoupled from this decision — the trust boundary of the
+  scripting facility is the registered callback surface, not a syntactic
+  subset.
+- Priority of the remaining questions (versioning, security), set on
+  2026-10-24: TopoProof is in alpha development, the only TopoScripts are
+  the test-suite scenarios, and there are no scripts in the wild; API
+  evolutions change the test scripts in the same change, and the security
+  model waits until a standalone user or an extension host actually
+  exists (`TDL-DESIGN-004`, low priority).
+
 ### Security and API exposure
 
 The restriction of APIs available to user scripts is intentionally deferred. The
@@ -242,7 +276,9 @@ trusted TopoProof test suite.
 ### Questions to arbitrate
 
 1. Which control structures and composite declarations enter the subset after
-   the initial one (object declarations followed by statements)?
+   the initial one (object declarations followed by statements)? —
+   **decided (2026-10-24, above): none are refused by the wrapper; the
+   subset is everything HAC handles.**
 2. What canonical `Put` representations are required for the public types
    beyond points (vectors, intersections, contours, topological entities)?
 3. Which drawing primitives are needed for the first migrated scenarios?
