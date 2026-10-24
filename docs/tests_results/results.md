@@ -493,14 +493,14 @@
    ### Scenario: [a compilation diagnostic points at the declaration line](../features/toposcript.md): 
    - OK : Given the file `bad_declaration.topo`  
    - OK : When I run `../bin/topocli run bad_declaration.topo`  
-   - OK : Then the error output contains `bad_declaration.topo:1:`  
+   - OK : Then the error output is `bad_declaration.topo:1:29: error: undefined identifier: Q`  
    - OK : And there is an error  
    - [X] scenario   [a compilation diagnostic points at the declaration line](../features/toposcript.md) pass  
 
    ### Scenario: [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `split_declaration.topo`  
    - OK : When I run `../bin/topocli run split_declaration.topo`  
-   - OK : Then the error output contains `split_declaration.topo:2:`  
+   - OK : Then the error output contains `split_declaration.topo:2:8: error: missing a semicolon: ";"`  
    - OK : And there is an error  
    - [X] scenario   [a declaration split across several lines is a HAC diagnostic](../features/toposcript.md) pass  
 
@@ -560,7 +560,7 @@
    ### Scenario: [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `late_declaration.topo`  
    - OK : When I run `../bin/topocli run late_declaration.topo`  
-   - OK : Then the error output contains `late_declaration.topo:5:`  
+   - OK : Then the error output contains `late_declaration.topo:5:7: error: missing a semicolon: ";"`  
    - OK : And there is an error  
    - [X] scenario   [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md) pass  
 
@@ -585,7 +585,7 @@
 
    ### Scenario: [an inline rejection points at the inline line](../features/toposcript.md): 
    - OK : When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`  
-   - OK : Then the error output contains `<inline>:3:`  
+   - OK : Then the error output contains `<inline>:3:6: error: missing a semicolon: ";"`  
    - OK : And there is an error  
    - [X] scenario   [an inline rejection points at the inline line](../features/toposcript.md) pass  
 

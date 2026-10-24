@@ -266,8 +266,8 @@ suite.
 ## Scenario: a compilation diagnostic points at the declaration line
 
 The diagnostics of the generated wrapper are mapped back to the
-fragment: the error on the first declaration line is reported on
-fragment line 1, not on a wrapper line.
+fragment: the HAC error on the first declaration line is reported on
+fragment line 1, with the HAC message, not on a wrapper line.
 
 - Given the file `bad_declaration.topo`
   ```ada
@@ -277,7 +277,7 @@ fragment line 1, not on a wrapper line.
   Put (R);
   ```
 - When I run `../bin/topocli run bad_declaration.topo`
-- Then the error output contains `bad_declaration.topo:1:`
+- Then the error output is `bad_declaration.topo:1:29: error: undefined identifier: Q`
 - And there is an error
 
 ## Scenario: a declaration split across several lines is a HAC diagnostic
@@ -285,7 +285,7 @@ fragment line 1, not on a wrapper line.
 The wrapper places the fragment, it does not judge it: the bare
 identifier is not recognised as a declaration, the line goes to the
 statement region, and HAC owns the diagnostic, with the location
-mapped back to the fragment line.
+mapped back to the fragment line and the HAC message passed through.
 
 - Given the file `split_declaration.topo`
   ```ada
@@ -293,7 +293,7 @@ mapped back to the fragment line.
      : constant Point_3D := (1, 2, 3);
   ```
 - When I run `../bin/topocli run split_declaration.topo`
-- Then the error output contains `split_declaration.topo:2:`
+- Then the error output contains `split_declaration.topo:2:8: error: missing a semicolon: ";"`
 - And there is an error
 
 ## Scenario: a declaration form beyond the former subset runs
@@ -454,7 +454,8 @@ it one unit beyond the largest representable position.
 
 The wrapper places the fragment, it does not judge it: the late
 declaration lands in the statement region, and HAC rejects it, with
-the location mapped back to the fragment line.
+the location mapped back to the fragment line and the HAC message
+passed through.
 
 - Given the file `late_declaration.topo`
   ```ada
@@ -465,7 +466,7 @@ the location mapped back to the fragment line.
   Q : Point_3D;
   ```
 - When I run `../bin/topocli run late_declaration.topo`
-- Then the error output contains `late_declaration.topo:5:`
+- Then the error output contains `late_declaration.topo:5:7: error: missing a semicolon: ";"`
 - And there is an error
 
 ## Scenario: draw the diagnostic image of the translation
@@ -536,10 +537,10 @@ on every runner.
 
 Each semicolon ends an inline line: the late declaration sits on the
 third one, lands in the statement region, and the HAC diagnostic
-carries the `<inline>` name and its line.
+carries the `<inline>` name, its line and the HAC message.
 
 - When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`
-- Then the error output contains `<inline>:3:`
+- Then the error output contains `<inline>:3:6: error: missing a semicolon: ";"`
 - And there is an error
 
 ## Scenario: an inline run writes to the output file
