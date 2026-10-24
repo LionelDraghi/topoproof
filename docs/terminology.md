@@ -47,6 +47,9 @@ This document defines the project's vocabulary. Terms used by the public API are
   - [`Dot_Product`](#dot_product)
   - [`Cross_Product`](#cross_product)
   - [`Cross_Vector_3D`](#cross_vector_3d)
+  - [`Plane`](#plane)
+  - [`Plane_Side`](#plane_side)
+  - [`Normal`](#normal)
 - [Provisional geometric terms](#provisional-geometric-terms)
   - [`Grid_Quantum`](#grid_quantum)
   - [`Grid_Unit`](#grid_unit)
@@ -261,6 +264,26 @@ operand is exactly zero, proved over the whole grid domain.
 The exact result type of `Cross_Product`: a derived mathematical vector
 whose components may leave the component domain of a grid vector. A
 cross vector is never a grid position and never a displacement.
+
+### `Plane`
+
+A plane is defined only by three non-collinear points; the collinear
+degeneracy is reported at construction, never built. A plane carries its
+three defining points, everything else is derived exactly on demand.
+
+### `Plane_Side`
+
+The exact classification of a point relative to a plane: in front on
+the side the normal points to, behind on the other side, on the plane
+when the plane equation vanishes. No tolerance is involved, and the
+classification is invariant under any representable translation.
+
+### `Normal`
+
+The exact normal of the plane through three non-collinear points: the
+cross product of the two displacements from the first defining point.
+The normal of a valid plane is never null, and a null normal is exactly
+the collinear degeneracy.
 
 ## Provisional geometric terms
 

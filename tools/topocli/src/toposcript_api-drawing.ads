@@ -36,10 +36,34 @@ package TopoScript_API.Drawing is
    procedure Draw_Point_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Draw_Named_Point: like Draw_Point, and the
+   --  point carries the given name in the diagram, instead of the
+   --  automatic anchor name; the vectors already anchored on the
+   --  position follow the rename, so the render stays coherent.
+   procedure Draw_Named_Point_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Draw_Named_Point_2D: the 2D counterpart of
+   --  Draw_Named_Point, at the Z = 0 plane.
+   procedure Draw_Named_Point_2D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Draw_Named_Vector: like Draw_Vector, and the
+   --  tip anchor of the arrow carries the given name, so the diagram
+   --  labels the arrow end with the script variable of the tip.
+   procedure Draw_Named_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Draw_Vector: the arrow runs from the origin to
    --  the tip; both anchor on points, drawn or reused, colored with
    --  the vector color.
    procedure Draw_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Draw_Plane: the translucent parallelogram of
+   --  the three defining points, behind every other primitive; the
+   --  fourth corner is a grid position by the drawing input contract.
+   procedure Draw_Plane_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Draw_Point_2D: the point colors the scene at

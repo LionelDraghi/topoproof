@@ -42,7 +42,7 @@ Do not add a public operation without a contract. Keep each change within the cu
 
 The shared build pointers apply ([reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.template.md)); `make help` is the documentation of record. TopoProof specifics:
 
-- `make test`: build, then run the Markdown documentation in `docs/features` through bbt; the results log and badge evidence go to `artifacts/`.
+- `make test`: build, then run the Markdown documentation in `docs/features` through bbt, then validate every generated diagram as XML; the results log and badge evidence go to `artifacts/`.
 - `make prove`: run GNATprove on every kernel unit (`-U`, level 2) and validate the proof evidence; `make prove+` escalates to level 4 with counterexamples.
 - `make check`: build, test, prove and validate the evidence — the complete verification chain; `make all` is the same target (deviation: `all` covers no doc, since TopoProof executes its documentation instead of generating it).
 - `make release`: build with the release profile (run-time checks suppressed on the proved kernel, kept on the client).

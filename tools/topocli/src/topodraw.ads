@@ -35,12 +35,29 @@ package Topodraw is
    package Scene_Vector_Vectors is new Ada.Containers.Indefinite_Vectors
      (Positive, Vector_Rec);
 
+   --  One plane patch: the parallelogram of the three defining
+   --  points, closed by the fourth corner B + C - A, filled
+   --  translucent behind every other primitive.
+   type Plane_Rec is record
+      AX, AY, AZ : Integer;
+      BX, BY, BZ : Integer;
+      CX, CY, CZ : Integer;
+      --  SVG fill and stroke color of the patch: empty keeps the
+      --  default gray of the rendered diagrams.
+      Color : Ada.Strings.Unbounded.Unbounded_String :=
+        Ada.Strings.Unbounded.Null_Unbounded_String;
+   end record;
+
+   package Scene_Plane_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Positive, Plane_Rec);
+
    type Scene is record
       Draw_Axes : Boolean := False;
       Tick_Step : Integer := -1;  -- -1: no ticks, 0: automatic step
       Anchors   : Boolean := False;
       Points    : Scene_Point_Vectors.Vector;
       Vectors   : Scene_Vector_Vectors.Vector;
+      Planes    : Scene_Plane_Vectors.Vector;
    end record;
 
    Scene_Error : exception;

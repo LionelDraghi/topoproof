@@ -431,6 +431,30 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Orientation (K : in Orientation_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Plane_Kind is");
+      Append_Line ("      (Plane_Valid, Plane_Collinear);");
+      Append_Line ("");
+      Append_Line ("   type Plane_Side_Kind is");
+      Append_Line ("      (Side_In_Front, Side_Behind, Side_On_Plane);");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Plane");
+      Append_Line
+        ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
+         "Result : out Plane_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Plane_Side");
+      Append_Line
+        ("      (P : in Point_3D; A : in Point_3D; B : in Point_3D; " &
+         "C : in Point_3D; Result : out Plane_Side_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Plane_Side (K : in Plane_Side_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Plane_Kind (K : in Plane_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   type Intersection_Kind is");
       Append_Line ("      (No_Intersection, Point_Intersection,");
       Append_Line ("       Off_Grid_Crossing, Overlap);");
@@ -463,8 +487,29 @@ package body TopoScript_Wrapper is
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line
+        ("   procedure Draw_Named_Point (P : in Point_3D; " &
+         "Name : in VString; Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
+        ("   procedure Draw_Named_Point_2D (P : in Point_2D; " &
+         "Name : in VString; Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
         ("   procedure Draw_Vector (Origin : in Point_3D; " &
          "Value : in Vector_3D; Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
+        ("   procedure Draw_Named_Vector (Origin : in Point_3D; " &
+         "Value : in Vector_3D; Name : in VString; Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Draw_Plane");
+      Append_Line
+        ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
+         "Color : in Color_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line

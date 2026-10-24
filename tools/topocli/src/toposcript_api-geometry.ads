@@ -14,6 +14,7 @@ with HAC_Sys.Interfacing;
 
 with TopoProof.Geometry.Intersections;
 with TopoProof.Geometry.Orientations;
+with TopoProof.Geometry.Planes;
 
 package TopoScript_API.Geometry is
 
@@ -44,6 +45,20 @@ package TopoScript_API.Geometry is
      new HAC_Sys.Interfacing.To_Native_Any_Enum
        (TopoProof.Geometry.Intersections.Intersection_Kind);
 
+   function Plane_Side_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (TopoProof.Geometry.Planes.Plane_Side_Kind);
+
+   function To_Plane_Side_Kind is
+     new HAC_Sys.Interfacing.To_Native_Any_Enum
+       (TopoProof.Geometry.Planes.Plane_Side_Kind);
+
+   function Plane_Kind_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (TopoProof.Geometry.Planes.Plane_Kind);
+
+   function To_Plane_Kind is
+     new HAC_Sys.Interfacing.To_Native_Any_Enum
+       (TopoProof.Geometry.Planes.Plane_Kind);
+
    --  Native side of Translate: the script passes the point and the
    --  vector as records; the callback runs the proved Translate and
    --  writes the translated point into the out parameter.
@@ -67,6 +82,18 @@ package TopoScript_API.Geometry is
    --  Cross_Product and writes the exact cross vector into the out
    --  parameter.
    procedure Cross_Product_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Make_Plane: the script passes the three defining
+   --  points; the callback runs the plane constructor and writes the
+   --  construction report, the collinear degeneracy included.
+   procedure Make_Plane_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Plane_Side: the script passes the classified
+   --  point and the three defining points; the callback runs the
+   --  proved classification and writes the side kind.
+   procedure Plane_Side_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Equal: the callback runs the exact point

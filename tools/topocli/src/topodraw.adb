@@ -64,6 +64,7 @@ package body Topodraw is
    Vec_Col  : constant String := "#1a7f37";
    Axis_Col : constant String := "#8b949e";
    Path_Col : constant String := "#6e7781";
+   Plane_Col : constant String := "#d0d7de77";
    Font_Attr : constant String :=
      "font-family=""sans-serif"" font-size=""" &
      Trim (Font_Size'Image, Both) & """";
@@ -398,6 +399,17 @@ package body Topodraw is
       for Pt of S.Points loop
          Anchors.Append (Coord3'(X => Pt.X, Y => Pt.Y, Z => Pt.Z));
       end loop;
+      for P of S.Planes loop
+         --  The four corners of the patch parallelogram, the fourth
+         --  closed by B + C - A, all fitted with the scene.
+         Anchors.Append (Coord3'(X => P.AX, Y => P.AY, Z => P.AZ));
+         Anchors.Append (Coord3'(X => P.BX, Y => P.BY, Z => P.BZ));
+         Anchors.Append (Coord3'(X => P.CX, Y => P.CY, Z => P.CZ));
+         Anchors.Append
+           (Coord3'(X => P.BX + P.CX - P.AX,
+                    Y => P.BY + P.CY - P.AY,
+                    Z => P.BZ + P.CZ - P.AZ));
+      end loop;
       if S.Draw_Axes then
          Anchors.Append (Coord3'(X => 0, Y => 0, Z => 0));
          Anchors.Append (Coord3'(X => Unit, Y => 0, Z => 0));
@@ -414,6 +426,45 @@ package body Topodraw is
       end if;
       return Anchors;
    end Collect_Anchors;
+
+   --  The plane patches, behind every other primitive: the
+   --  translucent parallelogram of each plane's three defining
+   --  points, closed by the fourth corner B + C - A.
+   procedure Emit_Planes (Doc : in out SVG_Document; S : Scene) is
+   begin
+      for P of S.Planes loop
+         declare
+            Corners : constant array (1 .. 4) of Coord3 :=
+              [(P.AX, P.AY, P.AZ),
+               (P.BX, P.BY, P.BZ),
+               (P.BX + P.CX - P.AX,
+                P.BY + P.CY - P.AY,
+                P.BZ + P.CZ - P.AZ),
+               (P.CX, P.CY, P.CZ)];
+            Color : constant String :=
+              (if P.Color = "" then Plane_Col
+               else To_String (P.Color));
+         begin
+            Append (Doc.Buffer, "<polygon points=""");
+            for K in Corners'Range loop
+               declare
+                  Scr : constant Screen2 :=
+                    To_Screen (Doc.Proj, Corners (K));
+               begin
+                  if K > 1 then
+                     Append (Doc.Buffer, " ");
+                  end if;
+                  Append_F (Doc, Scr.X);
+                  Append (Doc.Buffer, ",");
+                  Append_F (Doc, Scr.Y);
+               end;
+            end loop;
+            Append (Doc.Buffer, """ fill=""" & Color);
+            Append (Doc.Buffer, """ fill-opacity=""0.35"" stroke=""" & Color);
+            Append (Doc.Buffer, """/>" & ASCII.LF);
+         end;
+      end loop;
+   end Emit_Planes;
 
    --  The SVG header and the white background rectangle.
    procedure Emit_Background (Doc : in out SVG_Document) is
@@ -700,6 +751,7 @@ package body Topodraw is
          Labels_Last => 0);
    begin
       Emit_Background (Doc);
+      Emit_Planes (Doc, S);
       Emit_Anchor_Paths (Doc, S);
       Emit_Axes (Doc, S);
       Emit_Ticks (Doc, S, Unit);

@@ -172,6 +172,16 @@ package TopoScript_API.Output is
    procedure Put_Orientation_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Put_Plane_Side: writes the canonical image of
+   --  the plane side classification.
+   procedure Put_Plane_Side_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Plane_Kind: writes the canonical image of
+   --  the plane construction report.
+   procedure Put_Plane_Kind_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Put_Intersection: writes the canonical image of
    --  the intersection result, kind and reported positions.
    procedure Put_Intersection_Native

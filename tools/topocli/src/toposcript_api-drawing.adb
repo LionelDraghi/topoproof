@@ -74,6 +74,38 @@ package body TopoScript_API.Drawing is
       end if;
    end Color_Point;
 
+   --  Set the name of the point at the position: the vectors already
+   --  anchored on the position follow the rename, so the render finds
+   --  their endpoints. A position not drawn yet is appended as a
+   --  plain anchor point with the given name.
+   procedure Name_Point (X, Y, Z : Integer; Name : Unbounded_String) is
+      Found : Boolean := False;
+   begin
+      for Pt of Session.Current_Session.The_Scene.Points loop
+         if Pt.X = X and then Pt.Y = Y and then Pt.Z = Z then
+            for V of Session.Current_Session.The_Scene.Vectors loop
+               if V.From_Name = Pt.Name then
+                  V.From_Name := Name;
+               end if;
+               if V.To_Name = Pt.Name then
+                  V.To_Name := Name;
+               end if;
+            end loop;
+            Pt.Name := Name;
+            Found   := True;
+         end if;
+      end loop;
+      if not Found then
+         Session.Current_Session.The_Scene.Points.Append
+           (Point_Rec'
+              (Name  => Name,
+               X     => X,
+               Y     => Y,
+               Z     => Z,
+               Color => Null_Unbounded_String));
+      end if;
+   end Name_Point;
+
    function Anchor_Name (X, Y, Z : Integer) return Unbounded_String is
    begin
       for Pt of Session.Current_Session.The_Scene.Points loop
@@ -142,6 +174,103 @@ package body TopoScript_API.Drawing is
          To_Unbounded_String (Hex_Of (To_Color (Data (4)))));
    end Draw_Point_Native;
 
+   procedure Draw_Named_Point_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..3, Name at 4, Color at 5.
+      P : TopoProof.Geometry.Points.Point_3D;
+
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      if not Conversions.Read_Point_3D (Data, 1, P) then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      declare
+         Name  : constant Unbounded_String :=
+           To_Unbounded_String
+             (String'(HAC_Sys.Interfacing.To_Native (Data (4))));
+         Color : constant Unbounded_String :=
+           To_Unbounded_String (Hex_Of (To_Color (Data (5))));
+      begin
+         Color_Point (Integer (P.X), Integer (P.Y), Integer (P.Z),
+                      Color);
+         Name_Point (Integer (P.X), Integer (P.Y), Integer (P.Z),
+                     Name);
+      end;
+   end Draw_Named_Point_Native;
+
+   procedure Draw_Named_Point_2D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..2, Name at 3, Color at 4.
+      P : TopoProof.Geometry.Points.Point_2D;
+
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      if not Conversions.Read_Point_2D (Data, 1, P) then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      declare
+         Name  : constant Unbounded_String :=
+           To_Unbounded_String
+             (String'(HAC_Sys.Interfacing.To_Native (Data (3))));
+         Color : constant Unbounded_String :=
+           To_Unbounded_String (Hex_Of (To_Color (Data (4))));
+      begin
+         Color_Point (Integer (P.X), Integer (P.Y), 0, Color);
+         Name_Point (Integer (P.X), Integer (P.Y), 0, Name);
+      end;
+   end Draw_Named_Point_2D_Native;
+
+   procedure Draw_Plane_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, C at 7..9, Color at 10.
+      A, B, C : TopoProof.Geometry.Points.Point_3D;
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      --  The patch parallelogram is closed by the fourth corner
+      --  B + C - A, a grid position by the drawing input contract,
+      --  checked like the vector tips.
+      if not Conversions.Read_Point_3D (Data, 1, A)
+        or else not Conversions.Read_Point_3D (Data, 4, B)
+        or else not Conversions.Read_Point_3D (Data, 7, C)
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (B.X) + Long_Long_Integer (C.X)
+                     - Long_Long_Integer (A.X))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (B.Y) + Long_Long_Integer (C.Y)
+                     - Long_Long_Integer (A.Y))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (B.Z) + Long_Long_Integer (C.Z)
+                     - Long_Long_Integer (A.Z))
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      Session.Current_Session.The_Scene.Planes.Append
+        (Topodraw.Plane_Rec'
+           (AX => Integer (A.X), AY => Integer (A.Y), AZ => Integer (A.Z),
+            BX => Integer (B.X), BY => Integer (B.Y), BZ => Integer (B.Z),
+            CX => Integer (C.X), CY => Integer (C.Y), CZ => Integer (C.Z),
+            Color =>
+              To_Unbounded_String (Hex_Of (To_Color (Data (10))))));
+   end Draw_Plane_Native;
+
    procedure Draw_Vector_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
@@ -185,6 +314,53 @@ package body TopoScript_API.Drawing is
                  To_Unbounded_String (Hex_Of (To_Color (Data (7))))));
       end;
    end Draw_Vector_Native;
+
+   procedure Draw_Named_Vector_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: O at 1..3, V at 4..6, Name at 7, Color at 8.
+      O : TopoProof.Geometry.Points.Point_3D;
+      V : TopoProof.Geometry.Vectors.Vector_3D;
+
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      if not Conversions.Read_Point_3D (Data, 1, O)
+        or else not Conversions.Read_Vector_3D (Data, 4, V)
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.X) + Long_Long_Integer (V.DX))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.Y) + Long_Long_Integer (V.DY))
+        or else not Conversions.Grid_In_Range
+                    (Long_Long_Integer (O.Z) + Long_Long_Integer (V.DZ))
+      then
+         Session.Record_Failure ("error: vector outside the grid");
+         return;
+      end if;
+
+      declare
+         Name : constant Unbounded_String :=
+           To_Unbounded_String
+             (String'(HAC_Sys.Interfacing.To_Native (Data (7))));
+      begin
+         --  The tip anchor carries the given name: the diagram labels
+         --  the arrow end with the script variable of the tip.
+         Session.Current_Session.The_Scene.Vectors.Append
+           (Vector_Rec'
+              (From_Name =>
+                 Anchor_Name (Integer (O.X), Integer (O.Y), Integer (O.Z)),
+               To_Name   => Name,
+               Label     => Null_Unbounded_String,
+               Color     =>
+                 To_Unbounded_String (Hex_Of (To_Color (Data (8))))));
+         Name_Point (Integer (O.X) + Integer (V.DX),
+                     Integer (O.Y) + Integer (V.DY),
+                     Integer (O.Z) + Integer (V.DZ),
+                     Name);
+      end;
+   end Draw_Named_Vector_Native;
 
    procedure Draw_Point_2D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

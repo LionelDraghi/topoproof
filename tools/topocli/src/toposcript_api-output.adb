@@ -15,6 +15,7 @@ with TopoScript_API.Conversions;
 with TopoScript_API.Session;
 
 with TopoProof.Numerics;
+with TopoProof.Geometry.Planes;
 with TopoProof.Topology.Faces;
 with TopoProof.Topology.Loops;
 
@@ -120,6 +121,26 @@ package body TopoScript_API.Output is
             "orientation counter_clockwise",
          when TopoProof.Geometry.Orientations.Clockwise =>
             "orientation clockwise");
+
+   function Image
+     (K : TopoProof.Geometry.Planes.Plane_Side_Kind) return String
+   is
+     (case K is
+         when TopoProof.Geometry.Planes.In_Front =>
+            "side in_front",
+         when TopoProof.Geometry.Planes.Behind =>
+            "side behind",
+         when TopoProof.Geometry.Planes.On_Plane =>
+            "side on_plane");
+
+   function Image
+     (K : TopoProof.Geometry.Planes.Plane_Kind) return String
+   is
+     (case K is
+         when TopoProof.Geometry.Planes.Plane_Valid =>
+            "plane valid",
+         when TopoProof.Geometry.Planes.Plane_Collinear =>
+            "plane collinear");
 
    function Image
      (K            : TopoProof.Geometry.Intersections.Intersection_Kind;
@@ -335,6 +356,26 @@ package body TopoScript_API.Output is
    begin
       Put_Line (Image (K));
    end Put_Orientation_Native;
+
+   procedure Put_Plane_Side_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant TopoProof.Geometry.Planes.Plane_Side_Kind :=
+        Geometry.To_Plane_Side_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Plane_Side_Native;
+
+   procedure Put_Plane_Kind_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant TopoProof.Geometry.Planes.Plane_Kind :=
+        Geometry.To_Plane_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Plane_Kind_Native;
 
    procedure Put_Intersection_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

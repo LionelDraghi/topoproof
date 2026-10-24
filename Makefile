@@ -14,6 +14,7 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/translation.md \
             ../docs/features/displacement.md \
             ../docs/features/vectors.md \
+            ../docs/features/planes.md \
             ../docs/features/equality.md \
             ../docs/features/orientation.md \
             ../docs/features/intersection.md \
@@ -79,7 +80,8 @@ help:
 	echo "               (tools/topocli/topocli.gpr), dev profile"
 	echo "  release    : build with the release profile (fast proved kernel)"
 	echo "  test       : build, then run the Markdown documentation in"
-	echo "               docs/features through bbt"
+	echo "               docs/features through bbt, and validate the"
+	echo "               generated diagrams as XML"
 	echo "  prove      : run GNATprove on every kernel unit (-U, level 2)"
 	echo "               and validate the proof evidence"
 	echo "  prove+     : escalate unproved checks (level 4, counterexamples)"
@@ -133,7 +135,17 @@ test: build evidence-dirs
 	# URL of the badge, and the badge is fetched from it, published with
 	# the repository through docs/tests_results/badge.svg. Like every evidence,
 	# the committed file must match the fresh run.
-	curl -s -o docs/tests_results/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)" 
+	curl -s -o docs/tests_results/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)"
+	# Every generated diagram is validated as XML: a malformed SVG
+	# would preview as a missing image instead of failing loudly.
+	# --nonet keeps the validation offline: a document declaring an
+	# external entity or DTD never triggers a network fetch. No
+	# --valid: the diagrams are DTD-less by design, and DTD validation
+	# would flood every run with "no DTD found" errors.
+	# xmllint comes with libxml2; Linux is the platform of record.
+	command -v xmllint >/dev/null 2>&1 || { echo "error: xmllint is required (libxml2-utils)"; exit 1; }
+	xmllint --nonet --noout docs/features/images/*.svg
+	echo "  $$(ls docs/features/images/*.svg | wc -l) diagrams well formed"
 
 evidence-dirs:
 	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS) $(PROOF_CACHE)

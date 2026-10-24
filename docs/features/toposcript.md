@@ -159,6 +159,8 @@ Types:
 | `Closure_Kind` | `Closed`, `Open` |
 | `Contour_Orientation_Kind` | `Contour_Counter_Clockwise`, `Contour_Clockwise`, `Contour_Degenerate` (prefixed: HAC does not overload enumeration literals) |
 | `Bool_Kind` | `Bool_True`, `Bool_False` |
+| `Plane_Kind` | `Plane_Valid`, `Plane_Collinear` |
+| `Plane_Side_Kind` | `Side_In_Front`, `Side_Behind`, `Side_On_Plane` (prefixed: HAC does not overload enumeration literals) |
 | `Vertex_Handle`, `Edge_Handle` | the observable handles of the created vertices and edges, valid for the whole run |
 
 Operations:
@@ -169,6 +171,8 @@ Operations:
 | `Displacement (A, B, Result)` | computes the exact vector from `A` to `B` |
 | `Dot_Product (A, B, Result)` | computes the exact dot product of the two grid vectors |
 | `Cross_Product (A, B, Result)` | computes the exact cross product of the two grid vectors, exact components beyond the grid amplitude included |
+| `Make_Plane (A, B, C, Result)` | builds the plane of the three points, or reports the collinear degeneracy |
+| `Plane_Side (P, A, B, C, Result)` | classifies the point `P` relative to the plane of `A`, `B`, `C` |
 | `Equal (A, B, Result)` | compares two points exactly, through `Equal_True` / `Equal_False` |
 | `Orientation (A, B, C, Result)` | classifies the 2D path `A -> B -> C` exactly |
 | `Intersection (A, B, C, D, Result)` | classifies the exact intersection of the segments `A -> B` and `C -> D`, with the reported positions |
@@ -176,6 +180,8 @@ Operations:
 | `Put_Vector (D)` | writes `vector DX DY DZ` on standard output |
 | `Put_Dot (D)` | writes `dot D` on standard output |
 | `Put_Cross_Vector (V)` | writes `cross DX DY DZ` on standard output |
+| `Put_Plane_Side (K)` | writes `side in_front`, `side behind` or `side on_plane` on standard output |
+| `Put_Plane_Kind (K)` | writes `plane valid` or `plane collinear` on standard output |
 | `Put_Equal (K)` | writes `equal true` or `equal false` on standard output |
 | `Put_Orientation (K)` | writes `orientation ...` on standard output |
 | `Put_Intersection (R)` | writes the intersection line of `R` on standard output |
@@ -202,8 +208,12 @@ Operations:
 | `Begin_Image (Name)` | opens one image under the `VString` name |
 | `Draw_Axes` | axes with automatic ticks and dashed coordinate paths |
 | `Draw_Point (P, Color)` | colors a 3D point of the image |
+| `Draw_Named_Point (P, Name, Color)` | colors a 3D point of the image, labeled with `Name` instead of the automatic anchor name |
+| `Draw_Named_Vector (Origin, Value, Name, Color)` | draws the labeled arrow of the vector, its tip anchor labeled with `Name` |
 | `Draw_Vector (Origin, Value, Color)` | draws the labeled arrow of the vector |
+| `Draw_Plane (A, B, C, Color)` | draws the translucent parallelogram patch of the plane through `A`, `B`, `C` |
 | `Draw_Point_2D (P, Color)` | colors a 2D point of the image |
+| `Draw_Named_Point_2D (P, Name, Color)` | colors a 2D point of the image, labeled with `Name` instead of the automatic anchor name |
 | `Draw_Edge (P, Q, Color)` | draws the labeled segment arrow from `P` to `Q` |
 | `Draw_Segment_2D (P, Q, Color)` | draws the plain 2D segment from `P` to `Q`, without label |
 | `End_Image` | renders the image through the topodraw renderer |
@@ -394,12 +404,12 @@ statements resume after its final end.
 
   Begin_Image (+"../docs/features/images/toposcript_2.svg");
   Draw_Axes;
-  Draw_Point (A, Blue);
+  Draw_Named_Point (A, +"A", Blue);
   End_Image;
 
   Begin_Image (+"../docs/features/images/toposcript_3.svg");
   Draw_Axes;
-  Draw_Point (B, Green);
+  Draw_Named_Point (B, +"B", Green);
   End_Image;
   ```
 - When I successfully run `../bin/topocli run two_images.topo`
@@ -519,13 +529,13 @@ carries the result only.
 
   Begin_Image (+"../docs/features/images/toposcript_1.svg");
   Draw_Axes;
-  Draw_Point (P, Blue);
-  Draw_Vector (P, D, Blue);
-  Draw_Point (Expected, Green);
+  Draw_Named_Point (P, +"P", Blue);
+  Draw_Named_Vector (P, D, +"Result", Blue);
+  Draw_Named_Point (Expected, +"Expected", Green);
 
   Translate (P, D, Result);
 
-  Draw_Point (Result, Red);
+  Draw_Named_Point (Result, +"Result", Red);
   End_Image;
 
   Put (Result);
@@ -602,13 +612,13 @@ Result   : Point_3D;
 
 Begin_Image (+"translation.svg");
 Draw_Axes;
-Draw_Point (P, Blue);
-Draw_Vector (P, D, Blue);
-Draw_Point (Expected, Green);
+Draw_Named_Point (P, +"P", Blue);
+Draw_Named_Vector (P, D, +"Result", Blue);
+Draw_Named_Point (Expected, +"Expected", Green);
 
 Translate (P, D, Result);
 
-Draw_Point (Result, Red);
+Draw_Named_Point (Result, +"Result", Red);
 End_Image;
 
 Put (Result);

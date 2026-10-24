@@ -108,6 +108,48 @@ package body TopoScript_API.Geometry is
         (Data, 7, TopoProof.Geometry.Vectors.Cross_Product (A, B));
    end Cross_Product_Native;
 
+   procedure Make_Plane_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, C at 7..9, Kind at 10.
+      A, B, C : TopoProof.Geometry.Points.Point_3D;
+      Pl      : TopoProof.Geometry.Planes.Plane;
+      K       : TopoProof.Geometry.Planes.Plane_Kind;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, A)
+        or else not Conversions.Read_Point_3D (Data, 4, B)
+        or else not Conversions.Read_Point_3D (Data, 7, C)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      TopoProof.Geometry.Planes.Make_Plane (A, B, C, Pl, K);
+      Data (10) := Plane_Kind_To_HAC (K);
+   end Make_Plane_Native;
+
+   procedure Plane_Side_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..3, A at 4..6, B at 7..9, C at 10..12,
+      --  Kind at 13.
+      P, A, B, C : TopoProof.Geometry.Points.Point_3D;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, P)
+        or else not Conversions.Read_Point_3D (Data, 4, A)
+        or else not Conversions.Read_Point_3D (Data, 7, B)
+        or else not Conversions.Read_Point_3D (Data, 10, C)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      Data (13) := Plane_Side_To_HAC
+        (TopoProof.Geometry.Planes.Plane_Side ((A, B, C), P));
+   end Plane_Side_Native;
+
    procedure Equal_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is

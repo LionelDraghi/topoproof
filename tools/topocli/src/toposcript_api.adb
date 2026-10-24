@@ -21,6 +21,8 @@ package body TopoScript_API is
       Register (BD, Geometry.Displacement_Native'Access, "Displacement");
       Register (BD, Geometry.Dot_Product_Native'Access, "Dot_Product");
       Register (BD, Geometry.Cross_Product_Native'Access, "Cross_Product");
+      Register (BD, Geometry.Make_Plane_Native'Access, "Make_Plane");
+      Register (BD, Geometry.Plane_Side_Native'Access, "Plane_Side");
       Register (BD, Geometry.Equal_Native'Access, "Equal");
       Register (BD, Geometry.Orientation_Native'Access, "Orientation");
       Register (BD, Geometry.Intersection_Native'Access, "Intersection");
@@ -32,12 +34,23 @@ package body TopoScript_API is
       Register (BD, Output.Put_Equal_Native'Access, "Put_Equal");
       Register (BD, Output.Put_Orientation_Native'Access,
                 "Put_Orientation");
+      Register (BD, Output.Put_Plane_Side_Native'Access,
+                "Put_Plane_Side");
+      Register (BD, Output.Put_Plane_Kind_Native'Access,
+                "Put_Plane_Kind");
       Register (BD, Output.Put_Intersection_Native'Access,
                 "Put_Intersection");
       Register (BD, Drawing.Begin_Image_Native'Access, "Begin_Image");
       Register (BD, Drawing.Draw_Axes_Native'Access, "Draw_Axes");
       Register (BD, Drawing.Draw_Point_Native'Access, "Draw_Point");
+      Register (BD, Drawing.Draw_Named_Point_Native'Access,
+                "Draw_Named_Point");
+      Register (BD, Drawing.Draw_Named_Point_2D_Native'Access,
+                "Draw_Named_Point_2D");
+      Register (BD, Drawing.Draw_Named_Vector_Native'Access,
+                "Draw_Named_Vector");
       Register (BD, Drawing.Draw_Vector_Native'Access, "Draw_Vector");
+      Register (BD, Drawing.Draw_Plane_Native'Access, "Draw_Plane");
       Register (BD, Drawing.Draw_Point_2D_Native'Access,
                 "Draw_Point_2D");
       Register (BD, Drawing.Draw_Edge_Native'Access, "Draw_Edge");
