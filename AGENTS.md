@@ -76,4 +76,3 @@ Read a document only when the task requires it; do not open them all up front.
 - Keep output deterministic and line-oriented. Diagnostics go to standard error and failures return non-zero status.
 - `make test` means black-box execution of the Markdown documentation through bbt.
 - Update behaviour and its Markdown scenario in the same change.
-- Prefer Ada Language Server for semantic navigation and symbol references.
