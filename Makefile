@@ -45,7 +45,16 @@ ANALYSIS := --mode=all --report=all --warnings=error
 # absolute: gnatprove rejects a relative one ("no such directory"),
 # whatever the working directory.
 PROOF_CACHE := $(CURDIR)/obj/gnatprove-cache
+# The cache is disabled on Windows: with the switch, gnatprove 16.1
+# crashes in its front end on the CI runner (GNAT bug box, "unexpected
+# character", reproducible run after run on the same unit), whatever
+# the path form. The OS variable is Windows_NT on every Windows
+# environment, and unset on Linux and macOS.
+ifeq ($(OS),Windows_NT)
+PROOF_CACHE_SWITCH :=
+else
 PROOF_CACHE_SWITCH := --memcached-server=file:$(PROOF_CACHE)
+endif
 
 # SARIF evidence for code scanning. GNATprove >= 26 takes these switches;
 # the Alire index offers 16.1.0, which rejects them, so they stay here,

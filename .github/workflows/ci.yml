@@ -158,8 +158,10 @@ jobs:
       # and restore-keys recovers the most recent previous entry, which
       # is the proof of everything the commit did not touch. The cache
       # is per platform: proof results are not guaranteed to transfer
-      # between runtimes and predefined type sizes.
+      # between runtimes and predefined type sizes. Not saved on
+      # Windows: the gnatprove file cache crashes there (see Makefile).
       - name: Cache GNATprove proof results
+        if: runner.os != 'Windows'
         uses: actions/cache@v4
         with:
           path: obj/gnatprove-cache
