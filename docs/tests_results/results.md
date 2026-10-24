@@ -481,13 +481,13 @@
    ### Scenario: [an empty fragment executes silently](../features/toposcript.md): 
    - OK : Given the file `empty.topo`  
    - OK : When I successfully run `../bin/topocli run empty.topo`  
-   - OK : Then the output is  
+   - OK : Then there is no output  
    - [X] scenario   [an empty fragment executes silently](../features/toposcript.md) pass  
 
    ### Scenario: [a fragment of declarations only executes silently](../features/toposcript.md): 
    - OK : Given the file `declarations_only.topo`  
    - OK : When I successfully run `../bin/topocli run declarations_only.topo`  
-   - OK : Then the output is  
+   - OK : Then there is no output  
    - [X] scenario   [a fragment of declarations only executes silently](../features/toposcript.md) pass  
 
    ### Scenario: [a compilation diagnostic points at the declaration line](../features/toposcript.md): 
@@ -507,7 +507,7 @@
    ### Scenario: [a declaration form beyond the former subset runs](../features/toposcript.md): 
    - OK : Given the file `local_type.topo`  
    - OK : When I successfully run `../bin/topocli run local_type.topo`  
-   - OK : Then the output is  
+   - OK : Then there is no output  
    - [X] scenario   [a declaration form beyond the former subset runs](../features/toposcript.md) pass  
 
    ### Scenario: [a control structure runs through HAC](../features/toposcript.md): 
@@ -574,7 +574,7 @@
    ### Scenario: [--output receives the canonical result of a script](../features/toposcript.md): 
    - OK : Given the file `translate_output.topo`  
    - OK : When I successfully run `../bin/topocli run translate_output.topo --output result.out`  
-   - OK : Then the output is  
+   - OK : Then there is no output  
    - OK : And the file `result.out` is `point 15 -13 21`  
    - [X] scenario   [--output receives the canonical result of a script](../features/toposcript.md) pass  
 
@@ -591,7 +591,7 @@
 
    ### Scenario: [an inline run writes to the output file](../features/toposcript.md): 
    - OK : When I successfully run `../bin/topocli run_code "A : constant Point_2D := (0, 0); B : constant Point_2D := (2, 0); K : Continuity_Kind; Add_Point (A); Add_Point (B); Add_Point (B); Add_Point (A); Contour_Continuity (K); Put_Continuity (K);" --output inline.out`  
-   - OK : Then the output is  
+   - OK : Then there is no output  
    - OK : And the file `inline.out` is `continuity continuous`  
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 

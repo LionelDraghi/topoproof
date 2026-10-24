@@ -251,9 +251,7 @@ suite.
   ```text
   ```
 - When I successfully run `../bin/topocli run empty.topo`
-- Then the output is
-  ```text
-  ```
+- Then there is no output
 
 ## Scenario: a fragment of declarations only executes silently
 
@@ -263,9 +261,7 @@ suite.
   D : constant Vector_3D := (5, 7, -9);
   ```
 - When I successfully run `../bin/topocli run declarations_only.topo`
-- Then the output is
-  ```text
-  ```
+- Then there is no output
 
 ## Scenario: a compilation diagnostic points at the declaration line
 
@@ -311,9 +307,7 @@ handles, reaches the compilation and runs.
   C : constant Tint := Dark;
   ```
 - When I successfully run `../bin/topocli run local_type.topo`
-- Then the output is
-  ```text
-  ```
+- Then there is no output
 
 ## Scenario: a control structure runs through HAC
 
@@ -526,9 +520,7 @@ and the standard output stays empty.
   Put (Result);
   ```
 - When I successfully run `../bin/topocli run translate_output.topo --output result.out`
-- Then the output is
-  ```text
-  ```
+- Then there is no output
 - And the file `result.out` is `point 15 -13 21`
 
 ## Scenario: an inline fragment runs without a file
@@ -555,9 +547,7 @@ carries the `<inline>` name and its line.
 The inline entry owns the same option as the file entry.
 
 - When I successfully run `../bin/topocli run_code "A : constant Point_2D := (0, 0); B : constant Point_2D := (2, 0); K : Continuity_Kind; Add_Point (A); Add_Point (B); Add_Point (B); Add_Point (A); Contour_Continuity (K); Put_Continuity (K);" --output inline.out`
-- Then the output is
-  ```text
-  ```
+- Then there is no output
 - And the file `inline.out` is `continuity continuous`
 
 ## Diagnostic drawing
