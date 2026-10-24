@@ -28,12 +28,12 @@ the operation, is drawn in red.
 
   Begin_Image (+"../docs/features/images/translation_1.svg");
   Draw_Axes;
-  Draw_Point (P, Blue);
-  Draw_Vector (P, D, Blue);
+  Draw_Named_Point (P, +"P", Blue);
+  Draw_Named_Vector (P, D, +"Result", Blue);
 
   Translate (P, D, Result);
 
-  Draw_Point (Result, Red);
+  Draw_Named_Point (Result, +"Result", Red);
   End_Image;
 
   Put (Result);
@@ -62,7 +62,7 @@ representable grid and nothing else.
 
   Begin_Image (+"../docs/features/images/translation_2.svg");
   Draw_Axes;
-  Draw_Point (P, Blue);
+  Draw_Named_Point (P, +"P", Blue);
   End_Image;
 
   Translate (P, D, Result);

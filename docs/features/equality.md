@@ -31,8 +31,8 @@ positions.
 
   Begin_Image (+"../docs/features/images/equality_1.svg");
   Draw_Axes;
-  Draw_Point (A, Blue);
-  Draw_Point (B, Green);
+  Draw_Named_Point (A, +"A = B", Blue);
+  Draw_Named_Point (B, +"A = B", Green);
 
   Equal (A, B, K);
   End_Image;
@@ -61,8 +61,8 @@ vertical axis.
 
   Begin_Image (+"../docs/features/images/equality_2.svg");
   Draw_Axes;
-  Draw_Point (A, Blue);
-  Draw_Point (B, Green);
+  Draw_Named_Point (A, +"A", Blue);
+  Draw_Named_Point (B, +"B", Green);
 
   Equal (A, B, K);
   End_Image;
@@ -90,8 +90,8 @@ origin.
 
   Begin_Image (+"../docs/features/images/equality_3.svg");
   Draw_Axes;
-  Draw_Point (A, Blue);
-  Draw_Point (B, Green);
+  Draw_Named_Point (A, +"A", Blue);
+  Draw_Named_Point (B, +"B", Green);
 
   Equal (A, B, K);
   End_Image;

@@ -37,8 +37,8 @@ the same vertex.
 
   Begin_Image (+"../docs/features/images/edges_1.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
   Draw_Edge (A, B, Blue);
   End_Image;
 
@@ -81,9 +81,9 @@ meet at one vertex, and both edge traces report `vertex 2`.
 
   Begin_Image (+"../docs/features/images/edges_2.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, B, Blue);
   End_Image;

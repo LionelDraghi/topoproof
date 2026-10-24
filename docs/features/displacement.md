@@ -25,12 +25,12 @@ operation, drawn in red.
 
   Begin_Image (+"../docs/features/images/displacement_1.svg");
   Draw_Axes;
-  Draw_Point (A, Blue);
-  Draw_Point (B, Green);
+  Draw_Named_Point (A, +"A", Blue);
+  Draw_Named_Point (B, +"B", Green);
 
   Displacement (A, B, D);
 
-  Draw_Vector (A, D, Red);
+  Draw_Named_Vector (A, D, +"B", Red);
   End_Image;
 
   Put_Vector (D);

@@ -45,9 +45,9 @@ mirrors the orientation.
 
   Begin_Image (+"../docs/features/images/orientation_1.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Green);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Green);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -77,9 +77,9 @@ The path turns right at `(1, 0)`.
 
   Begin_Image (+"../docs/features/images/orientation_3.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Green);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Green);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -106,9 +106,9 @@ The path stays on the diagonal line: no turn at all.
 
   Begin_Image (+"../docs/features/images/orientation_4.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Green);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Green);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -136,8 +136,8 @@ reaching `C`.
 
   Begin_Image (+"../docs/features/images/orientation_5.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, C, Blue);
   End_Image;
 
@@ -164,9 +164,9 @@ coordinates is computed exactly in the `Determinant` domain.
 
   Begin_Image (+"../docs/features/images/orientation_6.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Green);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Green);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -233,9 +233,9 @@ The exchanged path of the first scenario.
 
   Begin_Image (+"../docs/features/images/orientation_2.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Green);
-  Draw_Point_2D (C, Red);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Green);
+  Draw_Named_Point_2D (C, +"C", Red);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -270,11 +270,14 @@ translated one in red.
 
   Begin_Image (+"../docs/features/images/orientation_7.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
+  Draw_Named_Point_2D (E, +"E", Red);
+  Draw_Named_Point_2D (F, +"F", Red);
+  Draw_Named_Point_2D (G, +"G", Red);
   Draw_Edge (E, F, Red);
   Draw_Edge (F, G, Red);
   End_Image;

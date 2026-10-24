@@ -35,13 +35,13 @@
 <line x1="315.4" y1="102.5" x2="324.6" y2="106.3" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="315.4" y1="61.3" x2="324.6" y2="65.1" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="531.5" cy="204.5" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="541.5" y="194.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (0, -1073741823, 0)</text>
+<text x="541.5" y="194.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (0, -1073741823, 0)</text>
 <circle cx="108.5" cy="333.8" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="118.5" y="323.8" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (0, 1073741823, 0)</text>
-<circle cx="114.9" cy="186.3" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="124.9" y="176.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">A3 (-1073741823, 0, 0)</text>
-<circle cx="525.1" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="535.1" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A4 (1073741823, 0, 0)</text>
+<text x="118.5" y="323.8" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (0, 1073741823, 0)</text>
+<circle cx="114.9" cy="186.3" r="5.0" fill="#1a7f37" stroke="#ffffff" stroke-width="1.5"/>
+<text x="124.9" y="176.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (-1073741823, 0, 0)</text>
+<circle cx="525.1" cy="352.0" r="5.0" fill="#1a7f37" stroke="#ffffff" stroke-width="1.5"/>
+<text x="535.1" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (1073741823, 0, 0)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker><marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
 <line x1="531.5" y1="204.5" x2="108.5" y2="333.8" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
 <line x1="114.9" y1="186.3" x2="525.1" y2="352.0" stroke="#1a7f37" stroke-width="2.0" marker-end="url(#arrow2)"/>

@@ -36,9 +36,9 @@ it as a face boundary.
 
   Begin_Image (+"../docs/features/images/faces_1.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, A, Blue);
@@ -74,10 +74,10 @@ it as a face boundary.
 
   Begin_Image (+"../docs/features/images/faces_2.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, D, Blue);

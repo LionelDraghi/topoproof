@@ -239,9 +239,9 @@ The endpoint of the first segment equals the start point of the second.
 
   Begin_Image (+"../docs/features/images/contour_4.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -279,10 +279,10 @@ The endpoint `(1, 0)` of the first segment differs from the start point
 
   Begin_Image (+"../docs/features/images/contour_5.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Blue);
   End_Image;
@@ -350,10 +350,10 @@ The last point equals the first: the square of the orientation definition.
 
   Begin_Image (+"../docs/features/images/contour_1.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, D, Blue);
@@ -393,9 +393,9 @@ the start point.
 
   Begin_Image (+"../docs/features/images/contour_6.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   End_Image;
@@ -479,10 +479,10 @@ on the right.
 
   Begin_Image (+"../docs/features/images/contour_2.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, D, Blue);
@@ -523,10 +523,10 @@ same area and opposite orientations, so the shoelace sums to zero.
 
   Begin_Image (+"../docs/features/images/contour_3.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, C, Blue);
   Draw_Segment_2D (C, D, Blue);
@@ -564,9 +564,9 @@ same area and opposite orientations, so the shoelace sums to zero.
 
   Begin_Image (+"../docs/features/images/contour_7.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, A, Blue);
@@ -607,11 +607,11 @@ traversed counter-clockwise.
 
   Begin_Image (+"../docs/features/images/contour_13.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
-  Draw_Point_2D (E, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
+  Draw_Named_Point_2D (E, +"E", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, D, Blue);
@@ -717,9 +717,9 @@ non-consecutive segments, so it is a valid junction.
 
   Begin_Image (+"../docs/features/images/contour_8.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, C, Blue);
   Draw_Segment_2D (C, B, Blue);
@@ -805,8 +805,8 @@ end.
 
   Begin_Image (+"../docs/features/images/contour_9.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, A, Blue);
   End_Image;
@@ -847,9 +847,9 @@ not canonical.
 
   Begin_Image (+"../docs/features/images/contour_10.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, C, Blue);
   Draw_Segment_2D (C, A, Blue);
@@ -919,8 +919,8 @@ extreme positions on both axes.
 
   Begin_Image (+"../docs/features/images/contour_11.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, A, Blue);
   End_Image;
@@ -961,10 +961,10 @@ clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
 
   Begin_Image (+"../docs/features/images/contour_12.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (B, C, Blue);
   Draw_Segment_2D (C, D, Blue);

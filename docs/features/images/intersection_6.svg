@@ -26,13 +26,13 @@
 <line x1="318.6" y1="156.7" x2="327.9" y2="160.5" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="318.6" y1="46.1" x2="327.9" y2="49.9" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="323.2" cy="269.2" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="333.2" y="259.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (0, 0, 0)</text>
+<text x="333.2" y="259.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (0, 0, 0)</text>
 <circle cx="528.3" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="538.3" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (2, 0, 0)</text>
-<circle cx="425.7" cy="310.6" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="435.7" y="300.6" fill="#0d2b3e" font-family="sans-serif" font-size="13">A3 (1, 0, 0)</text>
-<circle cx="320.0" cy="342.9" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="330.0" y="332.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">A4 (1, 1, 0)</text>
+<text x="538.3" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (2, 0, 0)</text>
+<circle cx="425.7" cy="310.6" r="5.0" fill="#1a7f37" stroke="#ffffff" stroke-width="1.5"/>
+<text x="435.7" y="300.6" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (1, 0, 0)</text>
+<circle cx="320.0" cy="342.9" r="5.0" fill="#1a7f37" stroke="#ffffff" stroke-width="1.5"/>
+<text x="330.0" y="332.9" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (1, 1, 0)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker><marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker></defs>
 <line x1="323.2" y1="269.2" x2="528.3" y2="352.0" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
 <text x="425.7" y="347.6" fill="#1f6feb" font-family="sans-serif" font-size="13">(2, 0)</text>

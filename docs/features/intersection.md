@@ -54,6 +54,10 @@ position: the operation says so instead of approximating.
 
   Begin_Image (+"../docs/features/images/intersection_1.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);
   End_Image;
@@ -80,6 +84,10 @@ position: the operation says so instead of approximating.
 
   Begin_Image (+"../docs/features/images/intersection_2.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);
   End_Image;
@@ -108,6 +116,10 @@ The two segments lie on the X axis and share the part from `(2, 0)` to
 
   Begin_Image (+"../docs/features/images/intersection_3.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
   End_Image;
@@ -136,6 +148,10 @@ of both.
 
   Begin_Image (+"../docs/features/images/intersection_4.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
   End_Image;
@@ -164,6 +180,10 @@ The two segments lie on the same line with a gap between `(1, 0)` and
 
   Begin_Image (+"../docs/features/images/intersection_5.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
   End_Image;
@@ -192,6 +212,10 @@ segment: a junction on the edge.
 
   Begin_Image (+"../docs/features/images/intersection_6.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Edge (A, B, Blue);
   Draw_Edge (C, D, Green);
   End_Image;
@@ -221,8 +245,10 @@ segment appears on the diagram.
 
   Begin_Image (+"../docs/features/images/intersection_7.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Edge (C, D, Green);
-  Draw_Point_2D (A, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
   End_Image;
 
   Intersection (A, B, C, D, R);
@@ -281,6 +307,10 @@ at the origin.
 
   Begin_Image (+"../docs/features/images/intersection_8.svg");
   Draw_Axes;
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Green);
+  Draw_Named_Point_2D (D, +"D", Green);
   Draw_Segment_2D (A, B, Blue);
   Draw_Segment_2D (C, D, Green);
   End_Image;

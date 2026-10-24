@@ -41,17 +41,17 @@
 <line x1="318.1" y1="93.8" x2="327.4" y2="97.6" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="318.1" y1="46.1" x2="327.4" y2="49.9" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="322.8" cy="238.7" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="332.8" y="228.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (0, 0, 0)</text>
+<text x="332.8" y="228.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (0, 0, 0)</text>
 <circle cx="367.0" cy="256.6" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="377.0" y="246.6" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (1, 0, 0)</text>
+<text x="377.0" y="246.6" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (1, 0, 0)</text>
 <circle cx="321.4" cy="270.5" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="331.4" y="290.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">A3 (1, 1, 0)</text>
-<circle cx="364.2" cy="320.2" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="374.2" y="310.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">A4 (3, 2, 0)</text>
-<circle cx="408.4" cy="338.1" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="418.4" y="328.1" fill="#0d2b3e" font-family="sans-serif" font-size="13">A5 (4, 2, 0)</text>
-<circle cx="362.8" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="372.8" y="357.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A6 (4, 3, 0)</text>
+<text x="331.4" y="290.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (1, 1, 0)</text>
+<circle cx="364.2" cy="320.2" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="374.2" y="310.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">E (3, 2, 0)</text>
+<circle cx="408.4" cy="338.1" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="418.4" y="328.1" fill="#0d2b3e" font-family="sans-serif" font-size="13">F (4, 2, 0)</text>
+<circle cx="362.8" cy="352.0" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="372.8" y="357.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">G (4, 3, 0)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker><marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#cf222e"/></marker></defs>
 <line x1="322.8" y1="238.7" x2="367.0" y2="256.6" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
 <text x="344.9" y="329.7" fill="#1f6feb" font-family="sans-serif" font-size="13">(1, 0)</text>

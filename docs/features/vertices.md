@@ -30,7 +30,7 @@ same vertex for the whole run.
 
   Begin_Image (+"../docs/features/images/vertices_1.svg");
   Draw_Axes;
-  Draw_Point_2D (P, Blue);
+  Draw_Named_Point_2D (P, +"P", Blue);
   End_Image;
 
   Create_Vertex (P, V);

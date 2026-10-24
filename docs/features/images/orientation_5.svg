@@ -28,9 +28,9 @@
 <line x1="284.7" y1="116.7" x2="294.0" y2="120.5" stroke="#8b949e" stroke-width="1.0"/>
 <line x1="284.7" y1="69.7" x2="294.0" y2="73.4" stroke="#8b949e" stroke-width="1.0"/>
 <circle cx="240.9" cy="352.0" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
-<text x="250.9" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A1 (5, 7, 0)</text>
+<text x="250.9" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (5, 7, 0)</text>
 <circle cx="553.2" cy="318.5" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
-<text x="563.2" y="308.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">A2 (9, -3, 0)</text>
+<text x="563.2" y="308.5" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (9, -3, 0)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker></defs>
 <line x1="240.9" y1="352.0" x2="553.2" y2="318.5" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
 <text x="397.0" y="327.2" fill="#1f6feb" font-family="sans-serif" font-size="13">(4, -10)</text>

@@ -45,9 +45,9 @@ it.
 
   Begin_Image (+"../docs/features/images/loops_1.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, A, Blue);
@@ -85,10 +85,10 @@ is on the right.
 
   Begin_Image (+"../docs/features/images/loops_2.svg");
   Draw_Axes;
-  Draw_Point_2D (A, Blue);
-  Draw_Point_2D (B, Blue);
-  Draw_Point_2D (C, Blue);
-  Draw_Point_2D (D, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Blue);
+  Draw_Named_Point_2D (C, +"C", Blue);
+  Draw_Named_Point_2D (D, +"D", Blue);
   Draw_Edge (A, B, Blue);
   Draw_Edge (B, C, Blue);
   Draw_Edge (C, D, Blue);
