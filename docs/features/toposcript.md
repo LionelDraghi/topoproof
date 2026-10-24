@@ -167,11 +167,15 @@ Operations:
 |-----------|--------|
 | `Translate (P, V, Result)` | runs the proved `Translate` on the point `P` and the vector `V` |
 | `Displacement (A, B, Result)` | computes the exact vector from `A` to `B` |
+| `Dot_Product (A, B, Result)` | computes the exact dot product of the two grid vectors |
+| `Cross_Product (A, B, Result)` | computes the exact cross product of the two grid vectors, exact components beyond the grid amplitude included |
 | `Equal (A, B, Result)` | compares two points exactly, through `Equal_True` / `Equal_False` |
 | `Orientation (A, B, C, Result)` | classifies the 2D path `A -> B -> C` exactly |
 | `Intersection (A, B, C, D, Result)` | classifies the exact intersection of the segments `A -> B` and `C -> D`, with the reported positions |
 | `Put (P)` | writes `point X Y Z` on standard output |
 | `Put_Vector (D)` | writes `vector DX DY DZ` on standard output |
+| `Put_Dot (D)` | writes `dot D` on standard output |
+| `Put_Cross_Vector (V)` | writes `cross DX DY DZ` on standard output |
 | `Put_Equal (K)` | writes `equal true` or `equal false` on standard output |
 | `Put_Orientation (K)` | writes `orientation ...` on standard output |
 | `Put_Intersection (R)` | writes the intersection line of `R` on standard output |

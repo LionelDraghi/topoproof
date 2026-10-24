@@ -30,6 +30,14 @@ is
              + Numerics.Dot_Product (Numerics.Component_Product (A.DZ, B.DZ));
    end Dot_Product;
 
+   function Dot_Product (U : Cross_Vector_3D; V : Vector_3D)
+      return Numerics.Cross_Dot is
+   begin
+      return Numerics.Cross_Dot (Numerics.Mixed_Product (U.DX, V.DX))
+             + Numerics.Cross_Dot (Numerics.Mixed_Product (U.DY, V.DY))
+             + Numerics.Cross_Dot (Numerics.Mixed_Product (U.DZ, V.DZ));
+   end Dot_Product;
+
    function Cross_Product (A, B : Vector_3D) return Cross_Vector_3D is
    begin
       return
@@ -55,5 +63,10 @@ is
    begin
       null;
    end Lemma_Cross_Antisymmetry;
+
+   procedure Lemma_Cross_Orthogonality (A, B : Vector_3D) is
+   begin
+      null;
+   end Lemma_Cross_Orthogonality;
 
 end TopoProof.Geometry.Vectors;

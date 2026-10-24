@@ -144,6 +144,35 @@ type Cross_Component is range -Cross_Amplitude .. Cross_Amplitude;
 Both stay exact for any grid input; no rejection and no rounding are
 involved.
 
+The cross product orthogonality of milestone 7 dots a cross vector with a
+grid vector: each mixed term multiplies a cross component, at the
+determinant degree, by a component difference, at the difference degree,
+so one mixed term sits at the determinant degree times the difference
+degree, exactly the cubic amplitude:
+
+```ada
+Mixed_Amplitude : constant := Cross_Amplitude * Grid_Amplitude;
+
+type Mixed_Component is range
+  -Mixed_Amplitude ..
+   Mixed_Amplitude;
+```
+
+The cross dot is the sum of the three mixed terms:
+
+```ada
+Cross_Dot_Amplitude : constant := 3 * Mixed_Amplitude;
+
+type Cross_Dot is range
+  -Cross_Dot_Amplitude ..
+   Cross_Dot_Amplitude;
+```
+
+With this grid, that is about 5.9E28 (about 2**95.6), again below 2**127,
+so the cross dot stays on the same 128-bit machine width for any grid
+input, and the orthogonality identity is proved over the whole domain,
+not on a restricted subset.
+
 ## Signed-area sums
 
 The contour orientation of milestone 4 accumulates one orientation

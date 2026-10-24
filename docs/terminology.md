@@ -43,6 +43,10 @@ This document defines the project's vocabulary. Terms used by the public API are
   - [`Face_2D`](#face_2d)
   - [`Face_Validity`](#face_validity)
   - [Face orientation](#face-orientation)
+- [Normative for milestone 7](#normative-for-milestone-7)
+  - [`Dot_Product`](#dot_product)
+  - [`Cross_Product`](#cross_product)
+  - [`Cross_Vector_3D`](#cross_vector_3d)
 - [Provisional geometric terms](#provisional-geometric-terms)
   - [`Grid_Quantum`](#grid_quantum)
   - [`Grid_Unit`](#grid_unit)
@@ -88,31 +92,6 @@ The vector from point `A` to point `B`:
 ```text
 Displacement (A, B) = B - A
 ```
-
-### `Dot_Product`
-
-The exact scalar product of two vectors:
-
-```text
-Dot_Product (A, B) = A.DX * B.DX + A.DY * B.DY + A.DZ * B.DZ
-```
-
-The result is exact and may exceed the component domain; it is never
-rounded.
-
-### `Cross_Product`
-
-The exact vector product of two vectors. Its result is an exact
-mathematical vector whose components are the three product differences:
-
-```text
-Cross_Product (A, B) = (A.DY * B.DZ - A.DZ * B.DY,
-                        A.DZ * B.DX - A.DX * B.DZ,
-                        A.DX * B.DY - A.DY * B.DX)
-```
-
-The result is exact and may leave the component domain; it is never
-rounded. A cross result is a derived quantity, never a grid position.
 
 ### `Translate`
 
@@ -246,6 +225,42 @@ The exact classification of a loop as a face boundary: valid, invalid boundary, 
 ### Face orientation
 
 The orientation of a valid face is exactly the orientation of its boundary loop, which a valid boundary guarantees to be counter-clockwise or clockwise: face orientation is consistent with loop orientation by construction.
+
+## Normative for milestone 7
+
+### `Dot_Product`
+
+The exact scalar product of two vectors:
+
+```text
+Dot_Product (A, B) = A.DX * B.DX + A.DY * B.DY + A.DZ * B.DZ
+```
+
+The result is exact and may exceed the component domain; it is never
+rounded. The same name also dots a cross vector with a grid vector,
+component by component, in a wider exact domain.
+
+### `Cross_Product`
+
+The exact vector product of two vectors. Its result is an exact
+mathematical vector whose components are the three product differences:
+
+```text
+Cross_Product (A, B) = (A.DY * B.DZ - A.DZ * B.DY,
+                        A.DZ * B.DX - A.DX * B.DZ,
+                        A.DX * B.DY - A.DY * B.DX)
+```
+
+The result is exact and may leave the component domain; it is never
+rounded. A cross result is a derived quantity, never a grid position.
+The cross vector is orthogonal to both operands: its dot with either
+operand is exactly zero, proved over the whole grid domain.
+
+### `Cross_Vector_3D`
+
+The exact result type of `Cross_Product`: a derived mathematical vector
+whose components may leave the component domain of a grid vector. A
+cross vector is never a grid position and never a displacement.
 
 ## Provisional geometric terms
 

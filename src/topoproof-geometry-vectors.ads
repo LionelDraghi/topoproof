@@ -8,6 +8,7 @@
 with TopoProof.Geometry.Points;
 with TopoProof.Numerics;
 use type TopoProof.Numerics.Cross_Component;
+use type TopoProof.Numerics.Cross_Dot;
 use type TopoProof.Numerics.Dot_Product;
 use type TopoProof.Numerics.Extended_Component;
 use type TopoProof.Numerics.Product_Component;
@@ -53,6 +54,17 @@ is
            + Numerics.Dot_Product (Numerics.Component_Product (A.DY, B.DY))
            + Numerics.Dot_Product (Numerics.Component_Product (A.DZ, B.DZ));
 
+   --  Exact dot product of a cross vector and a grid vector: the sum of
+   --  the three exact mixed products, in the Cross_Dot domain.
+   function Dot_Product (U : Cross_Vector_3D; V : Vector_3D)
+      return Numerics.Cross_Dot
+   with
+      Post =>
+         Dot_Product'Result
+         = Numerics.Cross_Dot (Numerics.Mixed_Product (U.DX, V.DX))
+           + Numerics.Cross_Dot (Numerics.Mixed_Product (U.DY, V.DY))
+           + Numerics.Cross_Dot (Numerics.Mixed_Product (U.DZ, V.DZ));
+
    --  Exact cross product of two grid vectors: each component is the
    --  exact difference of two exact component products.
    function Cross_Product (A, B : Vector_3D) return Cross_Vector_3D
@@ -81,5 +93,14 @@ is
          Cross_Product (A => A, B => B).DX = -Cross_Product (A => B, B => A).DX
          and then Cross_Product (A => A, B => B).DY = -Cross_Product (A => B, B => A).DY
          and then Cross_Product (A => A, B => B).DZ = -Cross_Product (A => B, B => A).DZ;
+
+   --  The cross product is orthogonal to both operands: the cross dot of
+   --  the cross vector with either operand is exactly zero.
+   procedure Lemma_Cross_Orthogonality (A, B : Vector_3D)
+   with
+      Ghost,
+      Post =>
+         Dot_Product (Cross_Product (A, B), A) = 0
+         and then Dot_Product (Cross_Product (A, B), B) = 0;
 
 end TopoProof.Geometry.Vectors;

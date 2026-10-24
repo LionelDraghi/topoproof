@@ -86,6 +86,31 @@ is
    --  Exact dot product of two component vectors.
    type Dot_Product is range -Dot_Amplitude .. Dot_Amplitude;
 
+   --  The amplitude of one mixed term: a cross-product component times a
+   --  component difference. The cross component has the determinant
+   --  amplitude, so the mixed term sits at the determinant degree times
+   --  the difference degree: exactly the cubic amplitude, the third
+   --  degree of the expression chain, on the 128-bit machine width.
+   Mixed_Amplitude : constant := Cross_Amplitude * Grid_Amplitude;
+
+   --  Exact mixed term of a cross dot.
+   type Mixed_Component is range -Mixed_Amplitude .. Mixed_Amplitude;
+
+   --  The exact mixed term of a cross dot: one cross-product component
+   --  times one component difference, each factor in its own domain, so
+   --  the product is bounded exactly by the mixed amplitude.
+   function Mixed_Product
+     (C : Cross_Component; V : Vector_Component) return Mixed_Component is
+     (Mixed_Component (C) * Mixed_Component (V));
+
+   --  The amplitude of the cross dot of a cross vector and a grid
+   --  vector: the sum of the three mixed terms, about 5.9E28, on the
+   --  same 128-bit machine width as the cubic products.
+   Cross_Dot_Amplitude : constant := 3 * Mixed_Amplitude;
+
+   --  Exact cross dot of a cross vector and a component vector.
+   type Cross_Dot is range -Cross_Dot_Amplitude .. Cross_Dot_Amplitude;
+
    --  The signed-area sum of a contour, by the shoelace formula: one
    --  determinant per vertex, so the amplitude is the determinant
    --  amplitude times the largest number of accumulated terms. A
