@@ -341,22 +341,10 @@ is
         (TD - TN = F4
          and then ((TD - TN > 0 and then TD > 0)
                    or else (TD - TN < 0 and then TD < 0)));
-      --  Consequently the quotients lie strictly between 0 and the
-      --  corresponding component differences.
-      pragma Assert
-        (Numerics.Cubic_Product (TD)
-           * (Numerics.Cubic_Product (Segments.Delta_X (X)) - QX)
-         = Numerics.Cubic_Product (TD - TN)
-           * Numerics.Cubic_Product (Segments.Delta_X (X)));
-      pragma Assert
-        (Numerics.Cubic_Product (TD)
-           * (Numerics.Cubic_Product (Segments.Delta_Y (X)) - QY)
-         = Numerics.Cubic_Product (TD - TN)
-           * Numerics.Cubic_Product (Segments.Delta_Y (X)));
-
-      --  The quotients exchange the axis factors: DX * QY = DY * QX,
-      --  because both equal TN * DX * DY / TD. Each quotient lies
-      --  strictly between 0 and the corresponding component difference.
+      --  Consequently each quotient lies strictly between 0 and the
+      --  corresponding component difference: the fraction TN / TD is
+      --  strictly inside (0, 1), and each step is that fraction of
+      --  the corresponding component difference.
       pragma Assert
         ((if Segments.Delta_X (X) > 0 then
              0 < QX and then QX < Numerics.Cubic_Product (Segments.Delta_X (X))
@@ -371,6 +359,24 @@ is
              0 > QY and then QY > Numerics.Cubic_Product (Segments.Delta_Y (X))
          else
              QY = 0));
+
+      --  The strict betweenness rewrites as the product identities:
+      --  TD * (DX - QX) = (TD - TN) * DX, and likewise on Y. The
+      --  betweenness above bounds the left products, so their
+      --  overflow checks are immediate.
+      pragma Assert
+        (Numerics.Cubic_Product (TD)
+           * (Numerics.Cubic_Product (Segments.Delta_X (X)) - QX)
+         = Numerics.Cubic_Product (TD - TN)
+           * Numerics.Cubic_Product (Segments.Delta_X (X)));
+      pragma Assert
+        (Numerics.Cubic_Product (TD)
+           * (Numerics.Cubic_Product (Segments.Delta_Y (X)) - QY)
+         = Numerics.Cubic_Product (TD - TN)
+           * Numerics.Cubic_Product (Segments.Delta_Y (X)));
+
+      --  The quotients exchange the axis factors: DX * QY = DY * QX,
+      --  because both equal TN * DX * DY / TD.
       pragma Assert
         (Numerics.Cubic_Product (Segments.Delta_X (X)) * QY
          = Numerics.Cubic_Product (Segments.Delta_Y (X)) * QX);
