@@ -169,7 +169,7 @@ no canonical line, only the rejection diagnostic.
   ```
 - When I run `../bin/topocli run open_chain.topo`
 - Then the error output is `error: open loop`
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: a degenerate edge support is rejected
 
@@ -212,4 +212,4 @@ the loop-level diagnostic.
   edge 2 vertex 2 vertex 1
   ```
 - And the error output is `error: degenerate edge support`
-- And there is an error
+- And the exit code is `1`

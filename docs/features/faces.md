@@ -135,4 +135,4 @@ no canonical line, only the rejection diagnostic.
   ```
 - When I run `../bin/topocli run degenerate_boundary.topo`
 - Then the error output is `error: degenerate face boundary`
-- And there is an error
+- And the exit code is `1`

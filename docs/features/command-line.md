@@ -51,7 +51,7 @@ command line is a usage error, with the help hint on the standard error.
   error: invalid command line
   try 'topocli --help'
   ```
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: an entry without its operand is rejected
 
@@ -61,10 +61,10 @@ command line is a usage error, with the help hint on the standard error.
   error: invalid command line
   try 'topocli --help'
   ```
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: a script file that does not exist is rejected
 
 - When I run `../bin/topocli run no_such_file.topo`
 - Then the error output is `error: file not found: no_such_file.topo`
-- And there is an error
+- And the exit code is `1`

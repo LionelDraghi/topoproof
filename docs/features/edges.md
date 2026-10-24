@@ -171,4 +171,4 @@ pair is degenerate: the edge is rejected.
 - When I run `../bin/topocli run degenerate_edge.topo`
 - Then the output is `vertex 1 point 1 2`
 - And the error output is `error: degenerate edge`
-- And there is an error
+- And the exit code is `1`

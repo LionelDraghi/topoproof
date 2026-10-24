@@ -283,7 +283,7 @@ fragment line 1, with the HAC message, not on a wrapper line.
   ```
 - When I run `../bin/topocli run bad_declaration.topo`
 - Then the error output is `bad_declaration.topo:1:29: error: undefined identifier: Q`
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: a declaration split across several lines runs
 
@@ -414,7 +414,7 @@ statements resume after its final end.
   ```
 - When I run `../bin/topocli run no_image.topo`
 - Then the error output is `error: no open image`
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: a chain continues after a rejected operation, the first failure is retained
 
@@ -438,7 +438,7 @@ its canonical result: the first rejection is never masked.
 - When I run `../bin/topocli run first_failure.topo`
 - Then the output is `point 15 -13 21`
 - And the error output is `error: open loop`
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: translate a point and a vector
 
@@ -472,7 +472,7 @@ it one unit beyond the largest representable position.
   ```
 - When I run `../bin/topocli run translate_beyond.topo`
 - Then the error output is `error: translation is not representable`
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: a declaration after the first statement is a HAC diagnostic
 
@@ -496,7 +496,7 @@ passed through.
   late_declaration.topo:5:7: error: missing a semicolon: ";"
   late_declaration.topo:5:15: error: end of file is expected here, found extra symbol
   ```
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: draw the diagnostic image of the translation
 
@@ -575,7 +575,7 @@ carries the `<inline>` name, its line and the HAC message.
   <inline>:3:6: error: missing a semicolon: ";"
   <inline>:3:14: error: end of file is expected here, found extra symbol
   ```
-- And there is an error
+- And the exit code is `1`
 
 ## Scenario: an inline run writes to the output file
 

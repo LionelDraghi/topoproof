@@ -8,19 +8,19 @@
    ### Scenario: [a command-line operation is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli translate P=(10, -20, 30) D=(5, 7, -9)`  
    - OK : Then the error output is  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a command-line operation is rejected](../features/command-line.md) pass  
 
    ### Scenario: [an entry without its operand is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli run`  
    - OK : Then the error output is  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [an entry without its operand is rejected](../features/command-line.md) pass  
 
    ### Scenario: [a script file that does not exist is rejected](../features/command-line.md): 
    - OK : When I run `../bin/topocli run no_such_file.topo`  
    - OK : Then the error output is `error: file not found: no_such_file.topo`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a script file that does not exist is rejected](../features/command-line.md) pass  
 
 
@@ -36,7 +36,7 @@
    - OK : Given the file `translate_beyond.topo`  
    - OK : When I run `../bin/topocli run translate_beyond.topo`  
    - OK : Then the error output is `error: translation is not representable`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - OK : And the file `../docs/features/images/translation_2.svg` contains `#1f6feb`    
    - [X] scenario   [reject an unrepresentable result](../features/translation.md) pass  
 
@@ -415,7 +415,7 @@
    - OK : When I run `../bin/topocli run degenerate_edge.topo`  
    - OK : Then the output is `vertex 1 point 1 2`  
    - OK : And the error output is `error: degenerate edge`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [an edge back to the same vertex is degenerate](../features/edges.md) pass  
 
 
@@ -444,7 +444,7 @@
    - OK : Given the file `open_chain.topo`  
    - OK : When I run `../bin/topocli run open_chain.topo`  
    - OK : Then the error output is `error: open loop`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [an open chain is rejected](../features/loops.md) pass  
 
    ### Scenario: [a degenerate edge support is rejected](../features/loops.md): 
@@ -452,7 +452,7 @@
    - OK : When I run `../bin/topocli run degenerate_support.topo`  
    - OK : Then the output is  
    - OK : And the error output is `error: degenerate edge support`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a degenerate edge support is rejected](../features/loops.md) pass  
 
 
@@ -475,7 +475,7 @@
    - OK : Given the file `degenerate_boundary.topo`  
    - OK : When I run `../bin/topocli run degenerate_boundary.topo`  
    - OK : Then the error output is `error: degenerate face boundary`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a degenerate boundary is rejected](../features/faces.md) pass  
 
 
@@ -496,7 +496,7 @@
    - OK : Given the file `bad_declaration.topo`  
    - OK : When I run `../bin/topocli run bad_declaration.topo`  
    - OK : Then the error output is `bad_declaration.topo:1:29: error: undefined identifier: Q`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a compilation diagnostic points at the declaration line](../features/toposcript.md) pass  
 
    ### Scenario: [a declaration split across several lines runs](../features/toposcript.md): 
@@ -540,7 +540,7 @@
    - OK : Given the file `no_image.topo`  
    - OK : When I run `../bin/topocli run no_image.topo`  
    - OK : Then the error output is `error: no open image`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [End_Image without Begin_Image records the rejection](../features/toposcript.md) pass  
 
    ### Scenario: [a chain continues after a rejected operation, the first failure is retained](../features/toposcript.md): 
@@ -548,7 +548,7 @@
    - OK : When I run `../bin/topocli run first_failure.topo`  
    - OK : Then the output is `point 15 -13 21`  
    - OK : And the error output is `error: open loop`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a chain continues after a rejected operation, the first failure is retained](../features/toposcript.md) pass  
 
    ### Scenario: [translate a point and a vector](../features/toposcript.md): 
@@ -561,14 +561,14 @@
    - OK : Given the file `translate_beyond.topo`  
    - OK : When I run `../bin/topocli run translate_beyond.topo`  
    - OK : Then the error output is `error: translation is not representable`  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [reject an unrepresentable translation](../features/toposcript.md) pass  
 
    ### Scenario: [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md): 
    - OK : Given the file `late_declaration.topo`  
    - OK : When I run `../bin/topocli run late_declaration.topo`  
    - OK : Then the error output is  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [a declaration after the first statement is a HAC diagnostic](../features/toposcript.md) pass  
 
    ### Scenario: [draw the diagnostic image of the translation](../features/toposcript.md): 
@@ -593,7 +593,7 @@
    ### Scenario: [an inline rejection points at the inline line](../features/toposcript.md): 
    - OK : When I run `../bin/topocli run_code "P : constant Point_3D := (10, -20, 30); Put (P); Q : Point_3D;"`  
    - OK : Then the error output is  
-   - OK : And there is an error  
+   - OK : And the exit code is `1`  
    - [X] scenario   [an inline rejection points at the inline line](../features/toposcript.md) pass  
 
    ### Scenario: [an inline run writes to the output file](../features/toposcript.md): 

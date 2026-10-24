@@ -69,7 +69,7 @@ representable grid and nothing else.
   ```
 - When I run `../bin/topocli run translate_beyond.topo`
 - Then the error output is `error: translation is not representable`
-- And there is an error
+- And the exit code is `1`
 - And the file `../docs/features/images/translation_2.svg` contains `#1f6feb`  
   (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures
   the corner point `P` is drawn, at the tip of the representable grid.)
