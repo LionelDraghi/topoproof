@@ -69,4 +69,9 @@ is
       null;
    end Lemma_Cross_Orthogonality;
 
+   procedure Lemma_Mixed_Antisymmetry (U, V, W : Vector_3D) is
+   begin
+      null;
+   end Lemma_Mixed_Antisymmetry;
+
 end TopoProof.Geometry.Vectors;

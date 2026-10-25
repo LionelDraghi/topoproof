@@ -59,6 +59,13 @@ package TopoScript_API.Geometry is
      new HAC_Sys.Interfacing.To_Native_Any_Enum
        (TopoProof.Geometry.Planes.Plane_Kind);
 
+   function Orientation_3D_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (TopoProof.Geometry.Orientations.Orientation_3D_Kind);
+
+   function To_Orientation_3D_Kind is
+     new HAC_Sys.Interfacing.To_Native_Any_Enum
+       (TopoProof.Geometry.Orientations.Orientation_3D_Kind);
+
    --  Native side of Translate: the script passes the point and the
    --  vector as records; the callback runs the proved Translate and
    --  writes the translated point into the out parameter.
@@ -106,6 +113,13 @@ package TopoScript_API.Geometry is
    --  orientation classification of the kernel on the 2D path
    --  A -> B -> C, and writes the kind into the out parameter.
    procedure Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Orientation_3D: the callback runs the exact
+   --  orientation classification of the kernel on the ordered point
+   --  quadruple A, B, C, D, and writes the kind into the out
+   --  parameter.
+   procedure Orientation_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Intersection: the callback runs the exact

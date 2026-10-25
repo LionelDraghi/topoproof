@@ -123,6 +123,17 @@ package body TopoScript_API.Output is
             "orientation clockwise");
 
    function Image
+     (K : TopoProof.Geometry.Orientations.Orientation_3D_Kind) return String
+   is
+     (case K is
+         when TopoProof.Geometry.Orientations.Coplanar =>
+            "orientation3d coplanar",
+         when TopoProof.Geometry.Orientations.Right_Handed =>
+            "orientation3d right_handed",
+         when TopoProof.Geometry.Orientations.Left_Handed =>
+            "orientation3d left_handed");
+
+   function Image
      (K : TopoProof.Geometry.Planes.Plane_Side_Kind) return String
    is
      (case K is
@@ -356,6 +367,16 @@ package body TopoScript_API.Output is
    begin
       Put_Line (Image (K));
    end Put_Orientation_Native;
+
+   procedure Put_Orientation_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant TopoProof.Geometry.Orientations.Orientation_3D_Kind :=
+        Geometry.To_Orientation_3D_Kind (Data (1));
+
+   begin
+      Put_Line (Image (K));
+   end Put_Orientation_3D_Native;
 
    procedure Put_Plane_Side_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)

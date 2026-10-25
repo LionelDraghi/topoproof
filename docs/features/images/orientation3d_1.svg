@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400">
+<rect width="640" height="400" fill="#ffffff"/>
+<polygon points="323.0,250.7 416.9,288.6 352.3,308.4 258.3,270.4" fill="#1a7f37" fill-opacity="0.35" stroke="#1a7f37"/>
+<line x1="323.0" y1="250.7" x2="258.3" y2="270.4" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="258.3" cy="270.4" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="258.3" y2="270.4" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<line x1="258.3" y1="270.4" x2="258.3" y2="67.8" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="258.3" cy="270.4" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="416.9" y2="288.6" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="416.9" cy="288.6" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="416.9" cy="288.6" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="323.0" y2="149.3" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="323.0" y2="352.0" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="354.3" y2="263.3" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<line x1="354.3" y1="263.3" x2="322.0" y2="273.2" stroke="#6e7781" stroke-width="1.0" stroke-dasharray="4 3"/>
+<circle cx="354.3" cy="263.3" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<circle cx="322.0" cy="273.2" r="2.5" fill="#ffffff" stroke="#6e7781" stroke-width="1.0"/>
+<line x1="323.0" y1="250.7" x2="354.3" y2="263.3" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
+<text x="360.3" y="277.3" fill="#8b949e" font-family="sans-serif" font-size="13">X</text>
+<line x1="323.0" y1="250.7" x2="290.6" y2="260.5" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
+<text x="274.6" y="274.5" fill="#8b949e" font-family="sans-serif" font-size="13">Y</text>
+<line x1="323.0" y1="250.7" x2="323.0" y2="216.9" stroke="#8b949e" stroke-width="1.0" stroke-dasharray="4 3"/>
+<text x="323.0" y="210.9" fill="#8b949e" font-family="sans-serif" font-size="13">Z</text>
+<circle cx="323.0" cy="250.7" r="2.5" fill="#8b949e"/>
+<line x1="359.1" y1="261.9" x2="349.5" y2="264.8" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="390.4" y1="274.5" x2="380.8" y2="277.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="421.7" y1="287.2" x2="412.1" y2="290.1" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="453.0" y1="299.8" x2="443.4" y2="302.7" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="484.3" y1="312.5" x2="474.8" y2="315.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="515.6" y1="325.1" x2="506.1" y2="328.0" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="290.6" y1="265.5" x2="290.6" y2="255.5" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="258.3" y1="275.4" x2="258.3" y2="265.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="226.0" y1="285.3" x2="226.0" y2="275.3" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="193.7" y1="295.2" x2="193.7" y2="285.2" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="161.4" y1="305.0" x2="161.4" y2="295.0" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="129.1" y1="314.9" x2="129.1" y2="304.9" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="215.0" x2="327.6" y2="218.8" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="181.2" x2="327.6" y2="185.0" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="147.5" x2="327.6" y2="151.2" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="113.7" x2="327.6" y2="117.4" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="79.9" x2="327.6" y2="83.7" stroke="#8b949e" stroke-width="1.0"/>
+<line x1="318.3" y1="46.1" x2="327.6" y2="49.9" stroke="#8b949e" stroke-width="1.0"/>
+<circle cx="258.3" cy="270.4" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="268.3" y="260.4" fill="#0d2b3e" font-family="sans-serif" font-size="13">C (0, 2, 0)</text>
+<circle cx="258.3" cy="67.8" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="268.3" y="57.8" fill="#0d2b3e" font-family="sans-serif" font-size="13">N (0, 2, 6)</text>
+<circle cx="323.0" cy="250.7" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="333.0" y="240.7" fill="#0d2b3e" font-family="sans-serif" font-size="13">A (0, 0, 0)</text>
+<circle cx="416.9" cy="288.6" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
+<text x="426.9" y="278.6" fill="#0d2b3e" font-family="sans-serif" font-size="13">B (3, 0, 0)</text>
+<circle cx="323.0" cy="149.3" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="333.0" y="139.3" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (0, 0, 3)</text>
+<circle cx="323.0" cy="352.0" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="333.0" y="342.0" fill="#0d2b3e" font-family="sans-serif" font-size="13">E (0, 0, -3)</text>
+<circle cx="322.0" cy="273.2" r="5.0" fill="#cf222e" stroke="#ffffff" stroke-width="1.5"/>
+<text x="332.0" y="293.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">F (1, 1, 0)</text>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#cf222e"/></marker></defs>
+<line x1="258.3" y1="270.4" x2="258.3" y2="67.8" stroke="#cf222e" stroke-width="2.0" marker-end="url(#arrow1)"/>
+</svg>

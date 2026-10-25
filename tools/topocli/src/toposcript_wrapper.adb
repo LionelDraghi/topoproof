@@ -431,6 +431,20 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Orientation (K : in Orientation_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Orientation_3D_Kind is");
+      Append_Line
+        ("      (Orientation_Coplanar, " &
+         "Orientation_Right_Handed, Orientation_Left_Handed);");
+      Append_Line ("");
+      Append_Line ("   procedure Orientation_3D");
+      Append_Line
+        ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
+         "D : in Point_3D; Result : out Orientation_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Orientation_3D (K : in Orientation_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   type Plane_Kind is");
       Append_Line ("      (Plane_Valid, Plane_Collinear);");
       Append_Line ("");

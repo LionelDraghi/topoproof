@@ -139,6 +139,42 @@
    - [X] scenario   [the grid boundary classifies exactly](../features/planes.md) pass  
 
 
+# Document: [orientation3d.md](../features/orientation3d.md)  
+   ### Scenario: [a tetrahedron along the axes classifies right-handed](../features/orientation3d.md): 
+   - OK : Given the file `tetrahedron.topo`  
+   - OK : When I successfully run `../bin/topocli run tetrahedron.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/orientation3d_1.svg` contains `#1a7f37`  
+   - [X] scenario   [a tetrahedron along the axes classifies right-handed](../features/orientation3d.md) pass  
+
+   ### Scenario: [exchanging two points mirrors the orientation](../features/orientation3d.md): 
+   - OK : Given the file `exchanged_tetrahedron.topo`  
+   - OK : When I successfully run `../bin/topocli run exchanged_tetrahedron.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/orientation3d_2.svg` contains `#cf222e`  
+   - [X] scenario   [exchanging two points mirrors the orientation](../features/orientation3d.md) pass  
+
+   ### Scenario: [coplanar points classify as coplanar](../features/orientation3d.md): 
+   - OK : Given the file `coplanar_tetrahedron.topo`  
+   - OK : When I successfully run `../bin/topocli run coplanar_tetrahedron.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/orientation3d_3.svg` contains `#1a7f37`  
+   - [X] scenario   [coplanar points classify as coplanar](../features/orientation3d.md) pass  
+
+   ### Scenario: [the classification is translation invariant](../features/orientation3d.md): 
+   - OK : Given the file `translated_tetrahedron.topo`  
+   - OK : When I successfully run `../bin/topocli run translated_tetrahedron.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/orientation3d_4.svg` contains `#cf222e`  
+   - [X] scenario   [the classification is translation invariant](../features/orientation3d.md) pass  
+
+   ### Scenario: [the grid corners do not overflow](../features/orientation3d.md): 
+   - OK : Given the file `corner_tetrahedron.topo`  
+   - OK : When I successfully run `../bin/topocli run corner_tetrahedron.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [the grid corners do not overflow](../features/orientation3d.md) pass  
+
+
 # Document: [equality.md](../features/equality.md)  
    ### Scenario: [identical points are equal](../features/equality.md): 
    - OK : Given the file `equal_true.topo`  
@@ -672,12 +708,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 99 scenarios OK
+## Summary : **Success**, 104 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 99    |
+| Successful | 104   |
 | Empty      | 0     |
 | Not Run    | 0     |
 

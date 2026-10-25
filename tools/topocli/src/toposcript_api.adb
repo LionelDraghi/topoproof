@@ -34,6 +34,10 @@ package body TopoScript_API is
       Register (BD, Output.Put_Equal_Native'Access, "Put_Equal");
       Register (BD, Output.Put_Orientation_Native'Access,
                 "Put_Orientation");
+      Register (BD, Geometry.Orientation_3D_Native'Access,
+                "Orientation_3D");
+      Register (BD, Output.Put_Orientation_3D_Native'Access,
+                "Put_Orientation_3D");
       Register (BD, Output.Put_Plane_Side_Native'Access,
                 "Put_Plane_Side");
       Register (BD, Output.Put_Plane_Kind_Native'Access,

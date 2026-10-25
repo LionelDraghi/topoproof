@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.5-dev] - 2026-??-??**
+  - [Added]   the exact orientation of four ordered grid points: the
+              mixed product (B - A) x (C - A) . (D - A) classifies the
+              ordered quadruple as right-handed, left-handed or
+              coplanar, in the exact 128-bit domain, with the
+              permutation, degeneracy, translation-invariance and
+              plane-equivalence lemmas proved over the whole grid
+              domain, documented with executable scenarios under
+              `docs/features/`
 
 - **[0.1.4] - 2026-10-23**
   - [Added]   TopoScript parity for every proved operation: displacement,

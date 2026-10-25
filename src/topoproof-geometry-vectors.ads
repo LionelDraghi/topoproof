@@ -103,4 +103,16 @@ is
          Dot_Product (Cross_Product (A, B), A) = 0
          and then Dot_Product (Cross_Product (A, B), B) = 0;
 
+   --  The mixed product is antisymmetric in its last two operands:
+   --  crossing the first vector with the third and dotting with the
+   --  second negates the mixed product of the first two dotted with
+   --  the third. Together with the cross orthogonality, this gives
+   --  the permutation behaviour of the orientation determinant.
+   procedure Lemma_Mixed_Antisymmetry (U, V, W : Vector_3D)
+   with
+      Ghost,
+      Post =>
+         Dot_Product (Cross_Product (U, W), V)
+         = -Dot_Product (Cross_Product (U, V), W);
+
 end TopoProof.Geometry.Vectors;

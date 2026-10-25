@@ -89,6 +89,12 @@ package TopoScript_API.Output is
    function Image
      (K : TopoProof.Geometry.Orientations.Orientation_Kind) return String;
 
+   --  The canonical image of a three-dimensional orientation result:
+   --  `orientation3d right_handed`, `orientation3d left_handed` or
+   --  `orientation3d coplanar`.
+   function Image
+     (K : TopoProof.Geometry.Orientations.Orientation_3D_Kind) return String;
+
    --  The canonical image of an intersection result: the kind line,
    --  with the common position of a point intersection, or the two
    --  boundaries of an overlap. The coordinates are the ones the kind
@@ -170,6 +176,11 @@ package TopoScript_API.Output is
    --  Native side of Put_Orientation: writes the canonical image of
    --  the orientation result.
    procedure Put_Orientation_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Put_Orientation_3D: writes the canonical image
+   --  of the three-dimensional orientation result.
+   procedure Put_Orientation_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
    --  Native side of Put_Plane_Side: writes the canonical image of

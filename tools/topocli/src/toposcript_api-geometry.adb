@@ -186,6 +186,27 @@ package body TopoScript_API.Geometry is
       Data (7) := Orientation_To_HAC (Orientation (A, B, C));
    end Orientation_Native;
 
+   procedure Orientation_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1..3, B at 4..6, C at 7..9, D at 10..12,
+      --  Kind at 13.
+      A, B, C, D : TopoProof.Geometry.Points.Point_3D;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, A)
+        or else not Conversions.Read_Point_3D (Data, 4, B)
+        or else not Conversions.Read_Point_3D (Data, 7, C)
+        or else not Conversions.Read_Point_3D (Data, 10, D)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+
+      Data (13) := Orientation_3D_To_HAC
+        (TopoProof.Geometry.Orientations.Orientation_3D (A, B, C, D));
+   end Orientation_3D_Native;
+
    procedure Intersection_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
