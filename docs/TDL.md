@@ -79,6 +79,27 @@ design decision.
   objects, and the drawing scenarios check the intended object rather
   than a colour.
 
+### TDL-PROOF-002: tame the hard proof points of Collinear_Membership
+
+- **Category:** PROOF
+- **Status:** open, later
+- **Context:** the proof effort of the kernel is concentrated in three
+  checks of the ghost lemma `Collinear_Membership`
+  (`topoproof-geometry-intersections.adb`): the strict-betweenness
+  overflow check of the crossing quotient (line 353, 20 s), the
+  `Lemma_Quotient_Ordering` precondition on the Y axis (line 386, 11 s),
+  and the product identity TD·(DX−QX) = (TD−TN)·DX (line 368, 3 s);
+  every other proved check of the project is at 1 s or less
+  (statistics of 2026-10-24, level 2). The running prover order
+  (`--prover=z3,cvc5,altergo`) halves the subprogram cost, but the
+  structural lever is to promote the repeated quotient-betweenness
+  reasoning into reusable lemmas, as the growth of the 3D structure
+  will multiply the uses of the cubic-product identities.
+- **Acceptance:** no check of the project exceeds a few seconds at
+  level 2 with the default prover configuration, and the
+  quotient-betweenness reasoning is factored in named lemmas with their
+  own proved contracts.
+
 ## Completed
 
 The former entries were completed or decided:
