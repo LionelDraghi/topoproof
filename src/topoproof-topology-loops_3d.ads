@@ -162,20 +162,24 @@ is
    --  classified first with Classify_Loop: Make_Loop completes the
    --  checked construction, and its precondition requires the chain
    --  to classify as Valid_Loop, so invalid loops cannot be obtained
-   --  from the public API.
+   --  from the public API. The chain may start at any position: the
+   --  shell classification builds loop values from the boundary
+   --  slices of a wider edge chain, and the loop copies them into
+   --  its own 1-indexed array.
    function Make_Loop
       (E     : Edges_3D.Edge_Store;
        V     : Vertices_3D.Vertex_Store;
        Chain : Edge_Handle_Array) return Loop_3D
    with
       Pre  =>
-         Chain'First = 1
+         Chain'First >= 1
          and then Chain'Length <= Max_Loop_Length
          and then Classify_Loop (E, V, Chain) = Valid_Loop,
       Post =>
          Make_Loop'Result.Length = Chain'Length
          and then Is_Valid_Loop (E, V, Make_Loop'Result)
          and then
-           (for all I in Chain'Range => Make_Loop'Result.Edges (I) = Chain (I));
+           Make_Loop'Result.Edges (1 .. Chain'Length)
+           = Chain (Chain'First .. Chain'Last);
 
 end TopoProof.Topology.Loops_3D;

@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.5-dev] - 2026-??-??**
+  - [Added]   the first closed solid (DD-005, increment c): the exact
+              signed volume of a closed shell assembly - the fan
+              decomposition of every planar face, one orientation
+              determinant per fan triangle, summed in the 128-bit
+              Volume domain - decides outward, inward, or the flat
+              degeneracy, reported, never built
   - [Added]   the shell assembly of the minimal B-Rep (DD-005, increment
               b): faces built one after another join an assembly over the
               shared 3D stores, and the shell classification decides the

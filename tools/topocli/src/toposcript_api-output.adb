@@ -80,6 +80,13 @@ package body TopoScript_API.Output is
          when Topology.Shell3D_Misaligned    => "shell3d misaligned_edge",
          when Topology.Shell3D_Free          => "shell3d free_edge");
 
+   function Image (K : Topology.Solid_3D_Kind) return String is
+     (case K is
+         when Topology.Solid3D_Outward        => "solid3d outward",
+         when Topology.Solid3D_Inward         => "solid3d inward",
+         when Topology.Solid3D_Flat           => "solid3d flat",
+         when Topology.Solid3D_Invalid_Shell  => "solid3d invalid_shell");
+
    function Image (K : Geometry.Equal_Kind) return String is
      (case K is
          when Geometry.Equal_True  => "equal true",
@@ -576,5 +583,22 @@ package body TopoScript_API.Output is
                  (TopoProof.Topology.Shells.Free_Edge, 1));
       end case;
    end Put_Shell_3D_Native;
+
+   procedure Put_Solid_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant Topology.Solid_3D_Kind :=
+        Topology.To_Solid_3D_Kind (Data (1));
+
+   begin
+      case K is
+         when Topology.Solid3D_Outward | Topology.Solid3D_Inward =>
+            Put_Line (Image (K));
+         when Topology.Solid3D_Flat =>
+            Session.Record_Failure ("error: flat shell");
+         when Topology.Solid3D_Invalid_Shell =>
+            Session.Record_Failure ("error: the shell is not closed");
+      end case;
+   end Put_Solid_3D_Native;
 
 end TopoScript_API.Output;

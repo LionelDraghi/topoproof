@@ -111,6 +111,18 @@ is
    --  Exact cross dot of a cross vector and a component vector.
    type Cross_Dot is range -Cross_Dot_Amplitude .. Cross_Dot_Amplitude;
 
+   --  The signed volume sum of a closed shell assembly, by the fan
+   --  decomposition of every planar face: one four-point orientation
+   --  determinant per fan triangle, so the amplitude is the Cross_Dot
+   --  amplitude times the largest number of fan terms. An assembly has
+   --  at most 2**15 faces and every face boundary at most 2**15 - 2
+   --  fan terms, about 2**30 terms, hence about 2**126, on the same
+   --  128-bit machine width as the cubic products.
+   Volume_Amplitude : constant := 2**30 * Cross_Dot_Amplitude;
+
+   --  Exact signed volume sum: six times the enclosed volume.
+   type Volume is range -Volume_Amplitude .. Volume_Amplitude;
+
    --  The signed-area sum of a contour, by the shoelace formula: one
    --  determinant per vertex, so the amplitude is the determinant
    --  amplitude times the largest number of accumulated terms. A

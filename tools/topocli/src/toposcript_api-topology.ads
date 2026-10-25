@@ -117,6 +117,21 @@ package TopoScript_API.Topology is
    function To_Shell_3D_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
      (Shell_3D_Kind);
 
+   --  The classification kinds of the solid operation (DD-005,
+   --  increment c): the wrapper injects the same type in the script
+   --  world, with the same positions.
+   type Solid_3D_Kind is
+     (Solid3D_Outward,
+      Solid3D_Inward,
+      Solid3D_Flat,
+      Solid3D_Invalid_Shell);
+
+   function Solid_3D_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (Solid_3D_Kind);
+
+   function To_Solid_3D_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
+     (Solid_3D_Kind);
+
    --  Native side of Add_Point: appends one 2D point to the topology
    --  chain of the designated session.
    procedure Add_Point_Native
@@ -220,6 +235,13 @@ package TopoScript_API.Topology is
    --  the 3D construction stores: loop validity of every boundary,
    --  then the exact pairing of the edge uses (DD-005, increment b).
    procedure Make_Shell_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Make_Solid_3D: classifies the same assembly as a
+   --  solid: the closed pairing first, then the exact signed volume
+   --  sum - outward, inward, or the flat degeneracy reported, never
+   --  built (DD-005, increment c).
+   procedure Make_Solid_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
 end TopoScript_API.Topology;

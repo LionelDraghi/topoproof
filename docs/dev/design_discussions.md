@@ -495,6 +495,17 @@ orientation questions DD-002 deferred.
    (`Face_Use`, `Loop_Use`) enters the minimal milestone: they are
    optional supporting structures of the plan, delivered only when an
    operation needs them.
+   **Amended in the solid increment (2026-10-25):** the solid is
+   decided by the exact signed volume sum of the shell: the fan
+   decomposition of every planar face, one four-point orientation
+   determinant per fan triangle, summed in a dedicated 128-bit Volume
+   domain (about 2**126, on the machine width). The sum is six times
+   the enclosed volume: positive for the outward orientation, negative
+   for the inward one - both make a solid, and the sign is reported -
+   zero encloses nothing: a flat, closed, paired shell is a valid
+   shell but never a solid, the flat degeneracy is reported, never
+   built (the DD-002, decision 3 pattern). The outward normalization
+   of a solid built inward stays open.
 
 ### Vertical increments
 

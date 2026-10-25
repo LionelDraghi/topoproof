@@ -20,6 +20,7 @@ with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
 with TopoProof.Topology.Loops_3D;
 with TopoProof.Topology.Shells;
+with TopoProof.Topology.Solids;
 with TopoProof.Topology.Vertices;
 with TopoProof.Topology.Vertices_3D;
 
@@ -936,6 +937,32 @@ package body TopoScript_API.Topology is
       end case;
    end Shell_Failure_Message;
 
+   --  The assembly of the built faces, flattened over the created
+   --  edges: the shared construction of Make_Shell_3D and
+   --  Make_Solid_3D.
+   function Build_Assembly return TopoProof.Topology.Shells.Shell is
+      F : constant Natural :=
+        Natural (Session.Current_Session.Groups.Length);
+      M : constant Natural := Session.Current_Session.Face_Start - 1;
+      S : TopoProof.Topology.Shells.Shell (F, M);
+      End_Index : Natural := 0;
+
+   begin
+      for K in 1 .. F loop
+         declare
+            G : constant TopoScript_API.Edge_Group :=
+              Session.Current_Session.Groups.Element (K);
+         begin
+            for U in G.First .. G.Last loop
+               End_Index := End_Index + 1;
+               S.Boundary (End_Index) := U;
+            end loop;
+            S.Face_Ends (K) := End_Index;
+         end;
+      end loop;
+      return S;
+   end Build_Assembly;
+
    procedure Make_Shell_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
@@ -956,24 +983,10 @@ package body TopoScript_API.Topology is
       end if;
 
       declare
-         S : TopoProof.Topology.Shells.Shell (F, M);
-         End_Index : Natural := 0;
+         S : constant TopoProof.Topology.Shells.Shell := Build_Assembly;
          Status : TopoProof.Topology.Shells.Shell_Validity;
 
       begin
-         for K in 1 .. F loop
-            declare
-               G : constant TopoScript_API.Edge_Group :=
-                 Session.Current_Session.Groups.Element (K);
-            begin
-               for U in G.First .. G.Last loop
-                  End_Index := End_Index + 1;
-                  S.Boundary (End_Index) := U;
-               end loop;
-               S.Face_Ends (K) := End_Index;
-            end;
-         end loop;
-
          Status :=
            TopoProof.Topology.Shells.Classify_Shell
              (Session.Current_Session.Links_3D,
@@ -1009,5 +1022,64 @@ package body TopoScript_API.Topology is
       end;
       Data (1) := Shell_3D_To_HAC (Kind);
    end Make_Shell_3D_Native;
+
+   procedure Make_Solid_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Kind at 1.
+      use type TopoProof.Topology.Shells.Shell_Validity;
+      use type TopoProof.Topology.Solids.Solid_Kind;
+      Kind : Solid_3D_Kind;
+
+   begin
+      if Natural (Session.Current_Session.Groups.Length)
+        > TopoProof.Topology.Shells.Max_Shell_Faces
+        or else Session.Current_Session.Face_Start - 1
+                > TopoProof.Topology.Loops_3D.Max_Loop_Length
+      then
+         Session.Record_Failure ("error: too many edges for one shell");
+         Data (1) := Solid_3D_To_HAC (Solid3D_Invalid_Shell);
+         return;
+      end if;
+
+      declare
+         S : constant TopoProof.Topology.Shells.Shell := Build_Assembly;
+         SV : constant TopoProof.Topology.Shells.Shell_Validity :=
+           TopoProof.Topology.Shells.Classify_Shell
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+
+      begin
+         if SV /= TopoProof.Topology.Shells.Closed_Shell then
+            --  The shell gates the solid: the pairing defects are
+            --  reported the shell way, and no solid is built.
+            case SV is
+               when TopoProof.Topology.Shells.Closed_Shell =>
+                  null;
+               when others =>
+                  Session.Record_Failure
+                    (Shell_Failure_Message
+                       (Session.Current_Session.Links_3D,
+                        Session.Current_Session.Vertices_3D, S, SV));
+            end case;
+            Kind := Solid3D_Invalid_Shell;
+
+         else
+            case TopoProof.Topology.Solids.Classify_Solid
+                 (Session.Current_Session.Links_3D,
+                  Session.Current_Session.Vertices_3D, S)
+            is
+               when TopoProof.Topology.Solids.Outward_Solid =>
+                  Kind := Solid3D_Outward;
+               when TopoProof.Topology.Solids.Inward_Solid =>
+                  Kind := Solid3D_Inward;
+               when TopoProof.Topology.Solids.Flat_Assembly =>
+                  Kind := Solid3D_Flat;
+                  Session.Record_Failure ("error: flat shell");
+            end case;
+         end if;
+      end;
+      Data (1) := Solid_3D_To_HAC (Kind);
+   end Make_Solid_3D_Native;
 
 end TopoScript_API.Topology;

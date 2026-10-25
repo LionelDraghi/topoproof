@@ -668,6 +668,44 @@
    - [X] scenario   [three faces on one edge are rejected](../features/shells.md) pass  
 
 
+# Document: [solids.md](../features/solids.md)  
+   ### Scenario: [the tetrahedron is a solid](../features/solids.md): 
+   - OK : Given the file `tetrahedron_solid.topo`  
+   - OK : When I successfully run `../bin/topocli run tetrahedron_solid.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/solids_1.svg` contains `#cf222e`  
+   - [X] scenario   [the tetrahedron is a solid](../features/solids.md) pass  
+
+   ### Scenario: [the box is a solid](../features/solids.md): 
+   - OK : Given the file `box_solid.topo`  
+   - OK : When I successfully run `../bin/topocli run box_solid.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/solids_2.svg` contains `#cf222e`  
+   - [X] scenario   [the box is a solid](../features/solids.md) pass  
+
+   ### Scenario: [an inward tetrahedron is a solid too](../features/solids.md): 
+   - OK : Given the file `inward_tetrahedron_solid.topo`  
+   - OK : When I successfully run `../bin/topocli run inward_tetrahedron_solid.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/solids_3.svg` contains `#1f6feb`  
+   - [X] scenario   [an inward tetrahedron is a solid too](../features/solids.md) pass  
+
+   ### Scenario: [a flat shell is not a solid](../features/solids.md): 
+   - OK : Given the file `flat_shell_solid.topo`  
+   - OK : When I run `../bin/topocli run flat_shell_solid.topo`  
+   - OK : Then the error output is `error: flat shell`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [a flat shell is not a solid](../features/solids.md) pass  
+
+   ### Scenario: [a non-closed shell is not a solid](../features/solids.md): 
+   - OK : Given the file `open_shell_solid.topo`  
+   - OK : When I run `../bin/topocli run open_shell_solid.topo`  
+   - OK : Then the error output is `error: an edge has no opposite use (face 1)`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/solids_4.svg` contains `#cf222e`  
+   - [X] scenario   [a non-closed shell is not a solid](../features/solids.md) pass  
+
+
 # Document: [toposcript.md](../features/toposcript.md)  
    ### Scenario: [an empty fragment executes silently](../features/toposcript.md): 
    - OK : Given the file `empty.topo`  
@@ -792,12 +830,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 115 scenarios OK
+## Summary : **Success**, 120 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 115   |
+| Successful | 120   |
 | Empty      | 0     |
 | Not Run    | 0     |
 

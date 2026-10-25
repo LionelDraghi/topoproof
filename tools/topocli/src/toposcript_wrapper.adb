@@ -676,6 +676,16 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Shell_3D (K : in Shell_3D_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Solid_3D_Kind is");
+      Append_Line ("      (Solid3D_Outward, Solid3D_Inward, Solid3D_Flat,");
+      Append_Line ("       Solid3D_Invalid_Shell);");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Solid_3D (K : out Solid_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Solid_3D (K : in Solid_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");
       Declaration_Skip := Count;
       Line_Count := 0;
