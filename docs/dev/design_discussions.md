@@ -454,6 +454,16 @@ orientation questions DD-002 deferred.
    exactly. On a closed, paired shell, an inverted face breaks the
    pairing of its edges, so the pairing check detects it (Milestone 8
    scenario: inverted-face rejection).
+   **Amended in the shell increment (2026-10-25):** the pairing is
+   decided on the directed support positions, not on the edge handles:
+   every directed support of every face boundary must be matched by
+   exactly one opposite support and no same-support use. Faces list
+   their own oriented edges, so a shared geometric segment appears as
+   two directed edges, one per incident face; the position criterion
+   catches two faces carrying one support in the same direction even
+   when they carry it through distinct edge handles, which the
+   handle-level criterion would miss, and it is the criterion the
+   position-identified chains of the 2D structure already follow.
 2. **The store-and-handle discipline extends to 3D as new units.**
    `Vertices_3D`, `Edges_3D` and `Loops_3D` repeat the bounded-store
    discipline of DD-002 (capacity discriminants without defaults,

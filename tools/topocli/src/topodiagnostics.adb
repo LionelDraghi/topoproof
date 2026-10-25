@@ -80,4 +80,27 @@ package body TopoDiagnostics is
              & Trim (Chain_Start'Image, Ada.Strings.Both);
    end Open_Loop_3D_Diagnostic;
 
+   function Shell_Diagnostic
+      (Status : Rejected_Shell;
+       K      : Positive;
+       Detail : String := "") return String
+   is
+      use Ada.Strings.Fixed;
+      Face : constant String :=
+        "face " & Trim (K'Image, Ada.Strings.Both);
+
+   begin
+      case Status is
+         when TopoProof.Topology.Shells.Invalid_Boundary =>
+            return "error: " & Face & " is not a valid loop (" & Detail & ")";
+         when TopoProof.Topology.Shells.Overused_Edge =>
+            return "error: an edge is used more than twice (" & Face & ")";
+         when TopoProof.Topology.Shells.Misaligned_Edge =>
+            return "error: an edge is used twice in the same direction ("
+                   & Face & ")";
+         when TopoProof.Topology.Shells.Free_Edge =>
+            return "error: an edge has no opposite use (" & Face & ")";
+      end case;
+   end Shell_Diagnostic;
+
 end TopoDiagnostics;

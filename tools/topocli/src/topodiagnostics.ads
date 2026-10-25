@@ -14,6 +14,7 @@ with TopoProof.Topology.Faces;
 with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
 with TopoProof.Topology.Loops_3D;
+with TopoProof.Topology.Shells;
 with TopoProof.Topology.Vertices_3D;
 
 package TopoDiagnostics is
@@ -62,6 +63,20 @@ package TopoDiagnostics is
 
    --  The client diagnostic of a rejected planar face classification.
    function Face_3D_Diagnostic (Status : Rejected_Face_3D) return String;
+
+   --  A rejected shell classification: every classification but the
+   --  closed one.
+   subtype Rejected_Shell is TopoProof.Topology.Shells.Shell_Validity
+      range TopoProof.Topology.Shells.Invalid_Boundary
+         ..  TopoProof.Topology.Shells.Free_Edge;
+
+   --  The client diagnostic of a rejected shell classification, with
+   --  the face that carries the defect, and the loop reason for an
+   --  invalid boundary.
+   function Shell_Diagnostic
+      (Status : Rejected_Shell;
+       K      : Positive;
+       Detail : String := "") return String;
 
    --  The client diagnostic of a script coordinate outside the grid:
    --  the conversion layer rejects it on every operation reading a

@@ -112,12 +112,15 @@ is
 
    --  The exact classification of a chain: the first violated property
    --  in the documented order, or Valid_Loop when none is violated.
+   --  The chain is indexed from Chain'First: the public constructions
+   --  index from 1, and the shell classification passes the face
+   --  boundary slices of a wider edge chain, which start later.
    function Classify_Loop
       (E     : Edges_3D.Edge_Store;
        V     : Vertices_3D.Vertex_Store;
        Chain : Edge_Handle_Array) return Loop_Validity
    with
-      Pre => Chain'First = 1,
+      Pre => Chain'First >= 1,
       Post =>
         (case Classify_Loop'Result is
             when Valid_Loop =>

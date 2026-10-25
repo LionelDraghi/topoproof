@@ -666,6 +666,16 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Face_3D (K : in Face_3D_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   type Shell_3D_Kind is");
+      Append_Line ("      (Shell3D_Closed, Shell3D_Invalid_Face, Shell3D_Overused,");
+      Append_Line ("       Shell3D_Misaligned, Shell3D_Free);");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Shell_3D (K : out Shell_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Shell_3D (K : in Shell_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");
       Declaration_Skip := Count;
       Line_Count := 0;

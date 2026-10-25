@@ -147,3 +147,10 @@ SPARK proves contracts and absence of run-time errors. `bbt` executes the public
 When the expected output is exactly known, state it entirely with `Then the
 output is` followed by a fenced code block, single-line or multi-line;
 `Then the output contains` is reserved for spotting one line among others.
+
+In every scenario that carries a diagram, the diagram comes right after
+the explanatory text that introduces it, and before the `.topo` script:
+the reader reads the explanation and sees the diagram it refers to,
+without scrolling past the script to find the graphic. The script then
+states what the scenario executes, and the `When`/`Then` steps state
+what is checked.

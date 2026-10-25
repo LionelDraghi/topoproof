@@ -19,6 +19,7 @@ with TopoProof.Geometry.Planes;
 with TopoProof.Topology.Faces;
 with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
+with TopoProof.Topology.Shells;
 
 package body TopoScript_API.Output is
 
@@ -70,6 +71,14 @@ package body TopoScript_API.Output is
          when Topology.Face3D_Invalid_Boundary => "face3d invalid_boundary",
          when Topology.Face3D_Collinear        => "face3d collinear",
          when Topology.Face3D_Non_Planar       => "face3d non_planar");
+
+   function Image (K : Topology.Shell_3D_Kind) return String is
+     (case K is
+         when Topology.Shell3D_Closed        => "shell3d closed",
+         when Topology.Shell3D_Invalid_Face  => "shell3d invalid_face",
+         when Topology.Shell3D_Overused      => "shell3d overused_edge",
+         when Topology.Shell3D_Misaligned    => "shell3d misaligned_edge",
+         when Topology.Shell3D_Free          => "shell3d free_edge");
 
    function Image (K : Geometry.Equal_Kind) return String is
      (case K is
@@ -538,5 +547,34 @@ package body TopoScript_API.Output is
                  (TopoProof.Topology.Faces_3D.Non_Planar_Boundary));
       end case;
    end Put_Face_3D_Native;
+
+   procedure Put_Shell_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant Topology.Shell_3D_Kind :=
+        Topology.To_Shell_3D_Kind (Data (1));
+
+   begin
+      case K is
+         when Topology.Shell3D_Closed =>
+            Put_Line (Image (K));
+         when Topology.Shell3D_Invalid_Face =>
+            Session.Record_Failure
+              (TopoDiagnostics.Shell_Diagnostic
+                 (TopoProof.Topology.Shells.Invalid_Boundary, 1));
+         when Topology.Shell3D_Overused =>
+            Session.Record_Failure
+              (TopoDiagnostics.Shell_Diagnostic
+                 (TopoProof.Topology.Shells.Overused_Edge, 1));
+         when Topology.Shell3D_Misaligned =>
+            Session.Record_Failure
+              (TopoDiagnostics.Shell_Diagnostic
+                 (TopoProof.Topology.Shells.Misaligned_Edge, 1));
+         when Topology.Shell3D_Free =>
+            Session.Record_Failure
+              (TopoDiagnostics.Shell_Diagnostic
+                 (TopoProof.Topology.Shells.Free_Edge, 1));
+      end case;
+   end Put_Shell_3D_Native;
 
 end TopoScript_API.Output;

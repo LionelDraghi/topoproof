@@ -97,7 +97,9 @@ package body TopoScript_API is
       Register (BD, Topology.Create_Edge_3D_Native'Access,
                 "Create_Edge_3D");
       Register (BD, Topology.Make_Face_3D_Native'Access, "Make_Face_3D");
+      Register (BD, Topology.Make_Shell_3D_Native'Access, "Make_Shell_3D");
       Register (BD, Output.Put_Face_3D_Native'Access, "Put_Face_3D");
+      Register (BD, Output.Put_Shell_3D_Native'Access, "Put_Shell_3D");
    end Register_All;
 
 end TopoScript_API;

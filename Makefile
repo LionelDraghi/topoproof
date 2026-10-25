@@ -25,6 +25,7 @@ SCENARII := ../docs/features/command-line.md \
             ../docs/features/loops.md \
             ../docs/features/faces.md \
             ../docs/features/faces3d.md \
+            ../docs/features/shells.md \
             ../docs/features/toposcript.md
 
 ARTIFACTS_DIR ?= artifacts

@@ -58,6 +58,10 @@ package body TopoScript_API.Session is
            TopoProof.Topology.Edges_3D.Edge_Count_Range
              (TopoProof.Topology.Edges_3D.Max_Edges_3D),
          others => <>);
+      --  The shell assembly restarts empty: no built face, the face
+      --  being built starts at the first edge.
+      Session.Groups.Clear;
+      Session.Face_Start := 1;
    end Reset;
 
    procedure Designate (Session : Session_Access) is

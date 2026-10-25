@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.5-dev] - 2026-??-??**
+  - [Added]   the shell assembly of the minimal B-Rep (DD-005, increment
+              b): faces built one after another join an assembly over the
+              shared 3D stores, and the shell classification decides the
+              exact pairing of the directed supports - closed, invalid
+              boundary, non-manifold overuse, inverted face, free edge -
+              with the carrying face reported on every rejection
   - [Added]   the first stone of the minimal B-Rep (DD-005, increment a):
               the three-dimensional structure builds vertices, edges and
               loops over `Point_3D` with the same store-and-handle

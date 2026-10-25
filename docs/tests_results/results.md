@@ -631,6 +631,43 @@
    - [X] scenario   [an open chain is rejected](../features/faces3d.md) pass  
 
 
+# Document: [shells.md](../features/shells.md)  
+   ### Scenario: [a tetrahedron closes its shell](../features/shells.md): 
+   - OK : Given the file `tetrahedron_shell.topo`  
+   - OK : When I successfully run `../bin/topocli run tetrahedron_shell.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/shells_1.svg` contains `#cf222e`  
+   - [X] scenario   [a tetrahedron closes its shell](../features/shells.md) pass  
+
+   ### Scenario: [the box closes its shell](../features/shells.md): 
+   - OK : Given the file `box_shell.topo`  
+   - OK : When I successfully run `../bin/topocli run box_shell.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/shells_2.svg` contains `#cf222e`  
+   - [X] scenario   [the box closes its shell](../features/shells.md) pass  
+
+   ### Scenario: [a missing face leaves a free edge](../features/shells.md): 
+   - OK : Given the file `missing_face_shell.topo`  
+   - OK : When I run `../bin/topocli run missing_face_shell.topo`  
+   - OK : Then the error output is `error: an edge has no opposite use (face 1)`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [a missing face leaves a free edge](../features/shells.md) pass  
+
+   ### Scenario: [an inverted face pairs in the same direction](../features/shells.md): 
+   - OK : Given the file `inverted_face_shell.topo`  
+   - OK : When I run `../bin/topocli run inverted_face_shell.topo`  
+   - OK : Then the error output is `error: an edge is used twice in the same direction (face 1)`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [an inverted face pairs in the same direction](../features/shells.md) pass  
+
+   ### Scenario: [three faces on one edge are rejected](../features/shells.md): 
+   - OK : Given the file `overused_edge_shell.topo`  
+   - OK : When I run `../bin/topocli run overused_edge_shell.topo`  
+   - OK : Then the error output is `error: an edge is used more than twice (face 1)`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [three faces on one edge are rejected](../features/shells.md) pass  
+
+
 # Document: [toposcript.md](../features/toposcript.md)  
    ### Scenario: [an empty fragment executes silently](../features/toposcript.md): 
    - OK : Given the file `empty.topo`  
@@ -755,12 +792,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 110 scenarios OK
+## Summary : **Success**, 115 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 110   |
+| Successful | 115   |
 | Empty      | 0     |
 | Not Run    | 0     |
 

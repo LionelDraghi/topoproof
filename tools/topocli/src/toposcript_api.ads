@@ -54,6 +54,15 @@ private
    package Chain_Vectors is new Ada.Containers.Indefinite_Vectors
      (Positive, Chain_Point);
 
+   --  One built face of the shell assembly: the edge handle range of
+   --  its boundary.
+   type Edge_Group is record
+      First, Last : TopoProof.Topology.Edges_3D.Edge_Handle;
+   end record;
+
+   package Group_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Positive, Edge_Group);
+
    type Script_Session is limited record
       --  The diagnostic of the first rejected operation: a script
       --  runs on after a rejected operation, and the later ones must
@@ -103,6 +112,15 @@ private
       Links_3D : TopoProof.Topology.Edges_3D.Edge_Store
         (TopoProof.Topology.Edges_3D.Edge_Count_Range
            (TopoProof.Topology.Edges_3D.Max_Edges_3D));
+      --  The shell assembly of the run (DD-005, increment b): the
+      --  built faces, as the edge handle ranges of their boundaries,
+      --  in build order, and the first edge handle of the face being
+      --  built. Make_Face_3D consumes the edges created since the
+      --  previous call: a planar boundary joins the assembly, a
+      --  rejected one is discarded; Make_Shell_3D classifies the
+      --  assembly as it stands.
+      Groups     : Group_Vectors.Vector;
+      Face_Start : Natural := 1;
    end record;
 
 end TopoScript_API;

@@ -19,6 +19,7 @@ with TopoProof.Topology.Faces;
 with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
 with TopoProof.Topology.Loops_3D;
+with TopoProof.Topology.Shells;
 with TopoProof.Topology.Vertices;
 with TopoProof.Topology.Vertices_3D;
 
@@ -756,26 +757,30 @@ package body TopoScript_API.Topology is
       N : constant Natural :=
         TopoProof.Topology.Edges_3D.Edge_Count
           (Session.Current_Session.Links_3D);
+      M : constant Natural := Session.Current_Session.Face_Start;
+      Len : constant Natural := N - M + 1;
       Kind : Face_3D_Kind := Face3D_Invalid_Boundary;
 
    begin
-      if N > TopoProof.Topology.Loops_3D.Max_Loop_Length then
+      if Len > TopoProof.Topology.Loops_3D.Max_Loop_Length then
          Session.Record_Failure
            ("error: too many edges for one loop");
+         Session.Current_Session.Face_Start := N + 1;
          Data (1) := Face_3D_To_HAC (Kind);
          return;
       end if;
 
-      --  The created edges, in creation order: the handles carry the
-      --  vertex identity, so the loop and face classifications judge
-      --  the whole boundary the kernel way.
+      --  The edges created since the previous face: one candidate
+      --  boundary, in creation order. The handles carry the vertex
+      --  identity, so the loop and face classifications judge the
+      --  whole boundary the kernel way.
       declare
-         Handles : TopoProof.Topology.Loops_3D.Edge_Handle_Array (1 .. N);
+         Handles : TopoProof.Topology.Loops_3D.Edge_Handle_Array (1 .. Len);
          Status  : TopoProof.Topology.Loops_3D.Loop_Validity;
 
       begin
-         for I in 1 .. N loop
-            Handles (I) := TopoProof.Topology.Edges_3D.Edge_Handle (I);
+         for I in 1 .. Len loop
+            Handles (I) := TopoProof.Topology.Edges_3D.Edge_Handle (M + I - 1);
          end loop;
          Status :=
            TopoProof.Topology.Loops_3D.Classify_Loop
@@ -794,6 +799,11 @@ package body TopoScript_API.Topology is
                is
                   when TopoProof.Topology.Faces_3D.Valid_Face =>
                      Kind := Face3D_Planar;
+                     --  The built face joins the shell assembly.
+                     Session.Current_Session.Groups.Append
+                       (TopoScript_API.Edge_Group'
+                          (First => TopoProof.Topology.Edges_3D.Edge_Handle (M),
+                           Last  => TopoProof.Topology.Edges_3D.Edge_Handle (N)));
                   when TopoProof.Topology.Faces_3D.Invalid_Boundary =>
                      --  A valid loop classifies as a valid boundary:
                      --  kernel contract.
@@ -817,14 +827,14 @@ package body TopoScript_API.Topology is
             --  closure would return to. A chain of one edge or more
             --  has both ends; an empty chain has none.
             if Status = TopoProof.Topology.Loops_3D.Open_Chain
-              and then N >= 1
+              and then Len >= 1
             then
                Session.Record_Failure
                  (TopoDiagnostics.Open_Loop_3D_Diagnostic
                     (Chain_End =>
                        TopoProof.Topology.Edges_3D.Endpoints
                          (Session.Current_Session.Links_3D,
-                          Handles (N)).To_Vertex,
+                          Handles (Len)).To_Vertex,
                      Chain_Start =>
                        TopoProof.Topology.Edges_3D.Endpoints
                          (Session.Current_Session.Links_3D,
@@ -836,7 +846,168 @@ package body TopoScript_API.Topology is
             Kind := Face3D_Invalid_Boundary;
          end if;
       end;
+      --  The candidate group is consumed either way: a rejected
+      --  boundary builds no face and joins no assembly.
+      Session.Current_Session.Face_Start := N + 1;
       Data (1) := Face_3D_To_HAC (Kind);
    end Make_Face_3D_Native;
+
+
+
+   --  The first face of the assembly whose boundary slice contains the
+   --  flattened use U: the faces are ascending and nonempty.
+   function Face_Of_Use (S : TopoProof.Topology.Shells.Shell; U : Natural)
+      return Natural
+   is
+   begin
+      for K in 1 .. S.Face_Count loop
+         if U <= S.Face_Ends (K) then
+            return K;
+         end if;
+      end loop;
+      return S.Face_Count;
+   end Face_Of_Use;
+
+   --  The diagnostic of the first defect of the assembly: the
+   --  classification kind, completed with the face that carries it.
+   function Shell_Failure_Message
+     (E     : TopoProof.Topology.Edges_3D.Edge_Store;
+      V     : TopoProof.Topology.Vertices_3D.Vertex_Store;
+      S     : TopoProof.Topology.Shells.Shell;
+      Status : TopoProof.Topology.Shells.Shell_Validity) return String
+   is
+      use type TopoProof.Topology.Loops_3D.Loop_Validity;
+      use type TopoProof.Topology.Shells.Shell_Validity;
+   begin
+      case Status is
+         when TopoProof.Topology.Shells.Closed_Shell =>
+            return "";
+         when TopoProof.Topology.Shells.Invalid_Boundary =>
+            for K in 1 .. S.Face_Count loop
+               if not TopoProof.Topology.Shells.Is_Valid_Boundary (E, V, S, K)
+               then
+                  declare
+                     LV : constant TopoProof.Topology.Loops_3D.Loop_Validity :=
+                       TopoProof.Topology.Loops_3D.Classify_Loop
+                         (E, V,
+                          S.Boundary
+                            (TopoProof.Topology.Shells.Boundary_First (S, K)
+                             .. S.Face_Ends (K)));
+                     Full : constant String :=
+                       TopoDiagnostics.Loop_3D_Diagnostic (LV);
+                  begin
+                     --  The loop reason, without its "error: " prefix.
+                     return TopoDiagnostics.Shell_Diagnostic
+                       (Status, K, Full (9 .. Full'Last));
+                  end;
+               end if;
+            end loop;
+            return TopoDiagnostics.Shell_Diagnostic (Status, 1);
+         when others =>
+            for U in 1 .. S.Edge_Total loop
+               declare
+                  SC : constant Natural :=
+                    TopoProof.Topology.Shells.Same_Support_Count
+                      (E, V, S.Boundary, U, 1);
+                  OC : constant Natural :=
+                    TopoProof.Topology.Shells.Opposite_Support_Count
+                      (E, V, S.Boundary, U, 1);
+               begin
+                  case Status is
+                     when TopoProof.Topology.Shells.Overused_Edge =>
+                        if SC + OC >= 2 then
+                           return TopoDiagnostics.Shell_Diagnostic
+                             (Status, Face_Of_Use (S, U));
+                        end if;
+                     when TopoProof.Topology.Shells.Misaligned_Edge =>
+                        if SC = 1 and then OC = 0 then
+                           return TopoDiagnostics.Shell_Diagnostic
+                             (Status, Face_Of_Use (S, U));
+                        end if;
+                     when others =>
+                        if SC = 0 and then OC = 0 then
+                           return TopoDiagnostics.Shell_Diagnostic
+                             (Status, Face_Of_Use (S, U));
+                        end if;
+                  end case;
+               end;
+            end loop;
+            return TopoDiagnostics.Shell_Diagnostic (Status, 1);
+      end case;
+   end Shell_Failure_Message;
+
+   procedure Make_Shell_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Kind at 1.
+      use type TopoProof.Topology.Shells.Shell_Validity;
+      F : constant Natural :=
+        Natural (Session.Current_Session.Groups.Length);
+      M : constant Natural := Session.Current_Session.Face_Start - 1;
+      Kind : Shell_3D_Kind;
+
+   begin
+      if F > TopoProof.Topology.Shells.Max_Shell_Faces
+        or else M > TopoProof.Topology.Loops_3D.Max_Loop_Length
+      then
+         Session.Record_Failure ("error: too many edges for one shell");
+         Data (1) := Shell_3D_To_HAC (Shell3D_Invalid_Face);
+         return;
+      end if;
+
+      declare
+         S : TopoProof.Topology.Shells.Shell (F, M);
+         End_Index : Natural := 0;
+         Status : TopoProof.Topology.Shells.Shell_Validity;
+
+      begin
+         for K in 1 .. F loop
+            declare
+               G : constant TopoScript_API.Edge_Group :=
+                 Session.Current_Session.Groups.Element (K);
+            begin
+               for U in G.First .. G.Last loop
+                  End_Index := End_Index + 1;
+                  S.Boundary (End_Index) := U;
+               end loop;
+               S.Face_Ends (K) := End_Index;
+            end;
+         end loop;
+
+         Status :=
+           TopoProof.Topology.Shells.Classify_Shell
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+         case Status is
+            when TopoProof.Topology.Shells.Closed_Shell =>
+               Kind := Shell3D_Closed;
+            when TopoProof.Topology.Shells.Invalid_Boundary =>
+               Kind := Shell3D_Invalid_Face;
+               Session.Record_Failure
+                 (Shell_Failure_Message
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D, S, Status));
+            when TopoProof.Topology.Shells.Overused_Edge =>
+               Kind := Shell3D_Overused;
+               Session.Record_Failure
+                 (Shell_Failure_Message
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D, S, Status));
+            when TopoProof.Topology.Shells.Misaligned_Edge =>
+               Kind := Shell3D_Misaligned;
+               Session.Record_Failure
+                 (Shell_Failure_Message
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D, S, Status));
+            when TopoProof.Topology.Shells.Free_Edge =>
+               Kind := Shell3D_Free;
+               Session.Record_Failure
+                 (Shell_Failure_Message
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D, S, Status));
+         end case;
+      end;
+      Data (1) := Shell_3D_To_HAC (Kind);
+   end Make_Shell_3D_Native;
 
 end TopoScript_API.Topology;

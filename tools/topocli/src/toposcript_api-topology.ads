@@ -101,6 +101,22 @@ package TopoScript_API.Topology is
    function To_Face_3D_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
      (Face_3D_Kind);
 
+   --  The classification kinds of the shell operation (DD-005,
+   --  increment b): the wrapper injects the same type in the script
+   --  world, with the same positions.
+   type Shell_3D_Kind is
+     (Shell3D_Closed,
+      Shell3D_Invalid_Face,
+      Shell3D_Overused,
+      Shell3D_Misaligned,
+      Shell3D_Free);
+
+   function Shell_3D_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (Shell_3D_Kind);
+
+   function To_Shell_3D_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
+     (Shell_3D_Kind);
+
    --  Native side of Add_Point: appends one 2D point to the topology
    --  chain of the designated session.
    procedure Add_Point_Native
@@ -197,6 +213,13 @@ package TopoScript_API.Topology is
    --  support points, the plane derived from them, never stored
    --  (DD-005, decision 3).
    procedure Make_Face_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Make_Shell_3D: classifies the shell assembly of
+   --  the designated session - the built faces, in build order, over
+   --  the 3D construction stores: loop validity of every boundary,
+   --  then the exact pairing of the edge uses (DD-005, increment b).
+   procedure Make_Shell_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
 end TopoScript_API.Topology;
