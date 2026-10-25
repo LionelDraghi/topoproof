@@ -19,7 +19,9 @@ with Ada.Text_IO;
 with HAC_Sys.Builder;
 with TopoProof.Numerics;
 with TopoProof.Topology.Edges;
+with TopoProof.Topology.Edges_3D;
 with TopoProof.Topology.Vertices;
+with TopoProof.Topology.Vertices_3D;
 with Topodraw;
 
 package TopoScript_API is
@@ -90,6 +92,17 @@ private
       Links : TopoProof.Topology.Edges.Edge_Store
         (TopoProof.Topology.Edges.Edge_Count_Range
            (TopoProof.Topology.Edges.Max_Edges));
+      --  The three-dimensional construction stores (DD-005, increment
+      --  a): the same discipline as the 2D stores, over Point_3D.
+      --  Create_Vertex_3D and Create_Edge_3D build the planar face
+      --  boundaries through them, and Make_Face_3D classifies the
+      --  created edges, in creation order, as one face boundary.
+      Vertices_3D : TopoProof.Topology.Vertices_3D.Vertex_Store
+        (TopoProof.Topology.Vertices_3D.Vertex_Count_Range
+           (TopoProof.Topology.Vertices_3D.Max_Vertices_3D));
+      Links_3D : TopoProof.Topology.Edges_3D.Edge_Store
+        (TopoProof.Topology.Edges_3D.Edge_Count_Range
+           (TopoProof.Topology.Edges_3D.Max_Edges_3D));
    end record;
 
 end TopoScript_API;

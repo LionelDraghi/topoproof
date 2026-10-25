@@ -128,6 +128,7 @@ The two segments lie on the X axis and share the part from `(2, 0)` to
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run overlap.topo`
 - Then the output is `intersection overlap 2 0 4 0`
 
@@ -160,6 +161,7 @@ of both.
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run touch.topo`
 - Then the output is `intersection point_intersection 2 0`
 
@@ -192,6 +194,7 @@ The two segments lie on the same line with a gap between `(1, 0)` and
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run gap.topo`
 - Then the output is `intersection no_intersection`
 
@@ -224,6 +227,7 @@ segment: a junction on the edge.
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run junction.topo`
 - Then the output is `intersection point_intersection 1 0`
 
@@ -255,6 +259,7 @@ segment appears on the diagram.
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run point_on_segment.topo`
 - Then the output is `intersection point_intersection 2 1`
 
@@ -319,6 +324,7 @@ at the origin.
 
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run corner_diagonals.topo`
 - Then the output is `intersection point_intersection 0 0`
 
@@ -355,6 +361,7 @@ script classifies both orders, and both results are written.
   Intersection (C, D, A, B, R);
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run symmetric_crossing.topo`
 - Then the output is
   ```text
@@ -382,6 +389,7 @@ The overlap of the collinear scenario, with the two segments exchanged.
   Intersection (C, D, A, B, R);
   Put_Intersection (R);
   ```
+
 - When I successfully run `../bin/topocli run symmetric_overlap.topo`
 - Then the output is
   ```text

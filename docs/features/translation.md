@@ -67,6 +67,7 @@ representable grid and nothing else.
 
   Translate (P, D, Result);
   ```
+
 - When I run `../bin/topocli run translate_beyond.topo`
 - Then the error output is `error: translation is not representable`
 - And the exit code is `1`
@@ -123,6 +124,7 @@ rebuilds `B`.
   Translate (A, D, Q);
   Put (Q);
   ```
+
 - When I successfully run `../bin/topocli run compose.topo`
 - Then the output is
   ```text

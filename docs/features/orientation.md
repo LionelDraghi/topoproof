@@ -88,6 +88,7 @@ The path turns right at `(1, 0)`.
 
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run cw_path.topo`
 - Then the output is `orientation clockwise`
 
@@ -117,6 +118,7 @@ The path stays on the diagonal line: no turn at all.
 
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run collinear_path.topo`
 - Then the output is `orientation collinear`
 
@@ -145,6 +147,7 @@ reaching `C`.
 
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run degenerate_path.topo`
 - Then the output is `orientation collinear`
 
@@ -175,6 +178,7 @@ coordinates is computed exactly in the `Determinant` domain.
 
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run corners_path.topo`
 - Then the output is `orientation counter_clockwise`
 
@@ -211,6 +215,7 @@ point: one script classifies both paths, and both results are written.
   Orientation (B, C, A, K);
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run cyclic_path.topo`
 - Then the output is
   ```text
@@ -244,6 +249,7 @@ The exchanged path of the first scenario.
 
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run exchanged_path.topo`
 - Then the output is `orientation clockwise`
 - And the file `../docs/features/images/orientation_2.svg` contains `#cf222e`  
@@ -288,6 +294,7 @@ translated one in red.
   Orientation (E, F, G, K);
   Put_Orientation (K);
   ```
+
 - When I successfully run `../bin/topocli run translated_path.topo`
 - Then the output is
   ```text

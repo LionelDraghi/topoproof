@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), 
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - **[0.1.5-dev] - 2026-??-??**
+  - [Added]   the first stone of the minimal B-Rep (DD-005, increment a):
+              the three-dimensional structure builds vertices, edges and
+              loops over `Point_3D` with the same store-and-handle
+              discipline as the 2D structure, and classifies planar face
+              boundaries exactly: the plane is derived from the support
+              points, the collinear and non-planar degeneracies are
+              reported, never built, documented with executable scenarios
+              under `docs/features/`
   - [Added]   the exact orientation of four ordered grid points: the
               mixed product (B - A) x (C - A) . (D - A) classifies the
               ordered quadruple as right-handed, left-handed or

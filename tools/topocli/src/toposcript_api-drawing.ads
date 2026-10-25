@@ -77,6 +77,12 @@ package TopoScript_API.Drawing is
    procedure Draw_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Draw_Edge_3D: the three-dimensional counterpart
+   --  of Draw_Edge, between two grid positions of the space; a
+   --  degenerate edge draws nothing.
+   procedure Draw_Edge_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Draw_Segment_2D: the plain 2D segment from P to
    --  Q, without label: the diagrams of crossing segments, where the
    --  displacement labels of Draw_Edge would overlap at the common

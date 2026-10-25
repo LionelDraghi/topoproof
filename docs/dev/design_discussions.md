@@ -20,6 +20,11 @@
   - [Consequences](#consequences)
   - [Difficulties and mitigations](#difficulties-and-mitigations)
   - [Open questions](#open-questions-1)
+- [DD-005: the minimal B-Rep in three dimensions](#dd-005-the-minimal-b-rep-in-three-dimensions)
+  - [Problem](#problem-2)
+  - [Proposed decisions](#proposed-decisions-2)
+  - [Vertical increments](#vertical-increments-2)
+  - [Open questions](#open-questions-2)
 
 This document records design topics. A discussion is not a normative rule
 until its status becomes **decided** and the decision is reflected in the
@@ -419,3 +424,90 @@ no script equivalent, so the command line cannot be retired today.
 3. The order of the migration waves, and whether the command-line page of
    the executable documentation survives as the runner documentation or is
    absorbed by the TopoScript page.
+
+## DD-005: the minimal B-Rep in three dimensions
+
+- **Status:** proposed (2026-10-25)
+- **Related milestone:** 8, minimal B-Rep
+- **Scope:** `Shell`, `Solid`, the 3D support of planar faces, and the
+  half-edge question DD-002 deferred to milestone 8
+
+### Problem
+
+Milestone 5 delivers the 2D topological structure: vertices over
+`Point_2D`, edges as handle pairs, loops as edge chains, faces bounded
+by one loop. Milestone 8 assembles planar faces into the first closed
+solid. The geometry is now three-dimensional (Milestone 7 delivered the
+exact planes and the four-point orientation), so the topological
+structure needs 3D support, and the shell raises the pairing and
+orientation questions DD-002 deferred.
+
+### Proposed decisions
+
+1. **Simple oriented edges, no half-edge.** A shell is a set of faces
+   over shared vertex and edge stores; its closure is decided by
+   pairing: every edge of the shell is used by exactly two face
+   boundaries, traversed in opposite directions. Half-edge twin and
+   next pointers are rejected for the minimal milestone: they add a
+   second identity level to prove without allocators, and the pairing
+   predicate over the face boundaries decides the same property
+   exactly. On a closed, paired shell, an inverted face breaks the
+   pairing of its edges, so the pairing check detects it (Milestone 8
+   scenario: inverted-face rejection).
+2. **The store-and-handle discipline extends to 3D as new units.**
+   `Vertices_3D`, `Edges_3D` and `Loops_3D` repeat the bounded-store
+   discipline of DD-002 (capacity discriminants without defaults,
+   handles compared only, entities never removed). The plain
+   duplication of the small 2D store units is accepted: a generic
+   unification would refactor proved units and rewrite their
+   references for no behavioural gain; it stays a listed alternative,
+   to revisit if a third point-dimension variant appears.
+3. **Faces are planar and exact; the plane is derived, never stored.**
+   A face boundary is a valid 3D loop whose support points are exactly
+   coplanar and not collinear: the construction derives the plane from
+   the support points (the first non-collinear triple of the closed
+   point sequence, exactly the plane `Are_Coplanar` and
+   `Orientation_3D` decide), and the classification reports the
+   collinear and non-planar degeneracies instead of building the face.
+   The support points are the single source of the plane: no stored
+   plane can diverge from them.
+4. **Face orientation is deferred to the shell and solid wave.** The
+   exact Newell normal of a 3D face, summed over the largest loop,
+   reaches 2**141: beyond the 128-bit machine width, so no exact
+   counter-clockwise classification of a 3D face exists on native
+   registers with the current model. The meaningful orientation
+   criterion of this milestone is topological: the edge pairing of the
+   closed shell. The outward orientation of a solid (every normal
+   diverging from the interior) is a separate question, kept open.
+5. **A solid is bounded by exactly one closed, paired shell.** The
+   solid carries one shell value; the shell carries its face
+   boundaries over the shared stores. No adjacency structure
+   (`Face_Use`, `Loop_Use`) enters the minimal milestone: they are
+   optional supporting structures of the plan, delivered only when an
+   operation needs them.
+
+### Vertical increments
+
+```text
+a) 3D vertices, edges, loops: the store discipline over Point_3D,
+   the chain classification, and the exact planar face
+b) shell: face assembly over shared stores, the pairing and closure
+   classification
+c) solid: the closed-shell construction, the orientation consistency
+   as the pairing criterion, the rejection scenarios
+d) optional adjacency structures, only when an operation needs them
+```
+
+### Open questions
+
+1. The outward orientation of a solid: a reference point in the
+   interior, or a convention on the first face, and what exactly is
+   provable about global orientation consistency in the discrete
+   model.
+2. The counter-clockwise classification of a 3D face, if a later
+   operation needs it: the projection onto the coordinate plane of the
+   dominant normal component keeps the shoelace exact and in-domain,
+   at the cost of proving the projection-choice independence.
+3. Whether the 2D topological units (milestones 4 and 5) eventually
+   become views of the 3D ones (a 2D loop as a planar face of the
+   Z = 0 plane), or stay the separate 2D structure they are today.

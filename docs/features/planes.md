@@ -31,6 +31,8 @@ of the plane itself on the plane. The diagram draws the plane patch
 between the Y and Z axes, the classified points, and the normal rising
 from the C corner, along X.
 
+![Coordinate plane diagram](images/planes_1.svg)
+
 - Given the file `coordinate_plane.topo`
   ```ada
   A : constant Point_3D := (0, 0, 0);
@@ -68,6 +70,7 @@ from the C corner, along X.
   Put_Plane_Side (T);
   Put_Plane_Side (U);
   ```
+
 - When I successfully run `../bin/topocli run coordinate_plane.topo`
 - Then the output is
   ```text
@@ -80,8 +83,6 @@ from the C corner, along X.
   (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
   the plane patch, the actual subject of the scenario, is drawn.)
 
-![Coordinate plane diagram](images/planes_1.svg)
-
 ## Scenario: coplanar points classify as on the plane
 
 The oblique plane through the origin, (2, 0, 2) and (0, 1, 2) carries every
@@ -92,6 +93,8 @@ lands on. The diagram draws the patch, wide open toward the viewer, and
 the normal direction: the exact cross product of the plane's two unit
 grid steps, computed by the script, tilted away from the vertical and
 rising from the C corner.
+
+![Oblique plane diagram](images/planes_2.svg)
 
 - Given the file `coplanar_points.topo`
   ```ada
@@ -133,6 +136,7 @@ rising from the C corner.
   Put_Plane_Side (SR);
   Put_Plane_Side (SS);
   ```
+
 - When I successfully run `../bin/topocli run coplanar_points.topo`
 - Then the output is
   ```text
@@ -146,8 +150,6 @@ rising from the C corner.
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   normal of the plane, the result of the script's own cross product, is
   drawn.)
-
-![Oblique plane diagram](images/planes_2.svg)
 
 ## Scenario: a collinear definition is rejected
 

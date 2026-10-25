@@ -520,6 +520,8 @@ result (`Result`, red on the same position): a failure is immediately
 visible. The image is a generated file: the canonical standard output
 carries the result only.
 
+![Diagnostic image of the translation](images/toposcript_1.svg)
+
 - Given the file `translate_draw.topo`
   ```ada
   P        : constant Point_3D := (10, -20, 30);
@@ -540,13 +542,12 @@ carries the result only.
 
   Put (Result);
   ```
+
 - When I successfully run `../bin/topocli run translate_draw.topo`
 - Then the output is `point 15 -13 21`
 - And the file `../docs/features/images/toposcript_1.svg` contains `#cf222e`  
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   actual result point, the target of the scenario, is drawn red.)
-
-![Diagnostic image of the translation](images/toposcript_1.svg)
 
 ## Scenario: --output receives the canonical result of a script
 

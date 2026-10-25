@@ -100,6 +100,7 @@ meet at one vertex, and both edge traces report `vertex 2`.
   Create_Edge (VC, VB, E2);
   Put_Edge (E2);
   ```
+
 - When I successfully run `../bin/topocli run shared_vertex.topo`
 - Then the output is
   ```text

@@ -84,6 +84,23 @@ package TopoScript_API.Topology is
    function To_Bool_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
      (Bool_Kind);
 
+   --  The classification kinds of the planar face operation of the
+   --  three-dimensional structure (DD-005, increment a): the wrapper
+   --  injects the same type in the script world, with the same
+   --  positions; the literals are prefixed, HAC does not overload
+   --  enumeration literals.
+   type Face_3D_Kind is
+     (Face3D_Planar,
+      Face3D_Invalid_Boundary,
+      Face3D_Collinear,
+      Face3D_Non_Planar);
+
+   function Face_3D_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Enum
+     (Face_3D_Kind);
+
+   function To_Face_3D_Kind is new HAC_Sys.Interfacing.To_Native_Any_Enum
+     (Face_3D_Kind);
+
    --  Native side of Add_Point: appends one 2D point to the topology
    --  chain of the designated session.
    procedure Add_Point_Native
@@ -159,6 +176,27 @@ package TopoScript_API.Topology is
    --  an edge between two distinct vertices at the same point is a
    --  valid edge that no valid loop contains (DD-002, decision 6).
    procedure Make_Loop_From_Edges_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Create_Vertex_3D: the three-dimensional
+   --  counterpart of Create_Vertex, in the 3D vertex store of the
+   --  designated session (DD-005, increment a).
+   procedure Create_Vertex_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Create_Edge_3D: the three-dimensional
+   --  counterpart of Create_Edge, over the 3D stores of the
+   --  designated session.
+   procedure Create_Edge_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Make_Face_3D: classifies the edges created in
+   --  the 3D construction stores of the designated session, in
+   --  creation order, as one planar face boundary: loop validity
+   --  first, then exact coplanarity and non-collinearity of the
+   --  support points, the plane derived from them, never stored
+   --  (DD-005, decision 3).
+   procedure Make_Face_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
 end TopoScript_API.Topology;

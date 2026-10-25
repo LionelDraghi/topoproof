@@ -435,6 +435,55 @@ package body TopoScript_API.Drawing is
       end;
    end Draw_Edge_Native;
 
+   --  The three-dimensional edge arrow: the same scene vector record
+   --  as its 2D counterpart, anchored on the space positions, and
+   --  labeled with the three-component displacement.
+   procedure Draw_Edge_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..3, Q at 4..6, Color at 7.
+      P : TopoProof.Geometry.Points.Point_3D;
+      Q : TopoProof.Geometry.Points.Point_3D;
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      if not Conversions.Read_Point_3D (Data, 1, P)
+        or else not Conversions.Read_Point_3D (Data, 4, Q)
+      then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+      if P.X = Q.X and then P.Y = Q.Y and then P.Z = Q.Z then
+         return;
+      end if;
+
+      declare
+         DX : constant Integer := Integer (Q.X) - Integer (P.X);
+         DY : constant Integer := Integer (Q.Y) - Integer (P.Y);
+         DZ : constant Integer := Integer (Q.Z) - Integer (P.Z);
+      begin
+         Session.Current_Session.The_Scene.Vectors.Append
+           (Vector_Rec'
+              (From_Name =>
+                 Anchor_Name
+                   (Integer (P.X), Integer (P.Y), Integer (P.Z)),
+               To_Name   =>
+                 Anchor_Name
+                   (Integer (Q.X), Integer (Q.Y), Integer (Q.Z)),
+               Label     => To_Unbounded_String
+                 ("(" & Ada.Strings.Fixed.Trim
+                       (DX'Image, Ada.Strings.Both)
+                  & ", " & Ada.Strings.Fixed.Trim
+                       (DY'Image, Ada.Strings.Both)
+                  & ", " & Ada.Strings.Fixed.Trim
+                       (DZ'Image, Ada.Strings.Both) & ")"),
+               Color     =>
+                 To_Unbounded_String (Hex_Of (To_Color (Data (7))))));
+      end;
+   end Draw_Edge_3D_Native;
+
    procedure Draw_Segment_2D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is

@@ -17,6 +17,8 @@ The script draws the two points and the displacement vector, then
 writes the canonical result. The vector is the actual result of the
 operation, drawn in red.
 
+![Displacement diagram](images/displacement_1.svg)
+
 - Given the file `displacement.topo`
   ```ada
   A    : constant Point_3D := (-1, 2, -3);
@@ -35,13 +37,12 @@ operation, drawn in red.
 
   Put_Vector (D);
   ```
+
 - When I successfully run `../bin/topocli run displacement.topo`
 - Then the output is `vector 5 -7 9`
 - And the file `../docs/features/images/displacement_1.svg` contains `#cf222e`  
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   displacement vector, the actual result of the scenario, is drawn red.)
-
-![Displacement diagram](images/displacement_1.svg)
 
 ## Scenario: the result of a script run goes to the output file
 

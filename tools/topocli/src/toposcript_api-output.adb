@@ -17,6 +17,7 @@ with TopoScript_API.Session;
 with TopoProof.Numerics;
 with TopoProof.Geometry.Planes;
 with TopoProof.Topology.Faces;
+with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
 
 package body TopoScript_API.Output is
@@ -62,6 +63,13 @@ package body TopoScript_API.Output is
      (case K is
          when Topology.Face_Counter_Clockwise => "face counter_clockwise",
          when Topology.Face_Clockwise         => "face clockwise");
+
+   function Image (K : Topology.Face_3D_Kind) return String is
+     (case K is
+         when Topology.Face3D_Planar           => "face3d planar",
+         when Topology.Face3D_Invalid_Boundary => "face3d invalid_boundary",
+         when Topology.Face3D_Collinear        => "face3d collinear",
+         when Topology.Face3D_Non_Planar       => "face3d non_planar");
 
    function Image (K : Geometry.Equal_Kind) return String is
      (case K is
@@ -505,5 +513,30 @@ package body TopoScript_API.Output is
                  (TopoProof.Topology.Faces.Invalid_Boundary));
       end case;
    end Put_Face_Native;
+
+   procedure Put_Face_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      K : constant Topology.Face_3D_Kind :=
+        Topology.To_Face_3D_Kind (Data (1));
+
+   begin
+      case K is
+         when Topology.Face3D_Planar =>
+            Put_Line (Image (K));
+         when Topology.Face3D_Invalid_Boundary =>
+            Session.Record_Failure
+              (TopoDiagnostics.Face_3D_Diagnostic
+                 (TopoProof.Topology.Faces_3D.Invalid_Boundary));
+         when Topology.Face3D_Collinear =>
+            Session.Record_Failure
+              (TopoDiagnostics.Face_3D_Diagnostic
+                 (TopoProof.Topology.Faces_3D.Collinear_Boundary));
+         when Topology.Face3D_Non_Planar =>
+            Session.Record_Failure
+              (TopoDiagnostics.Face_3D_Diagnostic
+                 (TopoProof.Topology.Faces_3D.Non_Planar_Boundary));
+      end case;
+   end Put_Face_3D_Native;
 
 end TopoScript_API.Output;

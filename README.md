@@ -75,5 +75,6 @@ contract and executable bbt scenarios:
 - [Edges](docs/features/edges.md)
 - [Loops](docs/features/loops.md)
 - [Faces](docs/features/faces.md)
+- [Faces in three dimensions](docs/features/faces3d.md)
 
 `make test` executes the documentation against the compiled application; `make prove` runs SPARK; `make check` runs both.

@@ -14,9 +14,13 @@ with TopoScript_API.Session;
 with TopoProof.Geometry.Points;
 with TopoProof.Geometry.Segment_Sequences;
 with TopoProof.Topology.Edges;
+with TopoProof.Topology.Edges_3D;
 with TopoProof.Topology.Faces;
+with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
+with TopoProof.Topology.Loops_3D;
 with TopoProof.Topology.Vertices;
+with TopoProof.Topology.Vertices_3D;
 
 package body TopoScript_API.Topology is
 
@@ -667,5 +671,172 @@ package body TopoScript_API.Topology is
       end;
       Data (1) := Face_To_HAC (Kind);
    end Make_Face_Native;
+
+   --  The three-dimensional constructions (DD-005, increment a): the
+   --  same guards as their 2D counterparts, over the 3D stores of the
+   --  designated session.
+   procedure Create_Vertex_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: P at 1..3, H out at 4.
+      P : TopoProof.Geometry.Points.Point_3D;
+      H : TopoProof.Topology.Vertices_3D.Vertex_Handle;
+
+   begin
+      if not Conversions.Read_Point_3D (Data, 1, P) then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+      --  The store of the run is at the kernel maximum capacity, so
+      --  the kernel precondition of Create holds structurally; the
+      --  guard keeps the callback total for a pathological script.
+      if TopoProof.Topology.Vertices_3D.Vertex_Count
+        (Session.Current_Session.Vertices_3D)
+        = TopoProof.Topology.Vertices_3D.Max_Vertices_3D
+      then
+         Session.Record_Failure
+           ("error: too many vertices for one store");
+         return;
+      end if;
+      TopoProof.Topology.Vertices_3D.Create
+        (Session.Current_Session.Vertices_3D, P, H);
+      Data (4) := Conversions.Vertex_Handle_To_HAC (H);
+   end Create_Vertex_3D_Native;
+
+   procedure Create_Edge_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: A at 1, B at 2, E out at 3.
+      A, B : TopoProof.Topology.Vertices_3D.Vertex_Handle;
+      E    : TopoProof.Topology.Edges_3D.Edge_Handle;
+
+   begin
+      if not Conversions.Read_Vertex_Handle (Data, 1, A)
+        or else not Conversions.Read_Vertex_Handle (Data, 2, B)
+      then
+         Session.Record_Failure ("error: invalid vertex handle");
+         return;
+      end if;
+      --  Both endpoints must exist in the 3D vertex store of the run:
+      --  a handle is valid only in the store it comes from.
+      if not TopoProof.Topology.Vertices_3D.Contains
+        (Session.Current_Session.Vertices_3D, A)
+        or else not TopoProof.Topology.Vertices_3D.Contains
+          (Session.Current_Session.Vertices_3D, B)
+      then
+         Session.Record_Failure ("error: unknown vertex");
+         return;
+      end if;
+      --  The degeneracy precondition is checked before the call: the
+      --  kernel contract is never violated from a script, the same
+      --  way as the edge client operation.
+      if A = B then
+         Session.Record_Failure ("error: degenerate edge");
+         return;
+      end if;
+      if TopoProof.Topology.Edges_3D.Edge_Count
+        (Session.Current_Session.Links_3D)
+        = TopoProof.Topology.Edges_3D.Max_Edges_3D
+      then
+         Session.Record_Failure ("error: too many edges for one store");
+         return;
+      end if;
+      TopoProof.Topology.Edges_3D.Create
+        (Session.Current_Session.Links_3D,
+         Session.Current_Session.Vertices_3D, A, B, E);
+      Data (3) := Conversions.Edge_Handle_To_HAC (E);
+   end Create_Edge_3D_Native;
+
+   procedure Make_Face_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Kind at 1.
+      use type TopoProof.Topology.Loops_3D.Loop_Validity;
+      use type TopoProof.Topology.Faces_3D.Face_Validity;
+      N : constant Natural :=
+        TopoProof.Topology.Edges_3D.Edge_Count
+          (Session.Current_Session.Links_3D);
+      Kind : Face_3D_Kind := Face3D_Invalid_Boundary;
+
+   begin
+      if N > TopoProof.Topology.Loops_3D.Max_Loop_Length then
+         Session.Record_Failure
+           ("error: too many edges for one loop");
+         Data (1) := Face_3D_To_HAC (Kind);
+         return;
+      end if;
+
+      --  The created edges, in creation order: the handles carry the
+      --  vertex identity, so the loop and face classifications judge
+      --  the whole boundary the kernel way.
+      declare
+         Handles : TopoProof.Topology.Loops_3D.Edge_Handle_Array (1 .. N);
+         Status  : TopoProof.Topology.Loops_3D.Loop_Validity;
+
+      begin
+         for I in 1 .. N loop
+            Handles (I) := TopoProof.Topology.Edges_3D.Edge_Handle (I);
+         end loop;
+         Status :=
+           TopoProof.Topology.Loops_3D.Classify_Loop
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, Handles);
+         if Status = TopoProof.Topology.Loops_3D.Valid_Loop then
+            declare
+               L : constant TopoProof.Topology.Loops_3D.Loop_3D :=
+                 TopoProof.Topology.Loops_3D.Make_Loop
+                   (Session.Current_Session.Links_3D,
+                    Session.Current_Session.Vertices_3D, Handles);
+            begin
+               case TopoProof.Topology.Faces_3D.Classify_Face
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D, L)
+               is
+                  when TopoProof.Topology.Faces_3D.Valid_Face =>
+                     Kind := Face3D_Planar;
+                  when TopoProof.Topology.Faces_3D.Invalid_Boundary =>
+                     --  A valid loop classifies as a valid boundary:
+                     --  kernel contract.
+                     Kind := Face3D_Invalid_Boundary;
+                  when TopoProof.Topology.Faces_3D.Collinear_Boundary =>
+                     Kind := Face3D_Collinear;
+                     Session.Record_Failure
+                       (TopoDiagnostics.Face_3D_Diagnostic
+                          (TopoProof.Topology.Faces_3D.Collinear_Boundary));
+                  when TopoProof.Topology.Faces_3D.Non_Planar_Boundary =>
+                     Kind := Face3D_Non_Planar;
+                     Session.Record_Failure
+                       (TopoDiagnostics.Face_3D_Diagnostic
+                          (TopoProof.Topology.Faces_3D.Non_Planar_Boundary));
+               end case;
+            end;
+
+         else
+            --  An open chain names its two unlinked vertices: the
+            --  vertex the chain ends at, and the starting vertex the
+            --  closure would return to. A chain of one edge or more
+            --  has both ends; an empty chain has none.
+            if Status = TopoProof.Topology.Loops_3D.Open_Chain
+              and then N >= 1
+            then
+               Session.Record_Failure
+                 (TopoDiagnostics.Open_Loop_3D_Diagnostic
+                    (Chain_End =>
+                       TopoProof.Topology.Edges_3D.Endpoints
+                         (Session.Current_Session.Links_3D,
+                          Handles (N)).To_Vertex,
+                     Chain_Start =>
+                       TopoProof.Topology.Edges_3D.Endpoints
+                         (Session.Current_Session.Links_3D,
+                          Handles (1)).From_Vertex));
+            else
+               Session.Record_Failure
+                 (TopoDiagnostics.Loop_3D_Diagnostic (Status));
+            end if;
+            Kind := Face3D_Invalid_Boundary;
+         end if;
+      end;
+      Data (1) := Face_3D_To_HAC (Kind);
+   end Make_Face_3D_Native;
 
 end TopoScript_API.Topology;

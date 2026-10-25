@@ -94,6 +94,7 @@ it as a face boundary.
 
   Put_Face (K);
   ```
+
 - When I successfully run `../bin/topocli run clockwise_face.topo`
 - Then the output is `face clockwise`
 - And the file `../docs/features/images/faces_2.svg` contains `#1f6feb`  

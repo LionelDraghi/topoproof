@@ -9,7 +9,9 @@ with Ada.Strings.Unbounded;
 use Ada.Strings.Unbounded;
 
 with TopoProof.Topology.Edges;
+with TopoProof.Topology.Edges_3D;
 with TopoProof.Topology.Vertices;
+with TopoProof.Topology.Vertices_3D;
 
 package body TopoScript_API.Session is
 
@@ -44,6 +46,17 @@ package body TopoScript_API.Session is
         (Capacity =>
            TopoProof.Topology.Edges.Edge_Count_Range
              (TopoProof.Topology.Edges.Max_Edges),
+         others => <>);
+      --  The three-dimensional stores restart empty, like the 2D ones.
+      Session.Vertices_3D :=
+        (Capacity =>
+           TopoProof.Topology.Vertices_3D.Vertex_Count_Range
+             (TopoProof.Topology.Vertices_3D.Max_Vertices_3D),
+         others => <>);
+      Session.Links_3D :=
+        (Capacity =>
+           TopoProof.Topology.Edges_3D.Edge_Count_Range
+             (TopoProof.Topology.Edges_3D.Max_Edges_3D),
          others => <>);
    end Reset;
 

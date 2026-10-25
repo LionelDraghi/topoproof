@@ -22,6 +22,8 @@ The dot product of the two vectors is the exact sum of the three exact
 component products. The script draws the two operands, then writes the
 canonical result.
 
+![Vectors diagram](images/vectors_1.svg)
+
 - Given the file `dot_product.topo`
   ```ada
   O : constant Point_3D := (0, 0, 0);
@@ -40,10 +42,9 @@ canonical result.
 
   Put_Dot (D);
   ```
+
 - When I successfully run `../bin/topocli run dot_product.topo`
 - Then the output is `dot -2`
-
-![Vectors diagram](images/vectors_1.svg)
 
 ## Scenario: the cross product of two vectors
 
@@ -53,6 +54,8 @@ over the whole grid domain by the `Lemma_Cross_Orthogonality` ghost lemma
 of the kernel, and observed below by an executable scenario — and its
 orientation follows the right-hand rule. The script draws the two operands
 and the cross vector, the actual result of the operation, drawn in red.
+
+![Cross product diagram](images/cross_product_1.svg)
 
 - Given the file `cross_product.topo`
   ```ada
@@ -73,13 +76,12 @@ and the cross vector, the actual result of the operation, drawn in red.
 
   Put_Cross_Vector (V);
   ```
+
 - When I successfully run `../bin/topocli run cross_product.topo`
 - Then the output is `cross -1 6 5`
 - And the file `../docs/features/images/cross_product_1.svg` contains `#cf222e`
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   cross vector, the actual result of the scenario, is drawn red.)
-
-![Cross product diagram](images/cross_product_1.svg)
 
 ## Scenario: the cross product is orthogonal to both operands
 

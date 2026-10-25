@@ -537,6 +537,11 @@ package body TopoScript_Wrapper is
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line
+        ("   procedure Draw_Edge_3D (P, Q : in Point_3D; " &
+         "Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line
         ("   procedure Draw_Segment_2D (P, Q : in Point_2D; " &
          "Color : in Color_Kind)");
       Append_Line ("      with Import => True;");
@@ -639,6 +644,26 @@ package body TopoScript_Wrapper is
       Append_Line ("");
       Append_Line ("   procedure Make_Loop_From_Edges");
       Append_Line ("      (K : out Loop_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   --  The three-dimensional structure (DD-005, increment a):");
+      Append_Line ("   type Face_3D_Kind is");
+      Append_Line ("      (Face3D_Planar, Face3D_Invalid_Boundary,");
+      Append_Line ("       Face3D_Collinear, Face3D_Non_Planar);");
+      Append_Line ("");
+      Append_Line ("   procedure Create_Vertex_3D");
+      Append_Line ("      (P : in Point_3D; H : out Vertex_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Create_Edge_3D");
+      Append_Line ("      (A : in Vertex_Handle; B : in Vertex_Handle;");
+      Append_Line ("       E : out Edge_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Make_Face_3D (K : out Face_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Face_3D (K : in Face_3D_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");

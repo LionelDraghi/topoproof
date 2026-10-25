@@ -34,6 +34,8 @@ lengths, so no base edge projects on the Z axis of the diagram. The
 diagram draws the base patch, the three classified points, and the base
 normal rising from the C corner, along Z.
 
+![Unit tetrahedron diagram](images/orientation3d_1.svg)
+
 - Given the file `tetrahedron.topo`
   ```ada
   A : constant Point_3D := (0, 0, 0);
@@ -80,14 +82,14 @@ normal rising from the C corner, along Z.
   (The `#1a7f37` value is the green of `Color_Kind`: the check ensures
   the base patch, the actual subject of the scenario, is drawn.)
 
-![Unit tetrahedron diagram](images/orientation3d_1.svg)
-
 ## Scenario: exchanging two points mirrors the orientation
 
 Exchanging the last two points of the quadruple mirrors the orientation:
 the tetrahedron is traversed the other way around. Exchanging the first
 two points mirrors it too, so exchanging two pairs, an even permutation,
 preserves it.
+
+![Exchanged tetrahedron diagram](images/orientation3d_2.svg)
 
 - Given the file `exchanged_tetrahedron.topo`
   ```ada
@@ -134,8 +136,6 @@ preserves it.
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   base normals, whose pair shows the mirror, are drawn.)
 
-![Exchanged tetrahedron diagram](images/orientation3d_2.svg)
-
 ## Scenario: coplanar points classify as coplanar
 
 The oblique plane through the origin, (2, 0, 2) and (0, 1, 2) carries
@@ -143,6 +143,8 @@ every point whose Z coordinate equals its X coordinate plus twice its Y
 coordinate: the determinant vanishes on them, whatever the other
 coordinates. A point displaced off the plane classifies by the side it
 lands on.
+
+![Coplanar tetrahedron diagram](images/orientation3d_3.svg)
 
 - Given the file `coplanar_tetrahedron.topo`
   ```ada
@@ -180,13 +182,13 @@ lands on.
   the plane patch carrying D, the actual subject of the scenario, is
   drawn.)
 
-![Coplanar tetrahedron diagram](images/orientation3d_3.svg)
-
 ## Scenario: the classification is translation invariant
 
 Translating the four points by any representable vector leaves the
 classification unchanged: the displacements, hence the determinant, do
 not depend on where the tetrahedron sits on the grid.
+
+![Translated tetrahedron diagram](images/orientation3d_4.svg)
 
 - Given the file `translated_tetrahedron.topo`
   ```ada
@@ -230,8 +232,6 @@ not depend on where the tetrahedron sits on the grid.
 - And the file `../docs/features/images/orientation3d_4.svg` contains `#cf222e`
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
   translated tetrahedron, the actual subject of the scenario, is drawn.)
-
-![Translated tetrahedron diagram](images/orientation3d_4.svg)
 
 ## Scenario: the grid corners do not overflow
 

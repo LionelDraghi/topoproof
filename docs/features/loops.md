@@ -105,6 +105,7 @@ is on the right.
 
   Put_Loop (K);
   ```
+
 - When I successfully run `../bin/topocli run clockwise_square.topo`
 - Then the output is `loop closed clockwise`
 - And the file `../docs/features/images/loops_2.svg` contains `#1f6feb`  

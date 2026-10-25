@@ -69,6 +69,7 @@ vertical axis.
 
   Put_Equal (K);
   ```
+
 - When I successfully run `../bin/topocli run equal_false.topo`
 - Then the output is `equal false`
 - And the file `../docs/features/images/equality_2.svg` contains `#1a7f37`  
@@ -98,6 +99,7 @@ origin.
 
   Put_Equal (K);
   ```
+
 - When I successfully run `../bin/topocli run equal_opposite.topo`
 - Then the output is `equal false`
 - And the file `../docs/features/images/equality_3.svg` contains `#1a7f37`  

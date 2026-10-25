@@ -58,6 +58,7 @@ package body TopoScript_API is
       Register (BD, Drawing.Draw_Point_2D_Native'Access,
                 "Draw_Point_2D");
       Register (BD, Drawing.Draw_Edge_Native'Access, "Draw_Edge");
+      Register (BD, Drawing.Draw_Edge_3D_Native'Access, "Draw_Edge_3D");
       Register (BD, Drawing.Draw_Segment_2D_Native'Access,
                 "Draw_Segment_2D");
       Register (BD, Drawing.End_Image_Native'Access, "End_Image");
@@ -91,6 +92,12 @@ package body TopoScript_API is
                 "Make_Loop_From_Edges");
       Register (BD, Output.Put_Vertex_Native'Access, "Put_Vertex");
       Register (BD, Output.Put_Edge_Native'Access, "Put_Edge");
+      Register (BD, Topology.Create_Vertex_3D_Native'Access,
+                "Create_Vertex_3D");
+      Register (BD, Topology.Create_Edge_3D_Native'Access,
+                "Create_Edge_3D");
+      Register (BD, Topology.Make_Face_3D_Native'Access, "Make_Face_3D");
+      Register (BD, Output.Put_Face_3D_Native'Access, "Put_Face_3D");
    end Register_All;
 
 end TopoScript_API;

@@ -584,6 +584,53 @@
    - [X] scenario   [a degenerate boundary is rejected](../features/faces.md) pass  
 
 
+# Document: [faces3d.md](../features/faces3d.md)  
+   ### Scenario: [a triangular face on a coordinate plane](../features/faces3d.md): 
+   - OK : Given the file `triangular_face.topo`  
+   - OK : When I successfully run `../bin/topocli run triangular_face.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/faces3d_1.svg` contains `#1a7f37`  
+   - [X] scenario   [a triangular face on a coordinate plane](../features/faces3d.md) pass  
+
+   ### Scenario: [an oblique face is planar too](../features/faces3d.md): 
+   - OK : Given the file `oblique_face.topo`  
+   - OK : When I successfully run `../bin/topocli run oblique_face.topo`  
+   - OK : Then the output is  
+   - OK : And the file `../docs/features/images/faces3d_2.svg` contains `#1a7f37`  
+   - [X] scenario   [an oblique face is planar too](../features/faces3d.md) pass  
+
+   ### Scenario: [a lifted vertex is rejected as non-planar](../features/faces3d.md): 
+   - OK : Given the file `lifted_face.topo`  
+   - OK : When I run `../bin/topocli run lifted_face.topo`  
+   - OK : Then the error output is `error: non-planar face boundary`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/faces3d_3.svg` contains `#cf222e`  
+   - [X] scenario   [a lifted vertex is rejected as non-planar](../features/faces3d.md) pass  
+
+   ### Scenario: [collinear support points carry no plane](../features/faces3d.md): 
+   - OK : Given the file `collinear_face.topo`  
+   - OK : When I run `../bin/topocli run collinear_face.topo`  
+   - OK : Then the error output is `error: collinear face boundary`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/faces3d_4.svg` contains `#1f6feb`  
+   - [X] scenario   [collinear support points carry no plane](../features/faces3d.md) pass  
+
+   ### Scenario: [a closed backtrack is never a face boundary](../features/faces3d.md): 
+   - OK : Given the file `backtrack_face.topo`  
+   - OK : When I run `../bin/topocli run backtrack_face.topo`  
+   - OK : Then the error output is `error: collinear face boundary`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [a closed backtrack is never a face boundary](../features/faces3d.md) pass  
+
+   ### Scenario: [an open chain is rejected](../features/faces3d.md): 
+   - OK : Given the file `open_face.topo`  
+   - OK : When I run `../bin/topocli run open_face.topo`  
+   - OK : Then the error output is `error: open loop, vertex 2 is not linked back to vertex 1`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/faces3d_5.svg` contains `#cf222e`  
+   - [X] scenario   [an open chain is rejected](../features/faces3d.md) pass  
+
+
 # Document: [toposcript.md](../features/toposcript.md)  
    ### Scenario: [an empty fragment executes silently](../features/toposcript.md): 
    - OK : Given the file `empty.topo`  
@@ -708,12 +755,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 104 scenarios OK
+## Summary : **Success**, 110 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 104   |
+| Successful | 110   |
 | Empty      | 0     |
 | Not Run    | 0     |
 

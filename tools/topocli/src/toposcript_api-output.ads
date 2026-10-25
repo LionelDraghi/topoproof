@@ -208,4 +208,9 @@ package TopoScript_API.Output is
    procedure Put_Face_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Put_Face_3D: writes the canonical image of the
+   --  planar face classification, or records the rejection diagnostic.
+   procedure Put_Face_3D_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
 end TopoScript_API.Output;

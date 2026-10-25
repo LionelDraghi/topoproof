@@ -255,6 +255,7 @@ The endpoint of the first segment equals the start point of the second.
 
   Put_Continuity (K);
   ```
+
 - When I successfully run `../bin/topocli run continuity_chain.topo`
 - Then the output is `continuity continuous`
 - And the file `../docs/features/images/contour_4.svg` contains `#1f6feb`  
@@ -296,6 +297,7 @@ The endpoint `(1, 0)` of the first segment differs from the start point
 
   Put_Continuity (K);
   ```
+
 - When I successfully run `../bin/topocli run continuity_gap.topo`
 - Then the output is `continuity discontinuous`
 - And the file `../docs/features/images/contour_5.svg` contains `#1f6feb`  
@@ -370,6 +372,7 @@ The last point equals the first: the square of the orientation definition.
 
   Put_Closure (K);
   ```
+
 - When I successfully run `../bin/topocli run closure_square.topo`
 - Then the output is `closure closed`
 - And the file `../docs/features/images/contour_1.svg` contains `#1f6feb`  
@@ -408,6 +411,7 @@ the start point.
 
   Put_Closure (K);
   ```
+
 - When I successfully run `../bin/topocli run closure_open.topo`
 - Then the output is `closure open`
 - And the file `../docs/features/images/contour_6.svg` contains `#1f6feb`  
@@ -437,9 +441,9 @@ the start point.
 The square of the orientation definition, traversed from `(0, 0)` towards
 `(2, 0)`: the interior is on the left.
 
-![Counter-clockwise square loop](images/contour_1.svg)
-
 The square and its diagram are the ones of the closure scenario.
+
+![Counter-clockwise square loop](images/contour_1.svg)
 
 - Given the file `orientation_ccw.topo`
   ```ada
@@ -459,6 +463,7 @@ The square and its diagram are the ones of the closure scenario.
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_ccw.topo`
 - Then the output is `orientation counter_clockwise`
 
@@ -499,6 +504,7 @@ on the right.
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_cw.topo`
 - Then the output is `orientation clockwise`
 - And the file `../docs/features/images/contour_2.svg` contains `#1f6feb`  
@@ -543,6 +549,7 @@ same area and opposite orientations, so the shoelace sums to zero.
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_bowtie.topo`
 - Then the output is `orientation degenerate`
 - And the file `../docs/features/images/contour_3.svg` contains `#1f6feb`  
@@ -581,6 +588,7 @@ same area and opposite orientations, so the shoelace sums to zero.
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_triangle.topo`
 - Then the output is `orientation counter_clockwise`
 - And the file `../docs/features/images/contour_7.svg` contains `#1f6feb`  
@@ -630,6 +638,7 @@ traversed counter-clockwise.
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_flat.topo`
 - Then the output is `orientation counter_clockwise`
 - And the file `../docs/features/images/contour_13.svg` contains `#1f6feb`  
@@ -644,9 +653,9 @@ The square of the orientation definition: the only non-consecutive pair
 that meets is the first and last segment, and they meet exactly at the
 shared endpoint `(0, 0)`.
 
-![Counter-clockwise square loop](images/contour_1.svg)
-
 The square and its diagram are the ones of the closure scenario.
+
+![Counter-clockwise square loop](images/contour_1.svg)
 
 - Given the file `self_square.topo`
   ```ada
@@ -666,6 +675,7 @@ The square and its diagram are the ones of the closure scenario.
 
   Put_Bool (S);
   ```
+
 - When I successfully run `../bin/topocli run self_square.topo`
 - Then the output is `false`
 
@@ -674,10 +684,10 @@ The square and its diagram are the ones of the closure scenario.
 The bowtie of the self-intersection definition: the first and third
 segments cross at the grid position `(1, 1)`.
 
-![Self-intersecting bowtie loop](images/contour_3.svg)
-
 The bowtie and its diagram are the ones of the degenerate orientation
 scenario.
+
+![Self-intersecting bowtie loop](images/contour_3.svg)
 
 - Given the file `self_bowtie.topo`
   ```ada
@@ -697,6 +707,7 @@ scenario.
 
   Put_Bool (S);
   ```
+
 - When I successfully run `../bin/topocli run self_bowtie.topo`
 - Then the output is `true`
 
@@ -734,6 +745,7 @@ non-consecutive segments, so it is a valid junction.
 
   Put_Bool (S);
   ```
+
 - When I successfully run `../bin/topocli run self_junction.topo`
 - Then the output is `false`
 - And the file `../docs/features/images/contour_8.svg` contains `#1f6feb`  
@@ -765,9 +777,9 @@ non-consecutive segments, so it is a valid junction.
 
 The square of the orientation definition.
 
-![Counter-clockwise square loop](images/contour_1.svg)
-
 The square and its diagram are the ones of the closure scenario.
+
+![Counter-clockwise square loop](images/contour_1.svg)
 
 - Given the file `valid_square.topo`
   ```ada
@@ -787,6 +799,7 @@ The square and its diagram are the ones of the closure scenario.
 
   Put_Bool (V);
   ```
+
 - When I successfully run `../bin/topocli run valid_square.topo`
 - Then the output is `true`
 
@@ -820,6 +833,7 @@ end.
 
   Put_Bool (V);
   ```
+
 - When I successfully run `../bin/topocli run valid_degenerate.topo`
 - Then the output is `false`
 - And the file `../docs/features/images/contour_9.svg` contains `#1f6feb`  
@@ -864,6 +878,7 @@ not canonical.
 
   Put_Bool (V);
   ```
+
 - When I successfully run `../bin/topocli run valid_flat.topo`
 - Then the output is `true`
 - And the file `../docs/features/images/contour_10.svg` contains `#1f6feb`  
@@ -878,9 +893,9 @@ The same chain, classified by the absence of flat turns: the collinear
 intermediate point makes the representation non-canonical, even though
 the contour itself is valid.
 
-![Three collinear consecutive points](images/contour_10.svg)
-
 The chain and its diagram are the ones of the previous scenario.
+
+![Three collinear consecutive points](images/contour_10.svg)
 
 - Given the file `flat_not_reduced.topo`
   ```ada
@@ -898,6 +913,7 @@ The chain and its diagram are the ones of the previous scenario.
 
   Put_Bool (F);
   ```
+
 - When I successfully run `../bin/topocli run flat_not_reduced.topo`
 - Then the output is `false`
 
@@ -934,6 +950,7 @@ extreme positions on both axes.
 
   Put_Continuity (K);
   ```
+
 - When I successfully run `../bin/topocli run continuity_extreme.topo`
 - Then the output is `continuity continuous`
 - And the file `../docs/features/images/contour_11.svg` contains `#1f6feb`  
@@ -981,6 +998,7 @@ clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
 
   Put_Contour_Orientation (O);
   ```
+
 - When I successfully run `../bin/topocli run orientation_extreme.topo`
 - Then the output is `orientation clockwise`
 - And the file `../docs/features/images/contour_12.svg` contains `#1f6feb`  
