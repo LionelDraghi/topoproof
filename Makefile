@@ -28,6 +28,23 @@ SCENARII := ../docs/features/command-line.md \
 ARTIFACTS_DIR ?= artifacts
 BBT_ARTIFACTS := $(ARTIFACTS_DIR)/bbt
 PROOF_ARTIFACTS := $(ARTIFACTS_DIR)/gnatprove
+COVERAGE_ARTIFACTS := $(ARTIFACTS_DIR)/coverage
+# Coverage metric of the coverage target: stmt by default, decision or
+# mcdc for stronger metrics (make coverage COVERAGE_LEVEL=decision).
+COVERAGE_LEVEL ?= stmt
+# Extra report formats of the coverage consolidation, next to the xcov
+# annotated sources that the coverage check always produces. Any comma
+# separated list of gnatcov --annotate forms applies: report (text
+# summary), sarif, cobertura, xml, xcov+ (make coverage
+# COVERAGE_FORMATS=report,sarif). html is not installable: the
+# gnatcov_bin crate lacks the dynamic HTML support.
+COVERAGE_FORMATS ?= report
+# Set to on by the coverage target: the test target then runs against the
+# instrumented build, and consolidates the execution traces at the end.
+COVERAGE_RUN ?=
+# GNATcoverage invocation, shared by every coverage recipe below. The
+# tool comes from the gnatcov_bin crate (alire.toml), like gnatprove.
+GNATCOV := $(ALR) exec -- gnatcov
 CHECK_EVIDENCE_DIR := tools/check-evidence
 CHECK_EVIDENCE := $(CHECK_EVIDENCE_DIR)/bin/check-evidence
 
@@ -68,8 +85,8 @@ SARIF_SWITCHES := --sarif-file=$(SARIF_FILE) --sarif-base-uri=$(SARIF_BASE_URI)
 .SILENT:
 
 .DEFAULT_GOAL := all
-.PHONY: help all build release test prove prove+ prove-stats proof-badge format check clean
-.PHONY: evidence-dirs proof-evidence evidence-checker check-proof-evidence
+.PHONY: help all build release test test-run prove prove+ prove-stats proof-badge format coverage check clean
+.PHONY: evidence-dirs test-run proof-evidence evidence-checker check-proof-evidence
 
 help:
 	echo "Usage: make [target]"
@@ -87,6 +104,11 @@ help:
 	echo "  prove+     : escalate unproved checks (level 4, counterexamples)"
 	echo "  prove-stats: run the same analysis with per-check statistics"
 	echo "               (prover steps and times), to target optimizations"
+	echo "  coverage   : make test against an instrumented kernel build,"
+	echo "               then consolidate the GNATcoverage traces into"
+	echo "               artifacts/coverage; COVERAGE_LEVEL=stmt|decision|"
+	echo "               mcdc (stmt default), COVERAGE_FORMATS=report|"
+	echo "               cobertura|xml|sarif (report default)"
 	echo "  check      : build, test, prove and validate the evidence:"
 	echo "               the complete verification chain"
 	echo "  format     : reformat the Ada sources with GNATformat"
@@ -119,11 +141,17 @@ release:
 # files created by the application in When steps are removed before the
 # run so that each run starts from a clean state. The complete output
 # is teed to $(BBT_ARTIFACTS)/results.log as reviewable evidence.
-test: build evidence-dirs
+# The test run itself, without any build: the coverage target invokes it
+# with the instrumented build in place (make test keeps the build
+# prerequisite for the normal path).
+test: build test-run
+
+test-run: evidence-dirs
 	echo
 	echo === running the executable documentation
 
 	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests_results/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
+
 	# The bbt run stores the scenario paths as given on the command
 	# line, relative to tests/: reanchored to the index location, the
 	# links resolve from docs/tests_results/results.md. The reanchoring goes
@@ -131,11 +159,13 @@ test: build evidence-dirs
 	# syntax across its BSD and GNU implementations.
 	sed 's|](\.\./docs/features/|](\.\./features/|g' docs/tests_results/results.md > docs/tests_results/results.tmp
 	mv docs/tests_results/results.tmp docs/tests_results/results.md
+
 	# The tests badge of the README: the bbt run writes the shields.io
 	# URL of the badge, and the badge is fetched from it, published with
 	# the repository through docs/tests_results/badge.svg. Like every evidence,
 	# the committed file must match the fresh run.
 	curl -s -o docs/tests_results/badge.svg "$$(cat $(BBT_ARTIFACTS)/badge.url)"
+
 	# Every generated diagram is validated as XML: a malformed SVG
 	# would preview as a missing image instead of failing loudly.
 	# --nonet keeps the validation offline: a document declaring an
@@ -146,6 +176,48 @@ test: build evidence-dirs
 	command -v xmllint >/dev/null 2>&1 || { echo "error: xmllint is required (libxml2-utils)"; exit 1; }
 	xmllint --nonet --noout docs/features/images/*.svg
 	echo "  $$(ls docs/features/images/*.svg | wc -l) diagrams well formed"
+
+ifeq ($(COVERAGE_RUN),on)
+	# Coverage consolidation, on the run that just went through the
+	# instrumented build (see the coverage target): every topocli
+	# invocation wrote a trace in $(COVERAGE_ARTIFACTS)/traces. The
+	# "no SID file found" warnings are expected: they list the units
+	# outside the analysis scope (client, HAC). The whole output, report
+	# formats included, is teed to coverage.log as reviewable evidence
+	# (the report format prints on standard output, it writes no file).
+	cd tools/topocli && $(ALR) exec -- bash -c 'set -o pipefail; \
+	  export GPR_PROJECT_PATH="$$GPR_PROJECT_PATH:$(CURDIR)/obj/coverage/rts/share/gpr"; \
+	  gnatcov coverage -P topocli.gpr --level=$(COVERAGE_LEVEL) \
+	    --annotate=xcov,$(COVERAGE_FORMATS) \
+	    --output-dir=$(CURDIR)/$(COVERAGE_ARTIFACTS) \
+	    $(CURDIR)/$(COVERAGE_ARTIFACTS)/traces/*.srctrace \
+	    2>&1 | sed "/no SID file found/d" | tee $(CURDIR)/$(COVERAGE_ARTIFACTS)/coverage.log'
+
+	# The check: the global statement coverage, summed from the per-unit
+	# xcov summaries ("N% statement coverage (a out of b)"). The xcov
+	# files are searched wherever gnatcov dropped them this run: at the
+	# root of the output dir, or in a per-format subdirectory when
+	# COVERAGE_FORMATS repeats xcov or combines formats. The summary
+	# goes to the console, and to coverage-status.json: the coverage
+	# badge data of the README, served by the shields.io endpoint badge
+	# through the committed file, like the SPARK one. The committed file
+	# is part of the reviewed change, and must always match the fresh
+	# evidence; green from 90% statements on.
+	find $(COVERAGE_ARTIFACTS) -name '*.xcov' -print0 \
+	  | xargs -0 -r grep -h "statement coverage (" \
+	  | awk '{ gsub(/[()]/, ""); \
+	           for (i = 1; i <= NF; i++) \
+	             if ($$i == "out") { covered += $$(i - 1); total += $$(i + 2) } } \
+	         END { if (total <= 0) { \
+	                 print "error: no coverage data found"; exit 1 } \
+	               pct = 100 * covered / total; \
+	               color = (pct >= 90) ? "green" : (pct >= 75) ? "orange" : "red"; \
+	               printf "kernel statement coverage: %d/%d statements (%.1f%%)\n", \
+	                      covered, total, pct; \
+	               printf "{\"schemaVersion\": 1, \"label\": \"coverage\", " \
+	                      "\"message\": \"%.1f%% statements\", \"color\": \"%s\"}\n", \
+	                      pct, color > "coverage-status.json" }'
+endif
 
 evidence-dirs:
 	mkdir -p $(BBT_ARTIFACTS) $(PROOF_ARTIFACTS) $(PROOF_CACHE)
@@ -234,6 +306,74 @@ prove-stats: evidence-dirs
 	sed -n '/Most difficult proved checks/,+12p' $(PROOF_ARTIFACTS)/gnatprove-stats.out
 	sed -n 's/^max steps used for successful proof: /max steps used for a successful proof: /p' $(PROOF_ARTIFACTS)/gnatprove-stats.out
 
+# Test coverage of the proved kernel with GNATcoverage (gnatcov_bin crate):
+# the executable documentation runs against an instrumented kernel build
+# through the client — the test target itself, invoked with COVERAGE_RUN=on
+# so the whole suite runs once, producing the badge, the index and the
+# traces together — and the test target consolidates the traces at the end.
+# The instrumented sources live in <objdir>/...gnatcov-instr and share the
+# obj/ directories with the normal build: the target ends with a clean
+# rebuild, leaving the normal (uninstrumented) binaries in place.
+# Only the kernel is instrumented (--projects): the client and the HAC
+# interpreter stay out of the analysis scope, the mains are instrumented
+# anyway, since they dump the traces.
+coverage: evidence-dirs
+	echo
+	echo === collecting the kernel test coverage, $(COVERAGE_LEVEL) level
+
+	# Fresh traces only: traces of a previous run belong to another
+	# instrumentation session (other counters, other SIDs) and would
+	# corrupt the consolidation. The consolidated reports stay in place:
+	# they are only overwritten by the fresh run, and make doc may read
+	# them (make clean is the only step that removes them).
+	rm -f $(COVERAGE_ARTIFACTS)/traces/*.srctrace
+	mkdir -p $(COVERAGE_ARTIFACTS)/traces
+
+	# The instrumentation runtime, installed in obj/ (make clean removes
+	# it with the rest of the build state).
+	$(GNATCOV) setup --prefix=$(CURDIR)/obj/coverage/rts
+
+	# Instrument the kernel, from the client crate (its Alire
+	# environment resolves the HAC import). The RTS location goes through
+	# GPR_PROJECT_PATH, so gprbuild resolves gnatcov_rts.gpr below, and
+	# gnatcov coverage finds the same installation. The stale instrumented
+	# copies go first: instrumented sources of a previous run (other
+	# counters, other SIDs, or units out of the current scope) would
+	# shadow the real ones, through the source subdirectory mechanism.
+	rm -rf $(CURDIR)/obj/*-gnatcov-instr $(CURDIR)/tools/topocli/obj/*-gnatcov-instr
+	cd tools/topocli && $(ALR) exec -- bash -c 'set -o pipefail; \
+	  export GPR_PROJECT_PATH="$$GPR_PROJECT_PATH:$(CURDIR)/obj/coverage/rts/share/gpr"; \
+	  gnatcov instrument -P topocli.gpr \
+	    --level=$(COVERAGE_LEVEL) \
+	    --projects=$(CURDIR)/topoproof.gpr \
+	    --dump-trigger=atexit \
+	    --dump-filename-prefix=$(CURDIR)/$(COVERAGE_ARTIFACTS)/traces/topocli'
+	# Build through the client, instrumented sources first: --src-subdirs
+	# must always be exactly gnatcov-instr (GNATcoverage user guide) —
+	# gprbuild 26 resolves the <project>-gnatcov-instr directories itself,
+	# through the gnatcov-instr.json marker that instrument drops in the
+	# object directories. The kernel and client objects are removed by
+	# hand instead of forcing a full rebuild (-f): HAC is not instrumented,
+	# its objects stay valid, and its style warnings stay out of the run.
+	rm -f obj/*.o obj/*.ali tools/topocli/obj/*.o tools/topocli/obj/*.ali
+	cd tools/topocli && $(ALR) exec -- bash -c 'set -o pipefail; \
+	  export GPR_PROJECT_PATH="$$GPR_PROJECT_PATH:$(CURDIR)/obj/coverage/rts/share/gpr"; \
+	  gprbuild -p -P topocli.gpr --src-subdirs=gnatcov-instr \
+	    --implicit-with=gnatcov_rts.gpr'
+
+	# The whole suite, once: badge, index and traces together.
+	$(MAKE) --no-print-directory test-run COVERAGE_RUN=on
+
+	# Restore the normal build: the instrumented objects share obj/ with
+	# the plain ones, so the kernel and client object trees are removed
+	# and rebuilt uninstrumented. No gnatclean -r: it would also wipe the
+	# HAC objects of the shared Alire build cache, and the next build
+	# would recompile the whole interpreter (and resurface its style
+	# warnings, which are HAC's own business).
+	rm -f obj/*.o obj/*.ali tools/topocli/obj/*.o tools/topocli/obj/*.ali
+	rm -rf obj/*-gnatcov-instr tools/topocli/obj/*-gnatcov-instr
+	$(MAKE) --no-print-directory build
+
 format:
 	echo
 	echo === reformatting the sources
@@ -250,7 +390,8 @@ clean:
 
 	$(ALR) clean
 	rm -rf obj bin gnatprove tools/topocli/obj \
-	  $(CHECK_EVIDENCE_DIR)/obj $(CHECK_EVIDENCE_DIR)/bin
+	  $(CHECK_EVIDENCE_DIR)/obj $(CHECK_EVIDENCE_DIR)/bin \
+	  $(COVERAGE_ARTIFACTS)
 	find tests -name '*.in' -delete -o -name '*.out' -delete
 
 	echo OK

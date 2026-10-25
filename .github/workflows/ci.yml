@@ -191,6 +191,10 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: artifacts/gnatprove/gnatprove.sarif
+          # The category separates this upload from the coverage job's
+          # SARIF of the same commit: same-category uploads overwrite
+          # each other, and the default is the workflow name for both.
+          category: gnatprove
 
       - name: Upload GNATprove evidence
         if: always()
@@ -198,3 +202,60 @@ jobs:
         with:
           name: gnatprove-evidence-${{ matrix.os }}
           path: artifacts/gnatprove/
+
+  # Test coverage of the kernel with GNATcoverage (make coverage): the
+  # suite runs once against an instrumented build, and the consolidation
+  # produces the SARIF file (code scanning) and the xcov annotated
+  # sources (job artifact). Linux only, like every evidence upload: one
+  # platform produces the evidence, the others would just duplicate it.
+  coverage:
+    runs-on: ubuntu-latest
+    # The SARIF upload creates code scanning alerts, which needs
+    # security-events: write on top of the workflow-wide contents: read.
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alire-project/setup-alire@latest
+      - name: Cache Alire dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/alire
+            ~/.local/share/alire
+          key: ${{ github.job }}-alire-${{ hashFiles('alire.toml', 'tools/topocli/alire.toml') }}
+          restore-keys: |
+            ${{ github.job }}-alire-
+
+      - name: Build the latest bbt from its repository
+        run: |
+          git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
+          cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
+          echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
+
+      - name: Collect the kernel test coverage
+        run: make coverage COVERAGE_FORMATS=report,sarif
+        shell: bash
+
+      # The coverage badge data is part of the repository: it must match
+      # the fresh evidence of this run.
+      - name: Check the committed coverage badge data
+        run: git diff --exit-code coverage-status.json
+        shell: bash
+
+      - name: Upload coverage SARIF
+        if: always() && hashFiles('artifacts/coverage/coverage.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/coverage/coverage.sarif
+          # Distinct from the prove job's category: same-category uploads
+          # overwrite each other.
+          category: coverage
+
+      - name: Upload coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-evidence
+          path: artifacts/coverage/

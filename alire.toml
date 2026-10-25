@@ -42,6 +42,12 @@ gnatprove = "^16.1.0"
 # TopoProof targets Linux only for now.
 gnatformat_bin = "^26.0.0"
 
+[[depends-on]]
+# test coverage: make coverage runs GNATcoverage
+# Same release train as gnatformat_bin (26.x pairs with GNAT 16); the
+# binary crate is used directly, the source crate adds nothing here.
+gnatcov_bin = "^26.2.1"
+
 [[actions]]
 # alr test builds the application and runs the Markdown documentation
 # through bbt
