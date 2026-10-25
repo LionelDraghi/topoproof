@@ -82,6 +82,12 @@ jobs:
           git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
           cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
           echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
+      # The ubuntu-26.04 runner image no longer ships xmllint
+      # (libxml2-utils); the diagram validation of make test needs it.
+      - name: Install xmllint (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
       # The recipes run under bash: the POSIX shell of the Linux and
       # macOS runners, and Git Bash on Windows.
       - name: Build and execute Markdown specifications
@@ -233,6 +239,11 @@ jobs:
           git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
           cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
           echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
+
+      # Same xmllint need as the build-and-bbt job: the test-run recipes
+      # validate every generated diagram.
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Collect the kernel test coverage
         run: make coverage COVERAGE_FORMATS=report,sarif

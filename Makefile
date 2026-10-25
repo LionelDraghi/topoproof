@@ -317,7 +317,12 @@ prove-stats: evidence-dirs
 # Only the kernel is instrumented (--projects): the client and the HAC
 # interpreter stay out of the analysis scope, the mains are instrumented
 # anyway, since they dump the traces.
-coverage: evidence-dirs
+# The normal build goes first: it synchronizes both Alire workspaces,
+# so the nested client crate resolves its HAC dependency before the
+# instrumentation runs — a fresh clone has no resolved client crate,
+# and gnatcov instrument would fail to load topocli.gpr (observed on
+# the CI runner).
+coverage: build evidence-dirs
 	echo
 	echo === collecting the kernel test coverage, $(COVERAGE_LEVEL) level
 
