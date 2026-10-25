@@ -4,8 +4,6 @@
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/topoproof.json)](https://alire.ada.dev/crates/topoproof.html)
 [![Version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Falire.toml&query=%24.version&label=latest&style=flat-square)](https://github.com/LionelDraghi/topoproof/blob/main/alire.toml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
-[![SPARK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fproof-status.json)](docs/dev/development_workflow.md)
-[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fcoverage-status.json)](docs/dev/development_workflow.md)
 
 **A provable 3D CAD kernel based on discrete geometry, exact arithmetic, and formal proof.**
 
@@ -31,6 +29,8 @@ Why? Because of one too many of these:
 
 [![CI](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml/badge.svg)](https://github.com/LionelDraghi/topoproof/actions/workflows/ci.yml)
 [![Tests](docs/tests_results/badge.svg)](docs/tests_results/results.md)
+[![SPARK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fproof-status.json)](docs/dev/development_workflow.md)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fcoverage-status.json)](docs/dev/development_workflow.md)
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
 the exact 2D predicates and contour foundations required before introducing 3D
