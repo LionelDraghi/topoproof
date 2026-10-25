@@ -560,6 +560,14 @@
    - OK : And the exit code is `1`  
    - [X] scenario   [a degenerate edge support is rejected](../features/loops.md) pass  
 
+   ### Scenario: [a disconnected chain is rejected](../features/loops.md): 
+   - OK : Given the file `disconnected_chain.topo`  
+   - OK : When I run `../bin/topocli run disconnected_chain.topo`  
+   - OK : Then the error output is `error: disconnected chain`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/loops_3.svg` contains `#cf222e`  
+   - [X] scenario   [a disconnected chain is rejected](../features/loops.md) pass  
+
 
 # Document: [faces.md](../features/faces.md)  
    ### Scenario: [a counter-clockwise face](../features/faces.md): 
@@ -629,6 +637,22 @@
    - OK : And the exit code is `1`  
    - OK : And the file `../docs/features/images/faces3d_5.svg` contains `#cf222e`  
    - [X] scenario   [an open chain is rejected](../features/faces3d.md) pass  
+
+   ### Scenario: [a disconnected chain is rejected](../features/faces3d.md): 
+   - OK : Given the file `disconnected_face.topo`  
+   - OK : When I run `../bin/topocli run disconnected_face.topo`  
+   - OK : Then the error output is `error: disconnected chain`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/faces3d_6.svg` contains `#cf222e`  
+   - [X] scenario   [a disconnected chain is rejected](../features/faces3d.md) pass  
+
+   ### Scenario: [a degenerate edge support is rejected](../features/faces3d.md): 
+   - OK : Given the file `degenerate_face.topo`  
+   - OK : When I run `../bin/topocli run degenerate_face.topo`  
+   - OK : Then the error output is `error: degenerate edge support`  
+   - OK : And the exit code is `1`  
+   - OK : And the file `../docs/features/images/faces3d_7.svg` contains `#cf222e`  
+   - [X] scenario   [a degenerate edge support is rejected](../features/faces3d.md) pass  
 
 
 # Document: [shells.md](../features/shells.md)  
@@ -830,12 +854,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 120 scenarios OK
+## Summary : **Success**, 123 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 120   |
+| Successful | 123   |
 | Empty      | 0     |
 | Not Run    | 0     |
 

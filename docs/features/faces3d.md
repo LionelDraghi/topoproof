@@ -23,6 +23,8 @@ vanishes exactly on the plane.
 - [Scenario: collinear support points carry no plane](#scenario-collinear-support-points-carry-no-plane)
 - [Scenario: a closed backtrack is never a face boundary](#scenario-a-closed-backtrack-is-never-a-face-boundary)
 - [Scenario: an open chain is rejected](#scenario-an-open-chain-is-rejected)
+- [Scenario: a disconnected chain is rejected](#scenario-a-disconnected-chain-is-rejected)
+- [Scenario: a degenerate edge support is rejected](#scenario-a-degenerate-edge-support-is-rejected)
 
 ## Scenario: a triangular face on a coordinate plane
 
@@ -298,4 +300,87 @@ red.
 - And the file `../docs/features/images/faces3d_5.svg` contains `#cf222e`
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures
   the two unlinked vertices, the actual subject of the scenario, are
+  drawn.)
+
+## Scenario: a disconnected chain is rejected
+
+The chain closes on its starting vertex — the last edge returns to `A`,
+the vertex the first edge starts from — but its two edges are not
+linked: the first arrives at `B`, the second starts from `C`. The loop
+invariants are judged first, and a closed chain that is not connected
+bounds no face. The diagram draws the two edges and the chain, the two
+unlinked vertices in red.
+
+![Disconnected chain diagram](images/faces3d_6.svg)
+
+- Given the file `disconnected_face.topo`
+  ```ada
+  A : constant Point_3D := (0, 0, 0);
+  B : constant Point_3D := (3, 0, 0);
+  C : constant Point_3D := (0, 3, 0);
+  HA, HB, HC : Vertex_Handle;
+  E1, E2 : Edge_Handle;
+  K : Face_3D_Kind;
+
+  Begin_Image (+"../docs/features/images/faces3d_6.svg");
+  Draw_Axes;
+  Draw_Edge_3D (A, B, Blue);
+  Draw_Edge_3D (C, A, Blue);
+  Draw_Named_Point (A, +"A", Blue);
+  Draw_Named_Point (B, +"B", Red);
+  Draw_Named_Point (C, +"C", Red);
+  End_Image;
+
+  Create_Vertex_3D (A, HA);
+  Create_Vertex_3D (B, HB);
+  Create_Vertex_3D (C, HC);
+  Create_Edge_3D (HA, HB, E1);
+  Create_Edge_3D (HC, HA, E2);
+  Make_Face_3D (K);
+  Put_Face_3D (K);
+  ```
+- When I run `../bin/topocli run disconnected_face.topo`
+- Then the error output is `error: disconnected chain`
+- And the exit code is `1`
+- And the file `../docs/features/images/faces3d_6.svg` contains `#cf222e`
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the two unlinked vertices, the actual subject of the scenario, are
+  drawn.)
+
+## Scenario: a degenerate edge support is rejected
+
+Two distinct vertices at the same point, joined both ways: the loop is
+closed and connected, every endpoint exists, but each edge support is
+reduced to a point. The degeneracy is judged at loop level, the same
+way as in the plane (DD-002, decision 6), and the chain builds no face.
+The diagram draws the point where the two vertices and the two edge
+supports collapse, in red.
+
+![Degenerate support diagram](images/faces3d_7.svg)
+
+- Given the file `degenerate_face.topo`
+  ```ada
+  P  : constant Point_3D := (1, 2, 3);
+  VA, VB : Vertex_Handle;
+  E1, E2 : Edge_Handle;
+  K : Face_3D_Kind;
+
+  Begin_Image (+"../docs/features/images/faces3d_7.svg");
+  Draw_Axes;
+  Draw_Named_Point (P, +"P", Red);
+  End_Image;
+
+  Create_Vertex_3D (P, VA);
+  Create_Vertex_3D (P, VB);
+  Create_Edge_3D (VA, VB, E1);
+  Create_Edge_3D (VB, VA, E2);
+  Make_Face_3D (K);
+  Put_Face_3D (K);
+  ```
+- When I run `../bin/topocli run degenerate_face.topo`
+- Then the error output is `error: degenerate edge support`
+- And the exit code is `1`
+- And the file `../docs/features/images/faces3d_7.svg` contains `#cf222e`
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the collapsed support point, the actual subject of the scenario, is
   drawn.)

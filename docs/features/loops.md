@@ -30,6 +30,7 @@ by `Make_Loop_From_Edges` over the created edges.
 - [Proved property](#proved-property)
 - [Scenario: an open chain is rejected](#scenario-an-open-chain-is-rejected)
 - [Scenario: a degenerate edge support is rejected](#scenario-a-degenerate-edge-support-is-rejected)
+- [Scenario: a disconnected chain is rejected](#scenario-a-disconnected-chain-is-rejected)
 
 ## Scenario: a triangle loop
 
@@ -214,3 +215,49 @@ the loop-level diagnostic.
   ```
 - And the error output is `error: degenerate edge support`
 - And the exit code is `1`
+
+## Scenario: a disconnected chain is rejected
+
+The chain closes on its starting vertex — the last edge returns to the
+vertex the first edge starts from — but its two edges are not linked:
+the first arrives at `B`, the second starts from `C`. A closed chain
+that is not connected is not a loop. The diagram draws the two edges
+and the chain, the two unlinked vertices in red.
+
+![Disconnected chain diagram](images/loops_3.svg)
+
+- Given the file `disconnected_chain.topo`
+  ```ada
+  A : constant Point_2D := (0, 0);
+  B : constant Point_2D := (5, 0);
+  C : constant Point_2D := (2, 4);
+  VA, VB, VC : Vertex_Handle;
+  E1, E2 : Edge_Handle;
+  K  : Loop_Kind;
+
+  Begin_Image (+"../docs/features/images/loops_3.svg");
+  Draw_Axes;
+  Draw_Edge (A, B, Blue);
+  Draw_Edge (C, A, Blue);
+  Draw_Named_Point_2D (A, +"A", Blue);
+  Draw_Named_Point_2D (B, +"B", Red);
+  Draw_Named_Point_2D (C, +"C", Red);
+  End_Image;
+
+  Create_Vertex (A, VA);
+  Create_Vertex (B, VB);
+  Create_Vertex (C, VC);
+  Create_Edge (VA, VB, E1);
+  Create_Edge (VC, VA, E2);
+
+  Make_Loop_From_Edges (K);
+
+  Put_Loop (K);
+  ```
+- When I run `../bin/topocli run disconnected_chain.topo`
+- Then the error output is `error: disconnected chain`
+- And the exit code is `1`
+- And the file `../docs/features/images/loops_3.svg` contains `#cf222e`
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures
+  the two unlinked vertices, the actual subject of the scenario, are
+  drawn.)
