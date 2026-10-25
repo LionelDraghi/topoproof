@@ -15,8 +15,11 @@ TopoProof replaces the historical model of continuous geometry, approximate comp
 - Ada/SPARK contracts and proofs;
 - topological invariants preserved by construction.
 
-Why? Because of one too many of these:
+Why? Because of one too many of these (while doing normal things):
 > Job 1, 'freecad&' terminated by signal SIGSEGV
+
+One of the funniest being immediately after running
+> $ freecad --safe-mode
 
 ## Contents <!-- omit from toc -->
 
@@ -33,8 +36,8 @@ Why? Because of one too many of these:
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLionelDraghi%2Ftopoproof%2Fmain%2Fcoverage-status.json)](docs/dev/development_workflow.md)
 
 TopoProof targets a provable 3D CAD kernel. The current implementation establishes
-the exact 2D predicates and contour foundations required before introducing 3D
-topology and B-Rep structures.
+the exact 2D and 3D predicates, the 2D topological structure, and the first
+planar faces of the B-Rep.
 
 ## Documentation
 
