@@ -57,7 +57,17 @@ CHECK_EVIDENCE := $(CHECK_EVIDENCE_DIR)/bin/check-evidence
 GNATPROVE := $(ALR) exec -- gnatprove
 KERNEL := -P topoproof.gpr -U
 # Common analysis switches: all checks, full report, warnings as errors.
-ANALYSIS := --mode=all --report=all --warnings=error
+# Prover order: Z3 first. On the one hard subprogram of the kernel (the
+# nonlinear betweenness of the crossing quotients, Collinear_Membership),
+# Z3 settles all 22 checks in half the CVC5 wall time (5 s against 9 s,
+# clean session, timeout 30, measured 2026-10-25); everywhere else every
+# check is at 1 s or less under either prover. The first prover that
+# succeeds ends the attempt, so CVC5 keeps the easy checks (it discharges
+# 93-97% of the project) and only pays where Z3 fails; altergo stays last,
+# and never first: it burns ~24 s failing on the hard checks before a
+# stronger prover pays for them again.
+PROVER ?= z3,cvc5,altergo
+ANALYSIS := --mode=all --report=all --warnings=error --prover=$(PROVER)
 
 # The proof-result cache: gnatprove saves every successful proof result
 # in this folder (--memcached-server=file:..., no server involved), and
@@ -303,7 +313,7 @@ prove-stats: evidence-dirs
 	echo
 	echo === collecting the proof statistics
 
-	$(ALR) exec -- bash -c 'set -o pipefail; gnatprove $(KERNEL) --mode=all --report=statistics --warnings=error --level=2 --output-header --subdirs=stats $(PROOF_CACHE_SWITCH) 2>&1 | tee $(PROOF_ARTIFACTS)/prove-stats.log'
+	$(ALR) exec -- bash -c 'set -o pipefail; gnatprove $(KERNEL) --mode=all --report=statistics --warnings=error --level=2 --prover=$(PROVER) --output-header --subdirs=stats $(PROOF_CACHE_SWITCH) 2>&1 | tee $(PROOF_ARTIFACTS)/prove-stats.log'
 	cp obj/stats/gnatprove/gnatprove.out $(PROOF_ARTIFACTS)/gnatprove-stats.out
 	echo
 	echo The most difficult proved checks:
