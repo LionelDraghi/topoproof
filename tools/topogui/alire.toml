@@ -1,0 +1,30 @@
+name = "topogui"
+description = "Graphical client of the TopoProof kernel"
+version = "0.1.0-dev"
+
+authors = ["Lionel Draghi"]
+maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]
+maintainers-logins = ["LionelDraghi"]
+licenses = "Apache-2.0"
+website = "https://github.com/LionelDraghi/topoproof"
+tags = ["gui", "cad", "geometry", "graphics"]
+
+executables = ["topogui"]
+project-files = ["topogui.gpr"]
+
+[configuration]
+generate_C = false
+generate_gpr = false
+
+[[depends-on]]
+# Same toolchain train as the kernel and the client: GNAT 16.
+gnat = ">=16"
+
+[[depends-on]]
+# Adi2, the GUI toolkit (SDL3-based, Ada 2022). Not published to the
+# community index yet: pinned to its repository, at a fixed commit so
+# the build stays reproducible until the crate lands in the index.
+adi2 = "*"
+
+[[pins]]
+adi2 = { url = "https://github.com/ovenpasta/adi2", commit = "4d589e6779510426cc202c914d47a5a7243b397d" }
