@@ -27,8 +27,8 @@ gnat = ">=16"
 # external tool: the CI builds the latest bbt from its repository, and
 # local runs use the bbt on the PATH. Restore the dependency once 0.6 is
 # published:
-#   [[depends-on]]
-#   bbt = ">=0.6.0"
+[[depends-on]]
+bbt = ">=0.6.0"
 
 [[depends-on]]
 # formal verification: make prove runs GNATprove
