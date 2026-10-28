@@ -1,6 +1,6 @@
 name = "topocli"
 description = "Command-line client of the TopoProof kernel"
-version = "0.1.5"
+version = "0.1.6-dev"
 
 authors = ["Lionel Draghi"]
 maintainers = ["Lionel Draghi <lionel.draghi@free.fr>"]

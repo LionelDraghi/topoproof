@@ -4,6 +4,8 @@ All notable changes **from a user perspective** to this project will be document
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.1.0/), (guidelines at the bottom of the page).  
 Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+- **[0.1.6-dev] - 2026-??-??**
+
 - **[0.1.5] - 2026-10-28**
   - [Added]   the first closed solid (DD-005, increment c): the exact
               signed volume of a closed shell assembly - the fan
