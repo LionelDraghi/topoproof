@@ -110,3 +110,9 @@ one.
 See the testing policy in `AGENTS.md`: headless HAC/TopoScript testing
 of everything that drives the kernel, MCP-driven automated GUI testing,
 manual owner testing of the delivered executable.
+
+## References
+
+- [PaliCAD](https://github.com/braydennilsen/PaliCAD) (2026-10-26): a
+  very simple and clean CAD GUI in Flutter. A reference for what a
+  minimal, uncluttered CAD front-end can look like.

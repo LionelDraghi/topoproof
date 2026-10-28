@@ -25,6 +25,7 @@
   - [Proposed decisions](#proposed-decisions-2)
   - [Vertical increments](#vertical-increments-2)
   - [Open questions](#open-questions-2)
+  - [References](#references)
 - [DD-006: TopoGUI, the user-need-driven front-end](#dd-006-topogui-the-user-need-driven-front-end)
   - [Current situation](#current-situation-2)
   - [Decisions](#decisions)
@@ -536,6 +537,15 @@ d) optional adjacency structures, only when an operation needs them
 3. Whether the 2D topological units (milestones 4 and 5) eventually
    become views of the 3D ones (a 2D loop as a planar face of the
    Z = 0 plane), or stay the separate 2D structure they are today.
+
+### References
+
+- [pali_ijo](https://github.com/braydennilsen/PaliCAD/tree/main/packages/pali_ijo)
+  (2026-10-26): a B-Rep library, not parametric yet, but a useful
+  reference to discuss the design choices of a B-Rep kernel.
+- [CGAL](https://github.com/CGAL/cgal/) (2026-10-26): the reference
+  computational geometry library — a trusted kernel to compare
+  design choices against.
 
 ## DD-006: TopoGUI, the user-need-driven front-end
 
