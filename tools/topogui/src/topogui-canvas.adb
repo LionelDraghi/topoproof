@@ -47,6 +47,12 @@ package body Topogui.Canvas is
    Pending        : Boolean := False;
    Pending_Vertex : Natural := 0;
 
+   --  The loop gesture accumulates the clicked points GUI-side; the
+   --  closing click, on the first point exactly, submits the whole
+   --  figure atomically (drawing-model.md, increment 3).
+   Pending_Figure : Topogui.Session.Click_Array (1 .. 512);
+   Pending_Count  : Natural := 0;
+
    --  The rendered drawing; replaced on every redraw. The owner must
    --  outlive the widget item that draws it (layout_item_system.md).
    Drawing_Owner : Adi.Image.Image_Owner := Adi.Image.Null_Image_Owner;
@@ -137,6 +143,26 @@ package body Topogui.Canvas is
               & "' stroke-width='1'/>" & ASCII.LF);
 
       --  The kernel-accepted edges, then the vertices above them.
+      --  An accepted face fills its polygon under the ink.
+      if Topogui.Session.Face_Count (The_Session) > 0 then
+         Append (S, "<polygon points='");
+         for I in 1 .. Topogui.Session.Face_Count (The_Session) loop
+            declare
+               Vertex : constant Topogui.Session.Vertex_Record :=
+                 Topogui.Session.Vertex_At
+                   (The_Session, Topogui.Session.Face_Handle (The_Session, I));
+            begin
+               Append (S, Img (Origin_X + Vertex.X * Px_Per_Unit) & ","
+                       & Img (Origin_Y - Vertex.Y * Px_Per_Unit));
+               if I < Topogui.Session.Face_Count (The_Session) then
+                  Append (S, " ");
+               end if;
+            end;
+         end loop;
+         Append (S, "' fill='" & Topogui.Theme.Accent_Svg
+                 & "' fill-opacity='0.15'/>" & ASCII.LF);
+      end if;
+
       for E in 1 .. Topogui.Session.Edge_Count (The_Session) loop
          declare
             Edge : constant Topogui.Session.Edge_Record :=
@@ -186,6 +212,23 @@ package body Topogui.Canvas is
                     & "' stroke-width='2'/>" & ASCII.LF);
          end;
       end if;
+
+      --  The pending loop figure: an outline square per clicked point,
+      --  waiting for the closing click.
+      for I in 1 .. Pending_Count loop
+         declare
+            PX : constant Integer :=
+              Origin_X + Pending_Figure (I).X * Px_Per_Unit;
+            PY : constant Integer :=
+              Origin_Y - Pending_Figure (I).Y * Px_Per_Unit;
+         begin
+            Append (S, "<rect x='" & Img (PX - 5) & "' y='"
+                    & Img (PY - 5) & "' width='10' height='10'"
+                    & " fill='none' stroke='"
+                    & Topogui.Theme.Accent_Svg
+                    & "' stroke-width='2'/>" & ASCII.LF);
+         end;
+      end loop;
 
       Append (S, "</svg>" & ASCII.LF);
       return To_String (S);
@@ -310,6 +353,50 @@ package body Topogui.Canvas is
                   end;
                end if;
             end;
+         when Draw_Loop =>
+            declare
+               Snap_H : constant Natural :=
+                 Topogui.Session.Snap (The_Session, GX, GY);
+            begin
+               if Pending_Count = 0 then
+                  Pending_Count := 1;
+                  Pending_Figure (1) := (X => GX, Y => GY, Snap => Snap_H);
+                  Report ("loop: first point " & Img (GX) & " " & Img (GY));
+                  Refresh;
+
+               elsif GX = Pending_Figure (1).X
+                 and then GY = Pending_Figure (1).Y
+               then
+                  --  The closing click, on the first point exactly:
+                  --  the whole figure is submitted atomically, and the
+                  --  kernel decides.
+                  declare
+                     Figure : constant Topogui.Session.Click_Array :=
+                       Pending_Figure (1 .. Pending_Count);
+                     OK     : Boolean;
+                     Line   : Unbounded_String;
+                     Reject : Unbounded_String;
+                  begin
+                     Pending_Count := 0;
+                     Topogui.Session.Close_Loop
+                       (The_Session, Figure, OK, Line, Reject);
+                     if OK then
+                        Report (To_String (Line));
+                     else
+                        Report (To_String (Reject));
+                     end if;
+                     Refresh;
+                  end;
+
+               else
+                  Pending_Count := Pending_Count + 1;
+                  Pending_Figure (Pending_Count) :=
+                    (X => GX, Y => GY, Snap => Snap_H);
+                  Report ("loop: point " & Img (GX) & " " & Img (GY));
+                  Refresh;
+               end if;
+            end;
+
       end case;
    end Gesture;
 
@@ -409,6 +496,20 @@ package body Topogui.Canvas is
       Prev_Left_Down := Left_Down;
    end Tick;
 
+   procedure Submit_Face is
+      OK     : Boolean;
+      Line   : Unbounded_String;
+      Reject : Unbounded_String;
+   begin
+      Topogui.Session.Build_Face (The_Session, OK, Line, Reject);
+      if OK then
+         Report (To_String (Line));
+         Refresh;
+      else
+         Report (To_String (Reject));
+      end if;
+   end Submit_Face;
+
    procedure Set_Status_Handler (CB : Status_Callback) is
    begin
       The_Status := CB;
@@ -418,9 +519,12 @@ package body Topogui.Canvas is
    begin
       Mode := M;
       Pending := False;
+      Pending_Count := 0;
       case M is
          when Draw_Point => Report ("Point mode: click to create a vertex.");
          when Draw_Edge  => Report ("Edge mode: click two points.");
+         when Draw_Loop  =>
+            Report ("Loop mode: click the figure points, close on the first.");
       end case;
       Refresh;
    end Set_Mode;

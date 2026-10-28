@@ -1,9 +1,9 @@
-# Drawing model (v0, increment 2) <!-- omit from toc -->
+# Drawing model (v0, increments 2 and 3) <!-- omit from toc -->
 
-> **Status:** implemented. The authority is DD-006: every geometric
-> decision comes from the proved kernel through the single TopoScript
-> front-end; the GUI owns only the view, the interaction, and the
-> session.
+> **Status:** implemented (increment 2: points and edges; increment 3:
+> loops and faces). The authority is DD-006: every geometric decision
+> comes from the proved kernel through the single TopoScript front-end;
+> the GUI owns only the view, the interaction, and the session.
 
 ## Session = replayable TopoScript
 
@@ -43,10 +43,49 @@ sessions are small, and the cost is a subprocess run per gesture.
 |---------|-----------|------------------|
 | Sketch > Point mode, click | quantize the click to the grid | `Create_Vertex (P, H)` + `Put_Vertex (H)` |
 | Sketch > Edge mode, click | quantize; if the point equals an existing vertex point exactly, reuse that vertex | `Create_Vertex (P, H)` when the point is new, then `Create_Edge (A, B, E)` on the second click, + `Put_Edge (E)` |
+| Sketch > Loop mode, clicks, closed on the first point | accumulate the clicked points GUI-side; the whole figure is submitted atomically on the closing click | `Create_Vertex` for the new points, `Create_Edge (A, B, E)` along the traversal, `Add_Point (P)` over the closed chain, then `Make_Loop_From_Edges (K)` + `Put_Loop (K)` |
+| Sketch > Face, one menu action | classify the accumulated chain of the accepted loop | `Make_Face (K)` + `Put_Face (K)` |
 
 An edge whose two ends resolve to the same vertex is submitted anyway:
 the kernel rejects it (degenerate edge), and the rejection is displayed
 verbatim. The GUI never pre-judges a kernel decision.
+
+## Loop and face construction (v0 increment 3)
+
+The loop gesture is atomic: the clicked points accumulate GUI-side only
+(rendered as outline markers), and the closing click — the point equal
+to the first clicked point, exact integer equality — submits the whole
+figure as one candidate replay: the new vertices, the edges along the
+traversal, the `Add_Point` chain closed on the first point, and
+`Make_Loop_From_Edges` over the created edges. Nothing reaches the
+kernel before the closure, and an abandoned figure leaves no session
+trace. A two-point closure and a same-point closure are submitted
+anyway: the kernel classifies them (degenerate chain, degenerate
+support), and the classification or diagnostic is displayed verbatim —
+including the single-point figure of two clicks on the same point,
+whose closing edge is degenerate.
+
+The loop is accepted only when the run exits 0 and the canonical trace
+is `loop closed counter_clockwise` or `loop closed clockwise`; any
+other classification (`loop closed degenerate`, ...), diagnostic, or
+non-zero status drops the candidate and displays what the kernel
+reported. The same acceptance rule governs the face: only
+`face counter_clockwise` or `face clockwise` extend the session.
+
+The face gesture is one menu action, not a drawing mode: it submits
+`Make_Face (K)` + `Put_Face (K)` over the chain the accepted loop
+appended to the replay script. The chain is session state — the
+`Add_Point` statements are part of the replay, like the vertex and
+edge statements — and the accepted face is recorded with its boundary
+handles, so the view fills the enclosed polygon.
+
+One figure per session: `Make_Loop_From_Edges` classifies every edge
+of the session in creation order, so a loop drawn over a session that
+already carries free edges is rejected by the kernel (disconnected
+chain), displayed verbatim; and a second loop or face after the first
+classifies the first figure's chain again. v0 keeps this discipline:
+the session is one figure — points, its edges, its loop, its face —
+and the session save-and-load increment keeps the same shape.
 
 **Snapping is exact integer equality** between the quantized click
 point and the kernel-reported points of the session — no tolerance, no
@@ -75,8 +114,9 @@ coordinates, one document at the canvas size — and hands it to the
 Adi2 `Image` widget, refreshed (`Set_Image` + `Mark_Dirty`) after every
 accepted gesture. Rasterization belongs to the toolkit; the view
 carries no geometry logic of its own. The grid (unit lines, axes) and
-the drawing ink are view concerns; the drawing accent enters the theme
-with this increment.
+the drawing ink are view concerns; the drawing accent entered the theme
+with increment 2, and the accepted face renders as the polygon filled
+with the same accent at low opacity, over the edges.
 
 ## Testing
 

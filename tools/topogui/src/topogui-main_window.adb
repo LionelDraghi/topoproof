@@ -86,6 +86,10 @@ package body Topogui.Main_Window is
          Topogui.Canvas.Set_Mode (Topogui.Canvas.Draw_Point);
       elsif Text = "Edge" then
          Topogui.Canvas.Set_Mode (Topogui.Canvas.Draw_Edge);
+      elsif Text = "Loop" then
+         Topogui.Canvas.Set_Mode (Topogui.Canvas.Draw_Loop);
+      elsif Text = "Face" then
+         Topogui.Canvas.Submit_Face;
       end if;
    end On_Sketch_Item;
 
@@ -157,11 +161,15 @@ package body Topogui.Main_Window is
       Adi.Widget.Context_Menu.Connect_Item_Selected
         (File_Menu, On_File_Item'Unrestricted_Access);
 
-      --  The drawing modes of v0 increment 2 (drawing-model.md).
+      --  The drawing modes of v0 increments 2 and 3 (drawing-model.md):
+      --  Point and Edge draw, Loop closes a figure, Face classifies
+      --  the accumulated chain.
       Sketch_Menu := Adi.Widget.Context_Menu.Create_Handle;
       Adi.Widget.Context_Menu.Attach_Window (Sketch_Menu, W);
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Point");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Edge");
+      Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Loop");
+      Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Face");
       Adi.Widget.Context_Menu.Connect_Item_Selected
         (Sketch_Menu, On_Sketch_Item'Unrestricted_Access);
 
