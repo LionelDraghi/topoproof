@@ -96,6 +96,8 @@ Introduce oriented segment sequences, continuity, closure, degenerate-edge rejec
 
 ## Milestone 5 - First Topological Structure
 
+> **Status: delivered in 0.1.2.**
+
 ### Goal
 
 Introduce the first topological entities and establish the separation between geometry and topology. Geometry defines positions; topology defines incidence and connectivity.
@@ -153,6 +155,9 @@ Introduce the first topological entities and establish the separation between ge
 
 
 ## Milestone 6 - TopoScript Embedded Scripting
+
+> **Status: delivered in 0.1.3; the consolidation and the single
+> front-end pivot in 0.1.4.**
 
 ### Goal
 
@@ -539,6 +544,8 @@ surface.
 
 ## Milestone 7 - Transition to 3D
 
+> **Status: delivered in 0.1.5-dev.**
+
 ### Goal
 
 Extend the geometric foundation from 2D to 3D while preserving the discrete, exact, and provable model.
@@ -595,6 +602,9 @@ Extend the geometric foundation from 2D to 3D while preserving the discrete, exa
 
 
 ## Milestone 8 - Minimal B-Rep
+
+> **Status: delivered in 0.1.5-dev (DD-005, increments a to c; the
+> optional adjacency structures are not part of the minimal milestone).**
 
 ### Goal
 

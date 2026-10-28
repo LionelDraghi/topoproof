@@ -432,7 +432,7 @@ no script equivalent, so the command line cannot be retired today.
 
 ## DD-005: the minimal B-Rep in three dimensions
 
-- **Status:** proposed (2026-10-25)
+- **Status:** decided (2026-10-28)
 - **Related milestone:** 8, minimal B-Rep
 - **Scope:** `Shell`, `Solid`, the 3D support of planar faces, and the
   half-edge question DD-002 deferred to milestone 8
