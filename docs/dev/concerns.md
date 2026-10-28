@@ -1,22 +1,18 @@
-# TopoProof task and decision list <!-- omit from toc -->
+# Concerns
 
-This file records unfinished work that must remain visible in the repository.
-Entries use one of the following categories:
+This is a lightweight index, not a duplicate issue tracker. Each row
+supplies priority, a short label, kind, authoritative link, and status;
+the details remain in the authoritative source.
 
-- **FIXME**: known defect or incomplete behaviour that can invalidate a claim.
-- **IMPROVE**: worthwhile improvement that does not invalidate current behaviour.
-- **DESIGN**: architectural work requiring an explicit design decision.
-- **PROOF**: missing, incomplete, or insufficiently auditable proof work.
-- **DOC**: missing or inconsistent executable or design documentation.
-- **TOOLING**: build, packaging, CI, or developer-experience work.
+| Priority | Concern | Kind | Source | Status |
+|---|---|---|---|---|
+| P2 | Arbitrate the remaining TopoScript API questions | Design | `TDL-DESIGN-004`, below | Open |
+| P3 | Load the wrapper prelude from an external source file | Debt | `TDL-IMPROVE-007`, below | Open |
+| P3 | Describe the scripting API once | Debt | `TDL-IMPROVE-008`, below | Open |
+| P3 | Give the drawing output semantic identifiers | Debt | `TDL-IMPROVE-010`, below | Open |
+| P3 | Tame the hard proof points of `Collinear_Membership` | Proof | `TDL-PROOF-002`, below | Open |
 
-Each entry has a stable identifier, a status, and an acceptance criterion. Completed
-entries are removed from this file and recorded in `docs/changelog.md` or the relevant
-design decision.
-
-## Open
-
-### TDL-DESIGN-004: arbitrate the remaining TopoScript API questions
+## TDL-DESIGN-004: arbitrate the remaining TopoScript API questions
 
 - **Category:** DESIGN
 - **Status:** open, low priority (2026-10-24)
@@ -26,8 +22,6 @@ design decision.
   single front-end waves; the subset question was decided on 2026-10-24
   (DD-003 amendment): the wrapper is a non-rejecting boilerplate generator
   and the subset is everything HAC handles, tracked by `TDL-IMPROVE-009`.
-  The follow-up questions (API versioning, restricted capabilities before
-  untrusted extensions) stay listed in `DD-003`.
 - **Priority rationale:** TopoProof is in alpha development. The only
   TopoScripts are the test-suite scenarios, there are no scripts in the
   wild and no external users; any scripting-API evolution changes the test
@@ -38,7 +32,7 @@ design decision.
 - **Acceptance:** each question of `DD-003` is either decided and recorded,
   or explicitly rejected with its reason.
 
-### TDL-IMPROVE-007: load the wrapper prelude from an external source file
+## TDL-IMPROVE-007: load the wrapper prelude from an external source file
 
 - **Category:** IMPROVE
 - **Status:** open, later
@@ -54,7 +48,7 @@ design decision.
   loaded content, a test compiles the loaded prelude through HAC, and
   the build tracks the file as an input.
 
-### TDL-IMPROVE-008: describe the scripting API once
+## TDL-IMPROVE-008: describe the scripting API once
 
 - **Category:** IMPROVE
 - **Status:** open, later
@@ -66,7 +60,7 @@ design decision.
   derive from one internal description, and the documented scripting
   API is verified against it.
 
-### TDL-IMPROVE-010: give the drawing output semantic identifiers
+## TDL-IMPROVE-010: give the drawing output semantic identifiers
 
 - **Category:** IMPROVE
 - **Status:** open, later
@@ -79,7 +73,7 @@ design decision.
   objects, and the drawing scenarios check the intended object rather
   than a colour.
 
-### TDL-PROOF-002: tame the hard proof points of Collinear_Membership
+## TDL-PROOF-002: tame the hard proof points of Collinear_Membership
 
 - **Category:** PROOF
 - **Status:** open, later
@@ -100,9 +94,10 @@ design decision.
   quotient-betweenness reasoning is factored in named lemmas with their
   own proved contracts.
 
-## Completed
+## Completed or decided
 
-The former entries were completed or decided:
+The former entries are completed or decided; they are recorded in the
+changelog and in the design decisions (`docs/dev/design_discussions.md`).
 
 - TDL-DESIGN-001 (validity of segment sequences): decided as DD-001, see
   `docs/dev/design_discussions.md`;

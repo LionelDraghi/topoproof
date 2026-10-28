@@ -2,7 +2,10 @@
 
 TopoProof is a provable 3D CAD kernel based on discrete geometry, exact integer arithmetic, and formal proofs in Ada/SPARK.
 
-The shared rules for Lionel's Ada projects live in the [reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.template.md) and apply here in full: non-negotiable git rules, procedure choice, task triage, reference policy, skills, and the definition of done. This file keeps only what is specific to TopoProof. The owner reviews files in the source control tool; a file validated there is approved.
+**Before any other action, read the shared template referenced below
+and follow it.**
+
+The shared rules for Lionel's Ada projects live in the [reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.md) and apply here in full: non-negotiable git rules (in brief: no `git add`, commit, push, tag, release or Alire publish without the owner's explicit, post-review consent), procedure choice, reference policy, skills, Ada tooling (Serena MCP first). This file keeps only what is specific to TopoProof. The owner reviews files in the source control tool; a file validated there is approved.
 
 ## Mandatory rules
 
@@ -40,7 +43,7 @@ Do not add a public operation without a contract. Keep each change within the cu
 
 ## Build pointers
 
-The shared build pointers apply ([reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.template.md)); `make help` is the documentation of record. TopoProof specifics:
+The shared build pointers apply ([reference repository on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.md)); `make help` is the documentation of record. TopoProof specifics:
 
 - `make test`: build, then run the Markdown documentation in `docs/features` through bbt, then validate every generated diagram as XML; the results log and badge evidence go to `artifacts/`.
 - `make prove`: run GNATprove on every kernel unit (`-U`, level 2) and validate the proof evidence; `make prove+` escalates to level 4 with counterexamples.
@@ -54,7 +57,7 @@ The shared build pointers apply ([reference repository on GitHub](https://github
 Read a document only when the task requires it; do not open them all up front.
 
 - To plan any change, place work in a milestone, or check what comes next: `docs/dev/development-plan.md`
-- To choose the next task or find already-tracked work: `docs/TDL.md`
+- To choose the next task or find already-tracked work: `docs/dev/concerns.md` and `docs/roadmap.md`
 - To follow the development workflow: `docs/dev/development_workflow.md`
 - To prepare or run a release: the [common release procedure on GitHub](https://github.com/LionelDraghi/ada-project-template/blob/main/release_procedure.md), with the TopoProof parameters and additions in `docs/dev/release_procedure.md`
 - To write, convert or debug bbt scenarios: the bbt skill, installed from GitHub (`npx skills add LionelDraghi/bbt --skill bbt-skill`)
