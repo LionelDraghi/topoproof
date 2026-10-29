@@ -62,6 +62,11 @@ package body Topogui.Canvas is
    Prev_Left_Down : Boolean := False;
    Last_W, Last_H : Integer := 0;
 
+   --  The drawing size the last Refresh set: the one-shot correction
+   --  signal of the Tick, not a per-frame one (the SVG re-render is
+   --  too heavy to repeat every frame).
+   Set_W, Set_H   : Integer := 0;
+
    procedure Report (Text : String) is
    begin
       if The_Status /= null then
@@ -248,6 +253,9 @@ package body Topogui.Canvas is
       then
          return;  --  Not laid out yet: nothing to draw into.
       end if;
+
+      Set_W := W_Px - 2;
+      Set_H := H_Px - 2;
 
       Adi.Image.Release (Drawing_Owner);
       Drawing_Owner :=
@@ -479,6 +487,17 @@ package body Topogui.Canvas is
          Last_W := Integer (Geo.Width);
          Last_H := Integer (Geo.Height);
          Refresh;
+      else
+         --  The box is stable but the drawing may lag one transient
+         --  layout behind: the oversized image of a growing frame is
+         --  clipped (Overflow_Hidden), so the box no longer follows
+         --  it. The size the last Refresh set is the truth; one
+         --  Refresh corrects the stale one, and the sizes then agree.
+         if Set_W /= Integer (Geo.Width) - 2
+           or else Set_H /= Integer (Geo.Height) - 2
+         then
+            Refresh;
+         end if;
       end if;
 
       if Left_Down and then not Prev_Left_Down

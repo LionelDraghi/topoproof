@@ -9,6 +9,24 @@ TopoGUI lives in `tools/topogui` and has the vocation to split from the
 TopoProof repository as its own project. Everything TopoGUI needs to
 work independently (documentation, tests, project rules) lives here.
 
+## Shared instructions
+
+The shared rules of Lionel's Ada projects apply in full:
+[ada-project-template/AGENTS.md](https://github.com/LionelDraghi/ada-project-template/blob/main/AGENTS.md).
+**Read them immediately, before any other reading or any action.** The
+TopoProof `AGENTS.md` at the repository root carries the project-level
+rules and applies here too; this file keeps only what is specific to
+TopoGUI.
+
+The development lifecycle is the shared one — Explore, Propose,
+Implement, Refactor, Finalize, Release — detailed in
+[lifecycle.md](https://github.com/LionelDraghi/ada-project-template/blob/main/lifecycle.md)
+and specialized for TopoGUI in
+[development_workflow.md](docs/dev/development_workflow.md). One skill
+per phase: `explore`, `propose`, `implement`, `refactor`, `finalize`,
+`release`; `next-task` when the next work is unclear. Read the current
+`SKILL.md` of a skill before using it, never a remembered copy.
+
 ## Mandatory rules
 
 - The shared TopoProof rules (`AGENTS.md` at the repository root) apply
@@ -24,35 +42,48 @@ work independently (documentation, tests, project rules) lives here.
 - Every kernel rejection surfaced by the GUI is displayed verbatim:
   no reinterpreted, softened, or approximate diagnostic.
 
-## Testing policy
+## Project identity
 
-- Headless testing uses HAC and TopoScript as far as possible: the
-  logic that drives the kernel is tested through `topocli run`, like
-  the TopoProof executable documentation.
-- The GUI itself has no "run the doc" harness. The project delivers
-  the executable; the owner tests it manually.
-- The MCP interface eases automated GUI testing; use it before
-  resorting to manual checks.
-- No visual regression infrastructure is built until a real need is
-  demonstrated.
+- Name: TopoGUI
+- Purpose: the user-facing graphical client of the proved TopoProof
+  kernel, driven through the single TopoScript front-end
+- Primary language: Ada, on the Adi2 toolkit
 
-## Toolkit
+## Enabled capabilities
 
-- Adi2 first. This choice is not definitive; the view-model code keeps
-  the toolkit dependency contained so it can be revisited.
+| Capability | Enabled | Project parameter, if any |
+|---|---:|---|
+| bbt executable specifications | no | no CLI surface of its own; the kernel-facing logic is headless-tested through `topocli run` |
+| Unit tests | no | the GUI deliverable is the executable; the owner tests it manually |
+| SPARK analysis | no | nothing here enters the kernel |
+| Formal proof | no | the kernel carries the proofs |
+| Static analysis / metrics | no | warnings are errors on every build |
+| Alire release | no | local crate, never published; dev versions `x.y.z-dev` |
+| Platform packages | no | Linux first |
 
-## Development discipline
+## Project commands
 
-```text
-Inspect -> specify -> implement -> test (headless first) -> document
-```
+- Build (development profile, the MCP introspection module live):
+  `alr exec -- gprbuild -s -j0 -XADI_BUILD_PROFILE=development
+  -XADI_PLATFORM=linux -XTopogui_Build_Profile=development -P topogui.gpr`
+- Build (default profile): `alr build`
+- Run: `./topogui`
+- Inspection and driving of the running application: the MCP channel
+  `/tmp/adi_mcp/<pid>/` with the adi2 crate's
+  `tools/adi_mcp_server.py` (`widget_tree`, `screenshot`,
+  `click_widget`, `css_values`, ...); see `README.md`.
 
-- The proof step of the kernel discipline does not apply inside
-  TopoGUI: nothing here is proved, everything here is tested.
-- The development plan of TopoGUI is `docs/dev/development-plan.md` in
-  this directory. It tracks user-facing versions (v0, v1), not kernel
-  milestones.
-- Product scope is set by DD-006: v0 is 2D drawing; v1 is extrusion
-  plus the direct creation of a rectangular parallelepiped and a
-  cylinder; v2 (candidate, not committed) may attack the fusion of
-  arbitrary volumes.
+## Project-specific paths
+
+- Development plan (product scope, v0, v1): `docs/dev/development-plan.md`
+- Drawing model (session, gestures, kernel arbitration): `docs/dev/drawing-model.md`
+- Design tokens (the visual direction): `src/topogui-theme.ads`
+
+## Exceptions
+
+- The kernel discipline step "prove" does not apply: nothing here is
+  proved, everything here is tested. The full reasoning and the testing
+  policy are in `docs/dev/development_workflow.md`.
+- No bbt harness and no `docs/features/` pages: the GUI deliverable is
+  the executable, tested headlessly through TopoScript and manually by
+  the owner.

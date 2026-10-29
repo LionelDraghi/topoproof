@@ -102,12 +102,34 @@ package body Topogui.Main_Window is
         Adi.Widget.Button.Create_Handle (Text);
    begin
       Set_Part_Style (Widget_Handle'(+Btn), Main_Part,
-                      Style.Base (Button_Base).On_Press (Button_Pressed).Build);
+                      Style.Base (Button_Base)
+                        .On_Hover (Button_Hover)
+                        .On_Press (Button_Pressed).Build);
       Set_Part_Style (Widget_Handle'(+Btn), Label_Part,
                       Style.Base (Button_Label).Build);
       Adi.Widget.Button.Connect_Clicked (Btn, On_Click);
       Add_Child (Parent, Widget_Handle'(+Btn));
    end Make_Menu_Button;
+
+   --  The context menus are white cards with shaded item rows (the
+   --  theme owns the look): the popup box takes Menu_Style, the item
+   --  rows Menu_Item_Style with their hover shade.
+
+   procedure Style_Menu
+     (Menu : Adi.Widget.Context_Menu.Menu_Handle)
+   is
+      Box : constant Adi.Widget_Styles.Widget_Style :=
+        Style.Base (Menu_Style).Build;
+      Row : constant Adi.Widget_Styles.Widget_Style :=
+        Style.Base (Menu_Item_Style).On_Hover (Menu_Item_Hover).Build;
+   begin
+      Adi.Widget.Context_Menu.Set_Menu_Part_Styles
+        (Menu, [Adi.Widget.Main_Part => (Style => Box, others => <>),
+                others               => <>]);
+      Adi.Widget.Context_Menu.Set_Item_Part_Styles
+        (Menu, [Adi.Widget.Main_Part => (Style => Row, others => <>),
+                others               => <>]);
+   end Style_Menu;
 
    function Build return Window_Handle is
       W : constant Window_Handle :=
@@ -154,6 +176,7 @@ package body Topogui.Main_Window is
 
       File_Menu := Adi.Widget.Context_Menu.Create_Handle;
       Adi.Widget.Context_Menu.Attach_Window (File_Menu, W);
+      Style_Menu (File_Menu);
       Adi.Widget.Context_Menu.Add_Item (File_Menu, "New");
       Adi.Widget.Context_Menu.Add_Item (File_Menu, "Open ...");
       Adi.Widget.Context_Menu.Add_Item (File_Menu, "Save");
@@ -166,6 +189,7 @@ package body Topogui.Main_Window is
       --  the accumulated chain.
       Sketch_Menu := Adi.Widget.Context_Menu.Create_Handle;
       Adi.Widget.Context_Menu.Attach_Window (Sketch_Menu, W);
+      Style_Menu (Sketch_Menu);
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Point");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Edge");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Loop");

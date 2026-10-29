@@ -91,19 +91,29 @@ perspectives are never implemented first).
 
 ## Visual direction
 
-A slate sketchbook (2026-10-25: neumorphic soft-extruded look trialled
-and adopted; see the git history for the darker drafting-table look it
-replaced). One soft surface colour everywhere - window, menu bar,
-status line, buttons and canvas share it - and the relief comes from a
-soft dark shadow towards the bottom right, completed by a light top and
-left border edge. The pressed state inverts the edges and drops the
-shadow: the widget reads as pressed in. The canvas is the hero: the
-same surface, a large quiet inset, where the drawing will appear. The
-status line is where kernel rejections are displayed verbatim. The
-tokens live in `src/topogui-theme.ads` (`Surface`, `Shadow_Dark`,
-`Edge_Light`, ...); a drawing accent for selected or constructed
-geometry is deliberately not chosen until the drawing increment needs
-one.
+The light, flat, Material-like direction (2026-10-29, owner's decision):
+white panels and canvas on a near-white ground, hairline dividers where
+the panels meet, one blue accent, and the relief reduced to the soft
+shadow a raised card deserves. No extrusion, no pressed-depth inversion:
+the pressed state is a shade, the way Material buttons read; the context
+menus are white cards with shaded item rows. The reference is the
+PaliCAD clarity: a minimal, uncluttered CAD front-end.
+
+The rule sets live in `src/topogui-theme-material.ads`; the views
+consume them through the `Topogui.Theme` contract (a parameterless
+accessor per role), so switching direction is a body change: the
+soft-extruded slate sketchbook of 2026-10-25 is archived as built in
+`src/topogui-theme-neumorphic.ads` and can be rebound from
+`topogui-theme.adb` (it predates the Menu_* rule sets; supply them when
+switching back). A drawing accent for selected geometry is deliberately
+not chosen until the selection increment needs one.
+
+Layout findings (2026-10-29, the layout that hid the first direction
+change): a flex item whose child carries an explicit size grows to it
+unless the item clips — the canvas box carries `Overflow_Hidden`
+(Overflow_X/Overflow_Y), which zeroes the CSS automatic minimum size and
+breaks the image-size feedback loop that inflated the canvas to
+millions of pixels and buried the menus.
 
 ## Testing
 
