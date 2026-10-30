@@ -1,4 +1,4 @@
-# Concerns
+# Concerns <!-- omit from toc -->
 
 This is a lightweight index, not a duplicate issue tracker. Each row
 supplies priority, a short label, kind, authoritative link, and status;
@@ -11,6 +11,15 @@ the details remain in the authoritative source.
 | P3 | Describe the scripting API once | Debt | `TDL-IMPROVE-008`, below | Open |
 | P3 | Give the drawing output semantic identifiers | Debt | `TDL-IMPROVE-010`, below | Open |
 | P3 | Tame the hard proof points of `Collinear_Membership` | Proof | `TDL-PROOF-002`, below | Open |
+
+## Contents <!-- omit from toc -->
+
+- [TDL-DESIGN-004: arbitrate the remaining TopoScript API questions](#tdl-design-004-arbitrate-the-remaining-toposcript-api-questions)
+- [TDL-IMPROVE-007: load the wrapper prelude from an external source file](#tdl-improve-007-load-the-wrapper-prelude-from-an-external-source-file)
+- [TDL-IMPROVE-008: describe the scripting API once](#tdl-improve-008-describe-the-scripting-api-once)
+- [TDL-IMPROVE-010: give the drawing output semantic identifiers](#tdl-improve-010-give-the-drawing-output-semantic-identifiers)
+- [TDL-PROOF-002: tame the hard proof points of Collinear_Membership](#tdl-proof-002-tame-the-hard-proof-points-of-collinear_membership)
+- [Completed or decided](#completed-or-decided)
 
 ## TDL-DESIGN-004: arbitrate the remaining TopoScript API questions
 

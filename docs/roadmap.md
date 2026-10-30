@@ -1,10 +1,17 @@
-# Roadmap
+# Roadmap <!-- omit from toc -->
 
 This file is an index of intentional future development. The detailed
 sources stay authoritative: the milestone details live in
 [`dev/development-plan.md`](dev/development-plan.md), the tracked tasks
 in [`dev/concerns.md`](dev/concerns.md), and the open research
 directions in [`perspectives.md`](perspectives.md).
+
+## Contents <!-- omit from toc -->
+
+- [Next milestones](#next-milestones)
+- [Delivered milestones](#delivered-milestones)
+- [Research perspectives](#research-perspectives)
+- [Tracked tasks](#tracked-tasks)
 
 ## Next milestones
 

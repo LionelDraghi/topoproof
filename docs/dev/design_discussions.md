@@ -35,6 +35,41 @@ This document records design topics. A discussion is not a normative rule
 until its status becomes **decided** and the decision is reflected in the
 terminology, contracts, executable documentation, and implementation.
 
+## Contents <!-- omit from toc -->
+
+- [DD-001: validity of segment sequences and future B-Rep boundaries](#dd-001-validity-of-segment-sequences-and-future-b-rep-boundaries)
+  - [Former situation](#former-situation)
+  - [Decision](#decision)
+  - [Rationale](#rationale)
+  - [Remaining questions, deferred to milestone 5](#remaining-questions-deferred-to-milestone-5)
+- [DD-002: geometry and topology separation, and the vertex store](#dd-002-geometry-and-topology-separation-and-the-vertex-store)
+  - [Problem](#problem)
+  - [Proposed decisions](#proposed-decisions)
+  - [Vertical increments](#vertical-increments)
+  - [Open questions](#open-questions)
+- [DD-003: TopoScript source form and bbt integration](#dd-003-toposcript-source-form-and-bbt-integration)
+  - [Current situation](#current-situation)
+  - [Decision: the wrapper is a non-rejecting boilerplate generator (2026-10-24)](#decision-the-wrapper-is-a-non-rejecting-boilerplate-generator-2026-10-24)
+  - [Security and API exposure](#security-and-api-exposure)
+  - [Questions to arbitrate](#questions-to-arbitrate)
+- [DD-004: TopoScript as the single front-end, and the phased retirement of the command line](#dd-004-toposcript-as-the-single-front-end-and-the-phased-retirement-of-the-command-line)
+  - [Current situation](#current-situation)
+  - [Proposed decisions](#proposed-decisions)
+  - [Consequences](#consequences)
+  - [Difficulties and mitigations](#difficulties-and-mitigations)
+  - [Open questions](#open-questions)
+- [DD-005: the minimal B-Rep in three dimensions](#dd-005-the-minimal-b-rep-in-three-dimensions)
+  - [Problem](#problem)
+  - [Proposed decisions](#proposed-decisions)
+  - [Vertical increments](#vertical-increments)
+  - [Open questions](#open-questions)
+  - [References](#references)
+- [DD-006: TopoGUI, the user-need-driven front-end](#dd-006-topogui-the-user-need-driven-front-end)
+  - [Current situation](#current-situation)
+  - [Decisions](#decisions)
+  - [Open questions](#open-questions)
+  - [Toolkit notes](#toolkit-notes)
+
 ## DD-001: validity of segment sequences and future B-Rep boundaries
 
 - **Status:** decided (2026-10-20)
