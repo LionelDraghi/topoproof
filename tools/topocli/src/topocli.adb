@@ -14,11 +14,17 @@ with TopoScript_API;
 with TopoScript_API.Output;
 with TopoScript_API.Session;
 with TopoScript_Diagnostics;
+with TopoScript_Geometry_Native;
 with TopoScript_Wrapper;
 
 procedure TopoCLI is
    Usage_Error : exception;
    Output_Path : Unbounded_String;
+
+   --  The M7 parallel test: run the geometry domain through the
+   --  hac-bindgen generated binding instead of the hand-written one
+   --  (--generated on run and run_code).
+   Generated : Boolean := False;
 
    --  The argument index after the --output pair headed at J, or 0
    --  when J is not the head of a pair: the flag and its file travel
@@ -54,6 +60,9 @@ procedure TopoCLI is
             BD : HAC_Sys.Builder.Build_Data;
          begin
             TopoScript_API.Register_All (BD);
+            if TopoScript_Wrapper.Generated_Binding then
+               TopoScript_Geometry_Native.Register_All (BD);
+            end if;
             TopoScript_Diagnostics.Set_Mapping
                (Path, Wrapped.Declaration_Skip, Wrapped.Begin_Line, Wrapped.Statement_Adjust);
             HAC_Sys.Builder.Set_Message_Feedbacks
@@ -157,12 +166,17 @@ begin
                   Output_Path := To_Unbounded_String (Argument (J + 1));
                   J := J + 2;
 
+               elsif Argument (J) = "--generated" then
+                  Generated := True;
+                  J := J + 1;
+
                else
                   raise Usage_Error;
 
                end if;
             end loop;
          end;
+         TopoScript_Wrapper.Set_Generated_Binding (Generated);
          Run_Script (Argument (2));
 
       else
@@ -181,6 +195,10 @@ begin
                   Output_Path := To_Unbounded_String (Argument (J + 1));
                   J := J + 2;
 
+               elsif Argument (J) = "--generated" then
+                  Generated := True;
+                  J := J + 1;
+
                else
                   if Length (Fragment) > 0 then
                      Append (Fragment, " ");
@@ -194,6 +212,7 @@ begin
                raise Usage_Error;
 
             end if;
+            TopoScript_Wrapper.Set_Generated_Binding (Generated);
             Run_Inline (To_String (Fragment));
          end;
       end if;
@@ -201,13 +220,15 @@ begin
    end if;
 
    if Argument_Count = 1 and then (Argument (1) = "--help" or else Argument (1) = "-h") then
-      Put_Line ("usage: topocli run FILE.topo [--output FILE]");
-      Put_Line ("       topocli run_code FRAGMENT [--output FILE]");
+      Put_Line ("usage: topocli run FILE.topo [--output FILE] [--generated]");
+      Put_Line ("       topocli run_code FRAGMENT [--output FILE] [--generated]");
       Put_Line ("run executes a TopoScript source file;");
       Put_Line ("run_code executes an inline fragment, split into");
       Put_Line ("lines at every semicolon;");
       Put_Line ("--output receives every canonical result line of the");
       Put_Line ("run, in order");
+      Put_Line ("--generated runs the geometry domain through the");
+      Put_Line ("hac-bindgen generated binding (M7 parallel test)");
       return;
    end if;
 

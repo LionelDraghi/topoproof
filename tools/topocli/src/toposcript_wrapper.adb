@@ -231,6 +231,19 @@ package body TopoScript_Wrapper is
         or else Has_Object_Declaration_Form (Line);
    end Is_Declaration;
 
+   --  The binding mode of the geometry domain (M7 parallel test):
+   --  the hand-written declarations and callbacks by default, or the
+   --  hac-bindgen generated binding.
+   Generated : Boolean := False;
+
+   procedure Set_Generated_Binding (To : Boolean) is
+   begin
+      Generated := To;
+   end Set_Generated_Binding;
+
+   function Generated_Binding return Boolean is
+      (Generated);
+
    procedure Generate
      (Fragment :     String;
       Result   : out Wrapped_Source)
@@ -351,6 +364,14 @@ package body TopoScript_Wrapper is
       --  declarations must follow the injected types and operations.
       Append_Line ("with HAT;");
       Append_Line ("use HAT;");
+      if Generated then
+         --  The generated HAC-side package of the geometry domain
+         --  (hac-bindgen, M7 parallel test): the geometry declarations
+         --  come from the generated unit, the wrapper only makes it
+         --  visible.
+         Append_Line ("with HAC_TopoScript_Geometry;");
+         Append_Line ("use HAC_TopoScript_Geometry;");
+      end if;
       Append_Line ("");
       Append_Line ("procedure TopoScript_Run is");
       Append_Line ("");
@@ -360,45 +381,61 @@ package body TopoScript_Wrapper is
       Append_Line ("   --  parameter; the native callbacks are registered");
       Append_Line ("   --  by the tool.");
       Append_Line ("");
-      Append_Line ("   type Point_3D is record");
-      Append_Line ("      X, Y, Z : Integer;");
-      Append_Line ("   end record;");
+      if not Generated then
+         Append_Line ("   type Point_3D is record");
+         Append_Line ("      X, Y, Z : Integer;");
+         Append_Line ("   end record;");
+      end if;
       Append_Line ("");
-      Append_Line ("   type Vector_3D is record");
-      Append_Line ("      DX, DY, DZ : Integer;");
-      Append_Line ("   end record;");
+      if not Generated then
+         Append_Line ("   type Vector_3D is record");
+         Append_Line ("      DX, DY, DZ : Integer;");
+         Append_Line ("   end record;");
+      end if;
       Append_Line ("");
-      Append_Line ("   type Point_2D is record");
-      Append_Line ("      X, Y : Integer;");
-      Append_Line ("   end record;");
+      if not Generated then
+         Append_Line ("   type Point_2D is record");
+         Append_Line ("      X, Y : Integer;");
+         Append_Line ("   end record;");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Translate");
-      Append_Line
-        ("      (P : in Point_3D; V : in Vector_3D; Result : out Point_3D)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Translate");
+         Append_Line
+           ("      (P : in Point_3D; V : in Vector_3D; Result : out Point_3D)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put (P : in Point_3D)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   type Equal_Kind is (Equal_True, Equal_False);");
+      if not Generated then
+         Append_Line ("   type Equal_Kind is (Equal_True, Equal_False);");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Displacement");
-      Append_Line
-        ("      (A : in Point_3D; B : in Point_3D; " &
-         "Result : out Vector_3D)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Displacement");
+         Append_Line
+           ("      (A : in Point_3D; B : in Point_3D; " &
+            "Result : out Vector_3D)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Dot_Product");
-      Append_Line
-        ("      (A : in Vector_3D; B : in Vector_3D; " &
-         "Result : out Integer)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Dot_Product");
+         Append_Line
+           ("      (A : in Vector_3D; B : in Vector_3D; " &
+            "Result : out Integer)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Cross_Product");
-      Append_Line
-        ("      (A : in Vector_3D; B : in Vector_3D; " &
-         "Result : out Vector_3D)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Cross_Product");
+         Append_Line
+           ("      (A : in Vector_3D; B : in Vector_3D; " &
+            "Result : out Vector_3D)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Dot (D : in Integer)");
       Append_Line ("      with Import => True;");
@@ -406,11 +443,13 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Cross_Vector (V : in Vector_3D)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   procedure Equal");
-      Append_Line
-        ("      (A : in Point_3D; B : in Point_3D; " &
-         "Result : out Equal_Kind)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Equal");
+         Append_Line
+           ("      (A : in Point_3D; B : in Point_3D; " &
+            "Result : out Equal_Kind)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Vector (D : in Vector_3D)");
       Append_Line ("      with Import => True;");
@@ -418,50 +457,64 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Equal (K : in Equal_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   type Orientation_Kind is");
-      Append_Line ("      (Orientation_Collinear, " &
-                   "Orientation_Counter_Clockwise, Orientation_Clockwise);");
+      if not Generated then
+         Append_Line ("   type Orientation_Kind is");
+         Append_Line ("      (Orientation_Collinear, " &
+                      "Orientation_Counter_Clockwise, Orientation_Clockwise);");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Orientation");
-      Append_Line
-        ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
-         "Result : out Orientation_Kind)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Orientation");
+         Append_Line
+           ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
+            "Result : out Orientation_Kind)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Orientation (K : in Orientation_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   type Orientation_3D_Kind is");
-      Append_Line
-        ("      (Orientation_Coplanar, " &
-         "Orientation_Right_Handed, Orientation_Left_Handed);");
+      if not Generated then
+         Append_Line ("   type Orientation_3D_Kind is");
+         Append_Line
+           ("      (Orientation_Coplanar, " &
+            "Orientation_Right_Handed, Orientation_Left_Handed);");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Orientation_3D");
-      Append_Line
-        ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
-         "D : in Point_3D; Result : out Orientation_3D_Kind)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Orientation_3D");
+         Append_Line
+           ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
+            "D : in Point_3D; Result : out Orientation_3D_Kind)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Orientation_3D (K : in Orientation_3D_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   type Plane_Kind is");
-      Append_Line ("      (Plane_Valid, Plane_Collinear);");
+      if not Generated then
+         Append_Line ("   type Plane_Kind is");
+         Append_Line ("      (Plane_Valid, Plane_Collinear);");
+         Append_Line ("");
+         Append_Line ("   type Plane_Side_Kind is");
+         Append_Line ("      (Side_In_Front, Side_Behind, Side_On_Plane);");
+      end if;
       Append_Line ("");
-      Append_Line ("   type Plane_Side_Kind is");
-      Append_Line ("      (Side_In_Front, Side_Behind, Side_On_Plane);");
+      if not Generated then
+         Append_Line ("   procedure Make_Plane");
+         Append_Line
+           ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
+            "Result : out Plane_Kind)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
-      Append_Line ("   procedure Make_Plane");
-      Append_Line
-        ("      (A : in Point_3D; B : in Point_3D; C : in Point_3D; " &
-         "Result : out Plane_Kind)");
-      Append_Line ("      with Import => True;");
-      Append_Line ("");
-      Append_Line ("   procedure Plane_Side");
-      Append_Line
-        ("      (P : in Point_3D; A : in Point_3D; B : in Point_3D; " &
-         "C : in Point_3D; Result : out Plane_Side_Kind)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Plane_Side");
+         Append_Line
+           ("      (P : in Point_3D; A : in Point_3D; B : in Point_3D; " &
+            "C : in Point_3D; Result : out Plane_Side_Kind)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Plane_Side (K : in Plane_Side_Kind)");
       Append_Line ("      with Import => True;");
@@ -469,20 +522,24 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Plane_Kind (K : in Plane_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
-      Append_Line ("   type Intersection_Kind is");
-      Append_Line ("      (No_Intersection, Point_Intersection,");
-      Append_Line ("       Off_Grid_Crossing, Overlap);");
+      if not Generated then
+         Append_Line ("   type Intersection_Kind is");
+         Append_Line ("      (No_Intersection, Point_Intersection,");
+         Append_Line ("       Off_Grid_Crossing, Overlap);");
+         Append_Line ("");
+         Append_Line ("   type Intersection_Result is record");
+         Append_Line ("      K : Intersection_Kind;");
+         Append_Line ("      PX, PY, QX, QY : Integer;");
+         Append_Line ("   end record;");
+      end if;
       Append_Line ("");
-      Append_Line ("   type Intersection_Result is record");
-      Append_Line ("      K : Intersection_Kind;");
-      Append_Line ("      PX, PY, QX, QY : Integer;");
-      Append_Line ("   end record;");
-      Append_Line ("");
-      Append_Line ("   procedure Intersection");
-      Append_Line
-        ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
-         "D : in Point_2D; Result : out Intersection_Result)");
-      Append_Line ("      with Import => True;");
+      if not Generated then
+         Append_Line ("   procedure Intersection");
+         Append_Line
+           ("      (A : in Point_2D; B : in Point_2D; C : in Point_2D; " &
+            "D : in Point_2D; Result : out Intersection_Result)");
+         Append_Line ("      with Import => True;");
+      end if;
       Append_Line ("");
       Append_Line ("   procedure Put_Intersection " &
                    "(R : in Intersection_Result)");
@@ -744,6 +801,7 @@ package body TopoScript_Wrapper is
          Begin_Line       => Begin_Line,
          Statement_Adjust => Begin_Line + 1 - First_Statement);
    end Generate;
+
 
    --  The in-memory source stream and its buffer live at library
    --  level: HAC holds an access to the stream for the whole build, and

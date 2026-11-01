@@ -31,13 +31,15 @@ the runner contract itself.
 - When I successfully run `../bin/topocli --help`
 - Then the output is
   ```text
-  usage: topocli run FILE.topo [--output FILE]
-         topocli run_code FRAGMENT [--output FILE]
+  usage: topocli run FILE.topo [--output FILE] [--generated]
+         topocli run_code FRAGMENT [--output FILE] [--generated]
   run executes a TopoScript source file;
   run_code executes an inline fragment, split into
   lines at every semicolon;
   --output receives every canonical result line of the
   run, in order
+  --generated runs the geometry domain through the
+  hac-bindgen generated binding (M7 parallel test)
   ```
 
 ## Scenario: a command-line operation is rejected

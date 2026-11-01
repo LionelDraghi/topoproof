@@ -70,6 +70,15 @@ package TopoScript_Wrapper is
    --  fragment path is not Generate's concern: the diagnostics pipe
    --  takes it through Set_Mapping.
 
+   --  The binding mode of the geometry domain (M7 parallel test):
+   --  by default, the hand-written declarations and callbacks; with
+   --  the generated binding on, the wrapper injects the with and use
+   --  of the hac-bindgen generated HAC-side package instead of the
+   --  geometry declarations, and the caller registers the generated
+   --  adapter next to the manual one. The other domains are unchanged.
+   procedure Set_Generated_Binding (To : Boolean);
+   function Generated_Binding return Boolean;
+
    --  In-memory source stream, consumed by HAC through the standard
    --  Ada stream interface: an empty read reports the end of the
    --  stream, which is the convention the HAC scanner expects. The
