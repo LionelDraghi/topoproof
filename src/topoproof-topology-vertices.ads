@@ -6,8 +6,10 @@
 -- -----------------------------------------------------------------------------
 
 with TopoProof.Geometry.Points;
+with TopoProof.Numerics;
 use TopoProof.Geometry;
 use type TopoProof.Geometry.Points.Point_2D;
+use type TopoProof.Numerics.Extended_Component;
 
 package TopoProof.Topology.Vertices
    with Pure, SPARK_Mode
@@ -83,6 +85,58 @@ is
          and then Contains (Store, V)
          and then Point_Of (Store, V) = P
          and then (for all W in 1 .. Vertex_Count (Store)'Old =>
+                      Point_Of (Store, W) = Point_Of (Store'Old, W));
+
+   --  True when the displacement (DX, DY) keeps the point of the vertex V
+   --  on the grid: an unrepresentable move has no point to deliver, like
+   --  the unrepresentable translation of the geometry (the same extended
+   --  intermediate and the same In_Range reading, over the two planar
+   --  axes).
+   function Move_Is_Representable
+      (Store : Vertex_Store; V : Vertex_Handle; DX, DY : Numerics.Vector_Component)
+      return Boolean
+   is (Numerics.In_Range
+         (Numerics.Extended_Component (Point_Of (Store, V).X)
+            + Numerics.Extended_Component (DX))
+       and then Numerics.In_Range
+         (Numerics.Extended_Component (Point_Of (Store, V).Y)
+            + Numerics.Extended_Component (DY)))
+   with Pre => Contains (Store, V);
+
+   --  Move the vertex V by the exact displacement (DX, DY), and deliver
+   --  the moved point: the caller never recomputes a position or reads
+   --  the store back, the call answers. The identity of the vertex stays:
+   --  the handle designates the same vertex, the edges, loops and faces
+   --  referring to it keep designating it, and every other stored vertex
+   --  keeps its point. No handle is created, none is merged, none is
+   --  invalidated (DD-002, identity is not position). An unrepresentable
+   --  move has no point: the precondition rejects it before anything is
+   --  written, so a rejected move cannot half-happen.
+   procedure Move
+      (Store     : in out Vertex_Store;
+       V         :        Vertex_Handle;
+       DX, DY    :        Numerics.Vector_Component;
+       New_Point :    out Points.Point_2D)
+   with
+      Pre  => Contains (Store, V)
+              and then Move_Is_Representable (Store, V, DX, DY),
+      Post =>
+         Contains (Store, V)
+         and then Point_Of (Store, V)
+                  = Points.Point_2D'(
+                       X => Numerics.Grid_Coordinate
+                              (Numerics.Extended_Component
+                                  (Point_Of (Store'Old, V).X)
+                                 + Numerics.Extended_Component (DX)),
+                       Y => Numerics.Grid_Coordinate
+                              (Numerics.Extended_Component
+                                  (Point_Of (Store'Old, V).Y)
+                                 + Numerics.Extended_Component (DY)))
+         and then New_Point = Point_Of (Store, V)
+         and then Vertex_Count (Store) = Store'Old.Count
+         and then (for all W in 1 .. V - 1 =>
+                      Point_Of (Store, W) = Point_Of (Store'Old, W))
+         and then (for all W in V + 1 .. Vertex_Count (Store) =>
                       Point_Of (Store, W) = Point_Of (Store'Old, W));
 
 end TopoProof.Topology.Vertices;

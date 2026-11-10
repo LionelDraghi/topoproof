@@ -1,0 +1,44 @@
+-- -----------------------------------------------------------------------------
+--  TopoProof, provable geometry application
+--  (https://github.com/LionelDraghi/topoproof)
+--  SPDX-License-Identifier: Apache-2.0
+--  SPDX-FileCopyrightText: 2026, Lionel Draghi
+-- -----------------------------------------------------------------------------
+
+with "adi";
+
+--  The graphical client of the proved kernel (DD-006). The kernel is
+--  never rebuilt here: this project only builds the GUI front-end, and
+--  keeps its run-time checks in every profile. Warnings are errors: a
+--  style violation or any other warning fails every build.
+project Adi_Gui is
+
+   for Languages use ("Ada");
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Exec_Dir use ".";
+   for Main use ("adi_gui-main.adb");
+
+   package Builder is
+      for Executable ("adi_gui-main.adb") use "adi_gui";
+   end Builder;
+
+   type Build_Profile_Kind is ("release", "development");
+   Build_Profile : Build_Profile_Kind :=
+     External ("Adi_Gui_Build_Profile", "development");
+
+   --  Same style-checking set as the kernel and the client, so the
+   --  three code bases compile with one single profile.
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatwa", "-gnatwe", "-gnatf",
+         "-gnatyabefhiklnprtx");
+   end Compiler;
+
+   package Format is
+      for Indentation ("Ada") use "3";
+      for Indentation_Continuation ("Ada") use "3";
+      for Width ("Ada") use "100";
+   end Format;
+
+end Adi_Gui;

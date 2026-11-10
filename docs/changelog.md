@@ -6,6 +6,13 @@ Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0
 
 - **[0.1.6-dev] - 2026-??-??**
 
+  - [Added]   the vertex move: `Move` translates a vertex point by an
+              exact displacement, with identity, handles and referring
+              elements kept, and an unrepresentable move rejected
+              before anything is written
+  - [Added]   the `Move_Vertex` TopoScript statement, the scripting
+              access to the proved vertex move
+
 - **[0.1.5] - 2026-10-28**
   - [Added]   the first closed solid (DD-005, increment c): the exact
               signed volume of a closed shell assembly - the fan

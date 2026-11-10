@@ -88,6 +88,7 @@ package body TopoScript_API is
       Register (BD, Topology.Create_Vertex_Native'Access,
                 "Create_Vertex");
       Register (BD, Topology.Create_Edge_Native'Access, "Create_Edge");
+      Register (BD, Topology.Move_Vertex_Native'Access, "Move_Vertex");
       Register (BD, Topology.Make_Loop_From_Edges_Native'Access,
                 "Make_Loop_From_Edges");
       Register (BD, Output.Put_Vertex_Native'Access, "Put_Vertex");

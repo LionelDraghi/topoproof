@@ -324,6 +324,63 @@ package body TopoScript_API.Topology is
       Data (3) := Conversions.Edge_Handle_To_HAC (E);
    end Create_Edge_Native;
 
+   procedure Move_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      V : TopoProof.Topology.Vertices.Vertex_Handle;
+
+      --  The displacement components are read on the widest native
+      --  integer first, then checked against the vector domain: an
+      --  exception raised inside the HAC virtual machine would not
+      --  propagate to the caller.
+      function Raw_Component (From : Positive) return Long_Long_Integer is
+        (Conversions.To_Long (Data (From)));
+
+      function In_Vector_Domain (R : Long_Long_Integer) return Boolean is
+        (R >= Long_Long_Integer (TopoProof.Numerics.Vector_Component'First)
+           and then
+         R <= Long_Long_Integer (TopoProof.Numerics.Vector_Component'Last));
+
+      DX, DY : TopoProof.Numerics.Vector_Component;
+      NP     : TopoProof.Geometry.Points.Point_2D;
+
+   begin
+      if not Conversions.Read_Vertex_Handle (Data, 1, V) then
+         Session.Record_Failure ("error: invalid vertex handle");
+         return;
+      end if;
+      --  Existence: a handle is valid only in the store it comes from.
+      if not TopoProof.Topology.Vertices.Contains
+        (Session.Current_Session.Vertices, V)
+      then
+         Session.Record_Failure ("error: unknown vertex");
+         return;
+      end if;
+      if not In_Vector_Domain (Raw_Component (2))
+        or else not In_Vector_Domain (Raw_Component (3))
+      then
+         Session.Record_Failure
+           ("error: the vertex move is not representable");
+         return;
+      end if;
+      DX := TopoProof.Numerics.Vector_Component (Raw_Component (2));
+      DY := TopoProof.Numerics.Vector_Component (Raw_Component (3));
+      --  The kernel precondition is read before the call: the kernel
+      --  contract is never violated from a script, the same way as
+      --  the edge client operation. A rejected move records its
+      --  diagnostic, writes nothing, and touches no store.
+      if not TopoProof.Topology.Vertices.Move_Is_Representable
+        (Session.Current_Session.Vertices, V, DX, DY)
+      then
+         Session.Record_Failure
+           ("error: the vertex move is not representable");
+         return;
+      end if;
+      TopoProof.Topology.Vertices.Move
+        (Session.Current_Session.Vertices, V, DX, DY, NP);
+      Conversions.Write_Point_2D (Data, 4, NP);
+   end Move_Vertex_Native;
+
    --  The number of distinct positions of the chain: a repeated
    --  position is one vertex.
    function Distinct_Count

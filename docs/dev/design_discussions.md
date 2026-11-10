@@ -26,7 +26,7 @@
   - [Vertical increments](#vertical-increments-2)
   - [Open questions](#open-questions-2)
   - [References](#references)
-- [DD-006: TopoGUI, the user-need-driven front-end](#dd-006-topogui-the-user-need-driven-front-end)
+- [DD-006: Adi_GUI, the user-need-driven front-end](#dd-006-adi_gui-the-user-need-driven-front-end)
   - [Current situation](#current-situation-2)
   - [Decisions](#decisions)
   - [Open questions](#open-questions-3)
@@ -64,7 +64,7 @@ terminology, contracts, executable documentation, and implementation.
   - [Vertical increments](#vertical-increments)
   - [Open questions](#open-questions)
   - [References](#references)
-- [DD-006: TopoGUI, the user-need-driven front-end](#dd-006-topogui-the-user-need-driven-front-end)
+- [DD-006: Adi_GUI, the user-need-driven front-end](#dd-006-adi_gui-the-user-need-driven-front-end)
   - [Current situation](#current-situation)
   - [Decisions](#decisions)
   - [Open questions](#open-questions)
@@ -582,10 +582,10 @@ d) optional adjacency structures, only when an operation needs them
   computational geometry library — a trusted kernel to compare
   design choices against.
 
-## DD-006: TopoGUI, the user-need-driven front-end
+## DD-006: Adi_GUI, the user-need-driven front-end
 
 - **Status:** decided (2026-10-25)
-- **Related milestone:** follows Milestone 8; TopoGUI v0 and v1
+- **Related milestone:** follows Milestone 8; Adi_GUI v0 and v1
 - **Scope:** planning direction, repository separation, testing policy,
   GUI toolkit, and the policy for kernel gaps
 
@@ -602,14 +602,14 @@ becomes a separate project.
 
 ### Decisions
 
-1. **TopoGUI is a separate project living in `tools/topogui`.** It has
+1. **Adi_GUI is a separate project living in `tools/adi_gui`.** It has
    its own `AGENTS.md`, its own documentation, and its own tests, and
    it has the vocation to split from the TopoProof repository as its
    own project.
 2. **Repartition rule.** What the development plan already says stays
    in TopoProof. What concerns the GUI and does not serve future
    TopoProof functions (toolkit choice, view model, undo, file
-   handling) lives in `tools/topogui`. Anything that serves future
+   handling) lives in `tools/adi_gui`. Anything that serves future
    kernel functions stays a TopoProof concern.
 3. **Product scope.** v0: 2D drawing over the proved kernel. v1:
    extrusion of a 2D drawing, plus the direct creation of a
@@ -631,7 +631,7 @@ becomes a separate project.
 
 1. Extrusion: the kernel milestone to specify — an exact prism from a
    closed planar loop, with the representability and orientation
-   proofs — before the TopoGUI v1 can be delivered.
+   proofs — before the Adi_GUI v1 can be delivered.
 2. The cylinder in a discrete, exact model: which representation is
    acceptable (a curved surface is outside the current model; an
    inscribed polyhedral approximation would need its own exactness
@@ -639,16 +639,25 @@ becomes a separate project.
 3. The rectangular parallelepiped: presumably a scripted composition of
    the existing construction operations (vertices, edges, loops, faces,
    shell, solid), driven by the GUI. To confirm when v1 is specified.
+4. Vertex move: the Adi_GUI move gesture (v0 increment 4) needs a way
+   to apply an exact translation to an existing vertex while its edges,
+   loop or face keep designating it. The kernel stores create vertices
+   and never mutate their point, and the proved `Translate` computes a
+   new point without touching a handle. Whether this is a store
+   mutation operation, a construction-time reinterpretation, or
+   something else is a kernel design decision; until it is specified
+   (and proved), Adi_GUI develops the selection half of the increment
+   only (owner arbitration of 2026-11-09).
 
 ### Toolkit notes
 
 Recorded findings on Adi2, the chosen toolkit (2026-10-25). They bind
-the TopoGUI theme until an upstream change lifts them.
+the Adi_GUI theme until an upstream change lifts them.
 
 1. **Borders follow CSS semantics.** A border only paints when its
    style is set: the Adi2 renderer suppresses borders whose
    `border-style` is `none` (the default), whatever the declared width
-   and colours. The TopoGUI theme therefore states
+   and colours. The Adi_GUI theme therefore states
    `Border_Style => Set (Solid_Edges)` on every style that carries a
    border width or colour.
 2. **Per-edge border colours are ignored on rounded widgets with a
@@ -658,7 +667,7 @@ the TopoGUI theme until an upstream change lifts them.
    square and non-uniform paths honour per-edge colours. Reported
    upstream as [ovenpasta/adi2#17](https://github.com/ovenpasta/adi2/issues/17)
    with a verified reproducer. Until it is fixed, the neumorphic relief
-   of the rounded TopoGUI widgets reads through the box shadows and the
+   of the rounded Adi_GUI widgets reads through the box shadows and the
    global ring colour only; the extruded/pressed edge inversion is
    effective on the square widgets (canvas, status line) and degraded
    to a global inversion on the rounded ones (buttons).

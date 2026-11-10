@@ -696,6 +696,11 @@ package body TopoScript_Wrapper is
       Append_Line ("   procedure Put_Vertex (H : in Vertex_Handle)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   procedure Move_Vertex");
+      Append_Line ("      (V : in Vertex_Handle; DX : in Integer; DY : in Integer;");
+      Append_Line ("       Q : out Point_2D)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line ("   procedure Put_Edge (E : in Edge_Handle)");
       Append_Line ("      with Import => True;");
       Append_Line ("");

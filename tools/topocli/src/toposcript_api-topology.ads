@@ -199,6 +199,16 @@ package TopoScript_API.Topology is
    procedure Create_Edge_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Move_Vertex: replaces the point of the designated
+   --  vertex by its exact translation by the displacement components
+   --  (DX, DY), and writes the moved point into the out parameter: the
+   --  delivered result makes the move observable, no caller recomputes
+   --  or reads back. An unrepresentable move is rejected by the kernel
+   --  precondition, read by the callback first: the diagnostic is
+   --  recorded, nothing is written, and the store is untouched.
+   procedure Move_Vertex_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Make_Loop_From_Edges: classifies the edges
    --  created in the construction stores of the designated session,
    --  in creation order, as a loop. The handles make the vertex

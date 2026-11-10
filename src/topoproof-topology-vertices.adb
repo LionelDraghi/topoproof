@@ -21,4 +21,29 @@ is
       V := Store.Count;
    end Create;
 
+   --  The move replaces the point of one stored vertex: the handle indexes
+   --  the point (the precondition entails Contains, hence V <= Count), the
+   --  translated point is written at that index, and nothing else changes.
+   --  The extended-component intermediates are total on their domain, and
+   --  the precondition carries the representability, so the conversions
+   --  back to Grid_Coordinate are in range.
+   procedure Move
+      (Store     : in out Vertex_Store;
+       V         :        Vertex_Handle;
+       DX, DY    :        Numerics.Vector_Component;
+       New_Point :    out Points.Point_2D)
+   is
+   begin
+      Store.Points (V) :=
+         (X =>
+             Numerics.Grid_Coordinate
+                (Numerics.Extended_Component (Store.Points (V).X)
+                   + Numerics.Extended_Component (DX)),
+          Y =>
+             Numerics.Grid_Coordinate
+                (Numerics.Extended_Component (Store.Points (V).Y)
+                   + Numerics.Extended_Component (DY)));
+      New_Point := Store.Points (V);
+   end Move;
+
 end TopoProof.Topology.Vertices;

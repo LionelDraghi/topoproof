@@ -19,6 +19,9 @@ same vertex for the whole run.
 - [Scenario: create a vertex from a point](#scenario-create-a-vertex-from-a-point)
 - [Scenario: two vertices at the same point are distinct](#scenario-two-vertices-at-the-same-point-are-distinct)
 - [Scenario: vertices are numbered in creation order](#scenario-vertices-are-numbered-in-creation-order)
+- [Move](#move)
+  - [Scenario: move a vertex to an exact translated point](#scenario-move-a-vertex-to-an-exact-translated-point)
+  - [Scenario: a move beyond the grid has no point](#scenario-a-move-beyond-the-grid-has-no-point)
 - [Proved property](#proved-property)
 
 ## Scenario: create a vertex from a point
@@ -93,6 +96,76 @@ ever happens in `Create_Vertex`.
   vertex 2 point 5 5
   vertex 3 point -5 3
   ```
+
+## Move
+
+`Move_Vertex (V, DX, DY, Q)` replaces the point of an existing vertex by
+its exact translation by the displacement `(DX, DY)`, and writes the
+moved point into `Q`: the delivered result makes the move observable, the
+caller never recomputes a position. The identity of the vertex stays: the
+handle designates the same vertex, so the edges, loops and faces referring
+to it keep designating it at the new position — no handle is created,
+none is merged, none is invalidated (DD-002, identity is not position).
+
+The moved point must stay on the grid. A move beyond the grid has no
+point: like the unrepresentable translation, it is a rejected run with the
+observable contract of the kernel rejections — the diagnostic on standard
+error, the exit code 1, and nothing delivered.
+
+The diagram of the move scenario draws the starting point in blue and the
+moved point in red, the moved point being the kernel-reported `out` value.
+
+### Scenario: move a vertex to an exact translated point
+
+- Given the file `move_vertex.topo`
+  ```ada
+  P : constant Point_2D := (10, -20);
+  V : Vertex_Handle;
+  Q : Point_2D;
+
+  Begin_Image (+"../docs/features/images/vertices_move_1.svg");
+  Draw_Axes;
+  Draw_Named_Point_2D (P, +"Before", Blue);
+  End_Image;
+
+  Create_Vertex (P, V);
+  Move_Vertex (V, 5, 7, Q);
+  Put_Vertex (V);
+
+  Begin_Image (+"../docs/features/images/vertices_move_1.svg");
+  Draw_Axes;
+  Draw_Named_Point_2D (P, +"Before", Blue);
+  Draw_Named_Point_2D (Q, +"Moved", Red);
+  End_Image;
+  ```
+- When I successfully run `../bin/topocli run move_vertex.topo`
+- Then the output is `vertex 1 point 15 -13`
+- And the file `../docs/features/images/vertices_move_1.svg` contains `#cf222e`  \
+  (The `#cf222e` value is the red of `Color_Kind`: the check ensures the
+  moved point, the actual result of the scenario, is drawn red at the
+  position the trace reports.)
+- And the file `../docs/features/images/vertices_move_1.svg` contains `#1f6feb`  \
+  (The `#1f6feb` value is the blue of `Color_Kind`: the check ensures the
+  starting point is drawn.)
+
+### Scenario: a move beyond the grid has no point
+
+The point starts on the corner of the grid; the move would take it one
+unit beyond the largest representable position. The image draws the
+starting point only: the moved point does not exist.
+
+- Given the file `move_beyond.topo`
+  ```ada
+  P : constant Point_2D := (1073741823, 0);
+  V : Vertex_Handle;
+  Q : Point_2D;
+
+  Create_Vertex (P, V);
+  Move_Vertex (V, 1, 0, Q);
+  ```
+- When I run `../bin/topocli run move_beyond.topo`
+- Then the error output is `error: the vertex move is not representable`
+- And the exit code is `1`
 
 ## Proved property
 

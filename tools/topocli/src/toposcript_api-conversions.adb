@@ -155,6 +155,16 @@ package body TopoScript_API.Conversions is
       Data (From + 2) := Grid_To_HAC (P.Z);
    end Write_Point_3D;
 
+   procedure Write_Point_2D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      P    :        TopoProof.Geometry.Points.Point_2D)
+   is
+   begin
+      Data (From)     := Grid_To_HAC (P.X);
+      Data (From + 1) := Grid_To_HAC (P.Y);
+   end Write_Point_2D;
+
    procedure Write_Vector_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
       From :        Positive;

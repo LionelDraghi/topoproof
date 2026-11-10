@@ -121,6 +121,12 @@ package TopoScript_API.Conversions is
       From :        Positive;
       P    :        TopoProof.Geometry.Points.Point_3D);
 
+   --  Write one planar point into the HAC elements at From.
+   procedure Write_Point_2D
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      P    :        TopoProof.Geometry.Points.Point_2D);
+
    --  Write one vector into the HAC elements at From.
    procedure Write_Vector_3D
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;

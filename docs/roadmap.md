@@ -22,8 +22,9 @@ consistent.
 
 Milestones 1 to 8 are delivered: the proved base is complete. The next
 phase is user-need-driven ([DD-006](dev/design_discussions.md)): the
-TopoGUI front-end, and the kernel gaps it reveals — the first one,
-extrusion — which enter the development plan as they are specified.
+Adi_GUI front-end, and the kernel gaps it reveals — the vertex move
+(Adi_GUI v0, DD-006 open question 4) and extrusion (Adi_GUI v1) — which
+enter the development plan as they are specified.
 
 ## Delivered milestones
 
@@ -35,8 +36,6 @@ plan](dev/development-plan.md), the changelog, and the proof artefacts.
 - Milestone 6 — TopoScript embedded scripting: delivered in 0.1.3, with
   its consolidation and the single front-end pivot in 0.1.4;
 - Milestone 7 — Transition to 3D: delivered in 0.1.5;
-- Milestone 8 — Minimal B-Rep (Shell, Solid): delivered in 0.1.5
-  (DD-005, increments a to c).
 - Milestone 8 — Minimal B-Rep (Shell, Solid): delivered in 0.1.5
   (DD-005, increments a to c).
 

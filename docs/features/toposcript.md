@@ -197,6 +197,7 @@ Operations:
 | `Contour_No_Flat_Turns (B)` | classifies the absence of flat turns, the kernel `Has_No_Flat_Turns` |
 | `Create_Vertex (P, H)` | creates one vertex referring to the point `P` in the store of the run, and returns its handle |
 | `Create_Edge (A, B, E)` | creates one oriented edge between the vertex handles `A` and `B`, and returns its handle |
+| `Move_Vertex (V, DX, DY, Q)` | replaces the point of the vertex `V` by its exact translation by the displacement `(DX, DY)`, and writes the moved point into `Q`; an unrepresentable move records the rejection |
 | `Put_Vertex (H)` | writes `vertex H point X Y`, the trace of the created vertex |
 | `Put_Edge (E)` | writes `edge E vertex A vertex B`, the trace of the created edge |
 | `Put_Loop (K)` | writes `loop closed ...`, or records the rejection diagnostic |

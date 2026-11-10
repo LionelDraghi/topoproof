@@ -493,6 +493,21 @@
    - OK : Then the output is  
    - [X] scenario   [vertices are numbered in creation order](../features/vertices.md) pass  
 
+   ### Scenario: [move a vertex to an exact translated point](../features/vertices.md): 
+   - OK : Given the file `move_vertex.topo`  
+   - OK : When I successfully run `../bin/topocli run move_vertex.topo`  
+   - OK : Then the output is `vertex 1 point 15 -13`  
+   - OK : And the file `../docs/features/images/vertices_move_1.svg` contains `#cf222e`  \  
+   - OK : And the file `../docs/features/images/vertices_move_1.svg` contains `#1f6feb`  \  
+   - [X] scenario   [move a vertex to an exact translated point](../features/vertices.md) pass  
+
+   ### Scenario: [a move beyond the grid has no point](../features/vertices.md): 
+   - OK : Given the file `move_beyond.topo`  
+   - OK : When I run `../bin/topocli run move_beyond.topo`  
+   - OK : Then the error output is `error: the vertex move is not representable`  
+   - OK : And the exit code is `1`  
+   - [X] scenario   [a move beyond the grid has no point](../features/vertices.md) pass  
+
 
 # Document: [edges.md](../features/edges.md)  
    ### Scenario: [create an edge between two vertices](../features/edges.md): 
@@ -854,12 +869,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 123 scenarios OK
+## Summary : **Success**, 125 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 123   |
+| Successful | 125   |
 | Empty      | 0     |
 | Not Run    | 0     |
 
