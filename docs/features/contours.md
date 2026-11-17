@@ -963,7 +963,7 @@ extreme positions on both axes.
 
 A square loop on the four corners of the grid, traversed from the
 top-right corner downwards: the interior is on the right, so the loop is
-clockwise, and the shoelace sum, about 2**63 per term, stays exact in the
+clockwise, and the shoelace sum, about `2**63` per term, stays exact in the
 `Area_Sum` domain.
 
 ![Extreme loop on the grid corners](images/contour_12.svg)
@@ -1026,7 +1026,7 @@ any sequence up to `Max_Points` points.
   `Determinant` domain; the contract of `Partial_Sum` bounds every partial
   sum by the number of accumulated terms times the determinant amplitude,
   and the total of at most `Max_Points` terms stays inside the `Area_Sum`
-  domain defined for orientation calculations (about 2**94, on the 128-bit
+  domain defined for orientation calculations (about `2**94`, on the 128-bit
   machine width, see Numeric Model).
 
 ### Self-Intersection
@@ -1071,7 +1071,7 @@ any sequence up to `Max_Points` points.
    cross determinants of consecutive position vectors. Each term is
    bounded by the `Determinant` domain, and a sequence has at most
    `Max_Points` points, so the total sum is bounded by
-   `Max_Points * Determinant'Last`, about 2**79, which fits in the
+   `Max_Points * Determinant'Last`, about `2**79`, which fits in the
    `Area_Sum` domain defined in `numeric-model.md`. The public function
    `Partial_Sum` computes the sum over any term range; its contract
    characterizes it by its one-term back decomposition and its amplitude
@@ -1081,7 +1081,7 @@ any sequence up to `Max_Points` points.
    operation. For a sequence of `n` points, the check performs `O(n^2)`
    intersection tests, but each test is constant-time and exact.
 
-4. **Sequence Length Bound**: `Max_Points` (2**15) keeps every index
+4. **Sequence Length Bound**: `Max_Points` (`2**15`) keeps every index
    arithmetic on sequences far from the `Natural` bounds and keeps the
    shoelace sum within the `Area_Sum` domain. A contour built by a script
    stays far below this bound; raising it later only requires re-proving

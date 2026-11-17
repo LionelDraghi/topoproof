@@ -113,7 +113,7 @@ Version numbering adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0
 
 - **[0.1.1] - 2026-10-19**
   - [Changed] the grid domain is now derived from the machine, not the other
-              way around: coordinates run to 2**30 - 1, the largest domain
+              way around: coordinates run to `2**30 - 1`, the largest domain
               for which the whole arithmetic chain stays on native widths,
               with differences saturating 32 bits and determinants exactly
               saturating 64 bits

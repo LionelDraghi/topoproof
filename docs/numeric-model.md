@@ -100,13 +100,13 @@ type Determinant is range
 
 With this grid, differences exactly saturate 32 bits, products are bounded
 by about 4.6E18, determinants exactly saturate 64 bits (about 9.2E18 <
-2**63), and cubic products are bounded by about 2**94 < 2**127. GNATprove
+`2**63`), and cubic products are bounded by about `2**94` < `2**127`. GNATprove
 proves that no operation of the orientation predicate can overflow these
 domains for any grid input.
 
 The segment crossing test adds the third degree of the chain: the exact
 coordinate quotients of the crossing multiply a determinant by a component
-difference, bounded by about 2**94 < 2**127, representable on 128 bits:
+difference, bounded by about `2**94` < `2**127`, representable on 128 bits:
 
 ```ada
 Cubic_Amplitude : constant :=
@@ -168,7 +168,7 @@ type Cross_Dot is range
    Cross_Dot_Amplitude;
 ```
 
-With this grid, that is about 5.9E28 (about 2**95.6), again below 2**127,
+With this grid, that is about 5.9E28 (about `2**95.6`), again below `2**127`,
 so the cross dot stays on the same 128-bit machine width for any grid
 input, and the orthogonality identity is proved over the whole domain,
 not on a restricted subset.
@@ -190,7 +190,7 @@ type Area_Sum is range
    Area_Sum_Amplitude;
 ```
 
-With this grid, that is about 2E28 (2**94), again below 2**127, so the
+With this grid, that is about 2E28 (`2**94`), again below `2**127`, so the
 sum stays on the same 128-bit machine width as the cubic products for any
 representable sequence length. GNATprove proves that the partial sums
 cannot overflow this domain: each term is bounded by the determinant

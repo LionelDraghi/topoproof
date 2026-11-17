@@ -523,7 +523,7 @@ orientation questions DD-002 deferred.
    plane can diverge from them.
 4. **Face orientation is deferred to the shell and solid wave.** The
    exact Newell normal of a 3D face, summed over the largest loop,
-   reaches 2**141: beyond the 128-bit machine width, so no exact
+   reaches `2**141`: beyond the 128-bit machine width, so no exact
    counter-clockwise classification of a 3D face exists on native
    registers with the current model. The meaningful orientation
    criterion of this milestone is topological: the edge pairing of the
@@ -539,7 +539,7 @@ orientation questions DD-002 deferred.
    decided by the exact signed volume sum of the shell: the fan
    decomposition of every planar face, one four-point orientation
    determinant per fan triangle, summed in a dedicated 128-bit Volume
-   domain (about 2**126, on the machine width). The sum is six times
+   domain (about `2**126`, on the machine width). The sum is six times
    the enclosed volume: positive for the outward orientation, negative
    for the inward one - both make a solid, and the sign is reported -
    zero encloses nothing: a flat, closed, paired shell is a valid

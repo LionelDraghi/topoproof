@@ -1,1 +1,6 @@
 * text=auto eol=lf
+# Generated diagrams: the writer emits the platform-native line ending
+# (Text_IO default), so present them natively in the working tree instead
+# of fighting a regen into permanent "modified" churn. The repository
+# side keeps the LF normalization from the rule above.
+docs/features/images/*.svg -eol
