@@ -14,12 +14,14 @@
 --  under their TopoScript names.
 
 with Ada.Containers.Indefinite_Vectors;
+with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 with HAC_Sys.Builder;
 with TopoProof.Numerics;
 with TopoProof.Topology.Edges;
 with TopoProof.Topology.Edges_3D;
+with TopoProof.Topology.Shells;
 with TopoProof.Topology.Vertices;
 with TopoProof.Topology.Vertices_3D;
 with Topodraw;
@@ -42,6 +44,16 @@ package TopoScript_API is
    --  domain.
    procedure Register_All (BD : HAC_Sys.Builder.Build_Data);
 
+   --  The handle of one solid value of the run (DD-006): an index into
+   --  the solid values built through the shared 3D stores. The count
+   --  of solids of one run is bounded by the edge store capacity: each
+   --  value carries at least six edges, and the stores never shrink,
+   --  so the bound stays valid for the whole run. Zero is the absent
+   --  solid: the result of a rejected primitive, never stored.
+   type Solid_Handle_Kind is range 0 .. TopoProof.Topology.Edges_3D.Max_Edges_3D;
+
+   No_Solid : constant Solid_Handle_Kind := 0;
+
 private
 
    --  One 2D point of the topology chain: in the script chain, a
@@ -62,6 +74,18 @@ private
 
    package Group_Vectors is new Ada.Containers.Indefinite_Vectors
      (Positive, Edge_Group);
+
+   --  The solid values of the run: one shell assembly each, over the
+   --  shared 3D stores (DD-006, increment a). Stored values are never
+   --  removed, so a handle keeps its meaning for the whole run.
+   use TopoProof.Topology.Shells;
+   package Solid_Vectors is new Ada.Containers.Indefinite_Vectors
+     (Positive, TopoProof.Topology.Shells.Shell);
+
+   --  The compound pieces of the last Difference (DD-006, decision 4):
+   --  solid handles, one stored solid value each.
+   package Solid_Handle_Vectors is new Ada.Containers.Vectors
+     (Positive, Solid_Handle_Kind);
 
    type Script_Session is limited record
       --  The diagnostic of the first rejected operation: a script
@@ -121,6 +145,14 @@ private
       --  assembly as it stands.
       Groups     : Group_Vectors.Vector;
       Face_Start : Natural := 1;
+      --  The solid values of the run (DD-006, increment a): one shell
+      --  assembly each, over the shared 3D stores. Stored values are
+      --  never removed, so a handle keeps its meaning for the whole
+      --  run, like every handle of the model.
+      Solids : Solid_Vectors.Vector;
+      --  The pieces of the last Difference (DD-006, decision 4): solid
+      --  handles, one stored solid value each, indexed from 1.
+      Compound : Solid_Handle_Vectors.Vector;
    end record;
 
 end TopoScript_API;

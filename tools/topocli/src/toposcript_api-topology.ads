@@ -254,4 +254,54 @@ package TopoScript_API.Topology is
    procedure Make_Solid_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Box: builds the whole boundary of the box of the
+   --  origin corner, of dimensions Width, Depth, Height along the
+   --  three axes, in one call, over the 3D construction stores of the
+   --  designated session (DD-006, human-level solid primitives): the
+   --  exact classification runs on the built assembly - shell then
+   --  solid - and the script receives the handle of the new solid
+   --  value, the absent solid on any rejection.
+   procedure Box_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Move: the moved copy of one solid value of the
+   --  designated session, stored at From and translated by (X, Y, Z),
+   --  each moved vertex exactly in the grid domain (DD-006, the solid
+   --  move named by the user decision of 2026-10-26). The handle of
+   --  the moved copy is written into the out parameter.
+   procedure Move_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Difference: the exact difference of two
+   --  axis-aligned box values of the designated session (DD-006,
+   --  decision 4): either no positive-volume overlap (the first box,
+   --  unchanged), a full covering (nothing - reported, never built),
+   --  or a decomposition into at most six axis-aligned boxes over the
+   --  clipped extents of the second box. Every piece is a valid solid
+   --  value built by the same construction as Box and classified
+   --  exactly. The number of pieces is written into the out
+   --  parameter (zero on the empty difference), and the pieces are
+   --  retrieved by Piece, in decomposition order.
+   procedure Difference_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Piece: the handle of the K-th piece stored by
+   --  the last Difference of the designated session (DD-006,
+   --  decision 4, the compound arbitration: the pieces live in the
+   --  scripting layer, the kernel model stays the one shell of
+   --  DD-005); K runs from 1 to the piece count of the last
+   --  Difference, the absent solid outside.
+   procedure Piece_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
+   --  Native side of Solid_Bounds: the exact grid bounds of one solid
+   --  value of the designated session: the min and max of every vertex
+   --  coordinate over the edge uses of the stored assembly, written
+   --  into the two out points (DD-006, the position read-out named by
+   --  the moved-solid review of 2026-10-26: the classification alone
+   --  does not say where the value sits, and the arrival position of
+   --  a moved solid must be checkable on the output).
+   procedure Solid_Bounds_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
 end TopoScript_API.Topology;

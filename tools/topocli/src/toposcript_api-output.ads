@@ -223,4 +223,10 @@ package TopoScript_API.Output is
    procedure Put_Solid_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Put_Solid: writes the canonical image of the
+   --  stored solid value of the designated session (DD-006, the
+   --  human-level solid values), or records the rejection diagnostic.
+   procedure Put_Solid_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
 end TopoScript_API.Output;

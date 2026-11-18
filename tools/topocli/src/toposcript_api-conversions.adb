@@ -225,4 +225,62 @@ package body TopoScript_API.Conversions is
       return True;
    end Read_Edge_Handle;
 
+   procedure Write_Solid_Handle
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      S    :        TopoScript_API.Solid_Handle_Kind)
+   is
+      function Solid_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
+        (TopoScript_API.Solid_Handle_Kind);
+
+   begin
+      Data (From) := Solid_To_HAC (S);
+   end Write_Solid_Handle;
+
+   function Read_Solid_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      S    : out TopoScript_API.Solid_Handle_Kind)
+      return Boolean
+   is
+      V : constant Long_Long_Integer := To_Long (Data (From));
+
+   begin
+      if V < Long_Long_Integer (TopoScript_API.Solid_Handle_Kind'First)
+        or else V > Long_Long_Integer (TopoScript_API.Solid_Handle_Kind'Last)
+      then
+         return False;
+      end if;
+      S := TopoScript_API.Solid_Handle_Kind (V);
+      return True;
+   end Read_Solid_Handle;
+
+   procedure Write_Count
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      N    :        Natural)
+   is
+      function Count_To_HAC is new HAC_Sys.Interfacing.To_HAC_Any_Integer
+        (Natural);
+
+   begin
+      Data (From) := Count_To_HAC (N);
+   end Write_Count;
+
+   function Read_Count
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      N    : out Natural)
+      return Boolean
+   is
+      V : constant Long_Long_Integer := To_Long (Data (From));
+
+   begin
+      if V < 0 or else V > Long_Long_Integer (Natural'Last) then
+         return False;
+      end if;
+      N := Natural (V);
+      return True;
+   end Read_Count;
+
 end TopoScript_API.Conversions;

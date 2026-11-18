@@ -24,12 +24,12 @@
   - [Problem](#problem-2)
   - [Proposed decisions](#proposed-decisions-2)
   - [Vertical increments](#vertical-increments-2)
+- [DD-006: human-level volume primitives and box booleans](#dd-006-human-level-volume-primitives-and-box-booleans)
+  - [Problem](#problem-3)
+  - [Proposed decisions](#proposed-decisions-3)
+  - [Vertical increments](#vertical-increments-3)
   - [Open questions](#open-questions-2)
-  - [References](#references)
-- [DD-006: Adi_GUI, the user-need-driven front-end](#dd-006-adi_gui-the-user-need-driven-front-end)
-  - [Current situation](#current-situation-2)
-  - [Decisions](#decisions)
-  - [Open questions](#open-questions-3)
+- [DD-007: Adi_GUI, the user-need-driven front-end](#dd-007-adi_gui-the-user-need-driven-front-end)
 
 This document records design topics. A discussion is not a normative rule
 until its status becomes **decided** and the decision is reflected in the
@@ -64,7 +64,12 @@ terminology, contracts, executable documentation, and implementation.
   - [Vertical increments](#vertical-increments)
   - [Open questions](#open-questions)
   - [References](#references)
-- [DD-006: Adi_GUI, the user-need-driven front-end](#dd-006-adi_gui-the-user-need-driven-front-end)
+- [DD-006: human-level volume primitives and box booleans](#dd-006-human-level-volume-primitives-and-box-booleans)
+  - [Reference: OpenSCAD](#reference-openscad)
+  - [Problem](#problem-3)
+  - [Proposed decisions](#proposed-decisions-3)
+  - [Vertical increments](#vertical-increments-2)
+- [DD-007: Adi_GUI, the user-need-driven front-end](#dd-007-adi_gui-the-user-need-driven-front-end)
   - [Current situation](#current-situation)
   - [Decisions](#decisions)
   - [Open questions](#open-questions)
@@ -582,7 +587,106 @@ d) optional adjacency structures, only when an operation needs them
   computational geometry library — a trusted kernel to compare
   design choices against.
 
-## DD-006: Adi_GUI, the user-need-driven front-end
+## DD-006: human-level volume primitives and box booleans
+
+- **Status:** proposed (2026-10-26)
+- **Related milestone:** 8, minimal B-Rep, and the post-milestone offer
+- **Scope:** the solid values of the scripting layer, the human-level
+  creation primitives (`Box` at first, the cylinder question kept
+  open), the move of a solid value, and the boolean operations, the
+  difference of axis-aligned boxes first
+
+### Reference: OpenSCAD
+
+The vocabulary and operation set of this discussion take the OpenSCAD
+language as their reference (2026-11-17): the creation primitives
+(`cube`, `cylinder`), the placement operations (`translate`,
+`rotate`, `scale`, `mirror`), the boolean operations (`difference`,
+`union`, `intersection`), and the general shape of the workflow -
+build simple solid values, place them, combine them. Two deliberate
+departures, both settled above: the solid move is named `Move`
+(decision 3), and primitives produce their value through an out
+parameter instead of assignment, because the scripting layer only
+imports procedures (decision 1). Other OpenSCAD operations (`rotate`,
+`scale`, `mirror`, `hull`) are out of scope until they enter the
+development plan: a rotation that leaves the grid would need its own
+exactness decision first, like the cylinder of decision 5.
+
+### Problem
+
+The milestone-8 solid is built the demo way: forty-six script lines of
+explicit vertices, edges, faces and classifications for one box. A
+human user thinks in volumes: `Box (Width, Depth, Height)`, placed and
+combined, not in boundary representations. The scripting layer needs
+creation primitives whose one call produces a whole valid solid value,
+and boolean operations to combine them, while the kernel model stays
+the one shell of DD-005 and every produced value stays exactly
+classifiable.
+
+### Proposed decisions
+
+1. **Solid values live in the scripting layer, as values, handles on
+   the side.** A solid value carries one `Shells.Shell` assembly over
+   the shared 3D stores of the run; the script manipulates an opaque
+   `Solid_Handle`, and the store grows without removal, so a handle
+   keeps its meaning for the whole run, like every handle of the
+   model. No kernel unit changes: the primitives compose the existing
+   proved constructions (`Create`, `Classify_Shell`,
+   `Classify_Solid`), and HAC imports procedures only, so the script
+   receives the handle through an out parameter:
+   `Box (Width => 100, Depth => 60, Height => 20, Result => Block)`.
+2. **`Box (Width, Depth, Height)` is the first creation primitive.**
+   The box of the origin corner, its six faces wound counter-clockwise
+   seen from outside, built in one call: eight vertices, twelve edges,
+   six planar faces, the shell closed by construction. The
+   classification still runs on the built value - a primitive never
+   bypasses the exact gate; dimensions must be positive and the whole
+   box must stay in the grid domain, otherwise the call records the
+   rejection and yields the absent solid.
+3. **`Move` moves a solid value, and no `Translate` of solids exists.**
+   The point and vector translation keeps its established script
+   meaning; the user decision of 2026-10-26 names the solid move
+   `Move (S, X, Y, Z, R)`: a copy of the value with every vertex
+   translated, the pairing preserved structurally, the grid domain and
+   the store capacities checked, each moved vertex exactly in its
+   domain.
+4. **Boolean operations start on axis-aligned boxes, and the first
+   one is the difference.** The difference of two axis-aligned boxes
+   is the exact set subtraction of two grid prisms: either no overlap
+   (the first solid, unchanged), a full covering (nothing - reported,
+   never built), or a decomposition into at most six axis-aligned
+   boxes over the clipped extents of the subtracted one. Every piece
+   is a valid solid value built by the same construction as `Box`, so
+   every piece stays exactly classifiable; the sum of the piece
+   volumes is the exact volume of the difference.
+   *Open question, deferred to the difference increment:* the result
+   of a difference is naturally a compound (several closed shells), while
+   a DD-005 solid carries exactly one shell. The increment arbitrates
+   between a compound value (a list of solid values in the scripting
+   layer, no kernel change) and the multi-loop face extension (faces
+   with hole loops, a kernel model change).
+5. **The cylinder is an open question, not a postponed
+   implementation.** A regular polygon of more than four sides has no
+   exact grid vertices, so an exact `Cylinder (Radius, Height)` on the
+   integer grid needs a model decision (a faceted prism with documented
+   snapping, a new curved-surface family, an octagon-free representation);
+   it is deliberately out of the first increments, and `Box` carries the
+   boolean work until the decision.
+
+### Vertical increments
+
+```text
+a) solid values: the Solids container of the run, the Solid_Handle
+   conversions and guards, Put_Solid
+b) Box: the one-call creation, classification, scenario and doc
+c) Move: the moved copy, grid and capacity checks, scenario
+d) Difference: the exact box decomposition, the compound arbitration,
+   the scenario, the doc
+e) later, the cylinder decision and the remaining booleans
+   (Intersection, Union) on boxes
+```
+
+## DD-007: Adi_GUI, the user-need-driven front-end
 
 - **Status:** decided (2026-10-25)
 - **Related milestone:** follows Milestone 8; Adi_GUI v0 and v1
@@ -671,3 +775,4 @@ the Adi_GUI theme until an upstream change lifts them.
    global ring colour only; the extruded/pressed edge inversion is
    effective on the square widgets (canvas, status line) and degraded
    to a global inversion on the rounded ones (buttons).
+

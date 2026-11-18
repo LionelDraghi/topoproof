@@ -159,4 +159,37 @@ package TopoScript_API.Conversions is
       E    : out TopoProof.Topology.Edges.Edge_Handle)
       return Boolean;
 
+   --  Write one script solid handle into the HAC element at From.
+   procedure Write_Solid_Handle
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      S    :        TopoScript_API.Solid_Handle_Kind);
+
+   --  Read one script solid handle from the HAC element at From: the
+   --  value is read on the widest native integer, then checked against
+   --  the handle domain, zero included (the absent solid). False means
+   --  the value designates no solid handle at all; whether the handle
+   --  designates a stored solid is a store check, left to the caller.
+   function Read_Solid_Handle
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      S    : out TopoScript_API.Solid_Handle_Kind)
+      return Boolean;
+
+   --  Write one piece count or one piece index (the Difference
+   --  compound of DD-006, decision 4) into the HAC element at From.
+   procedure Write_Count
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array;
+      From :        Positive;
+      N    :        Natural);
+
+   --  Read one piece count or one piece index: False means the value
+   --  is not a Natural at all; whether it designates a stored piece
+   --  is a store check, left to the caller.
+   function Read_Count
+     (Data : HAC_Sys.Interfacing.HAC_Element_Array;
+      From : Positive;
+      N    : out Natural)
+      return Boolean;
+
 end TopoScript_API.Conversions;

@@ -47,8 +47,8 @@
 <circle cx="48.0" cy="212.2" r="5.0" fill="#1f6feb" stroke="#ffffff" stroke-width="1.5"/>
 <text x="58.0" y="202.2" fill="#0d2b3e" font-family="sans-serif" font-size="13">D (-1073741823, 1073741823, 0)</text>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1a7f37"/></marker><marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#1f6feb"/></marker></defs>
-<line x1="315.8" y1="320.4" x2="592.0" y2="235.9" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
-<line x1="592.0" y1="235.9" x2="324.2" y2="127.7" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
-<line x1="324.2" y1="127.7" x2="48.0" y2="212.2" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
-<line x1="48.0" y1="212.2" x2="315.8" y2="320.4" stroke="#1f6feb" stroke-width="2.0" marker-end="url(#arrow1)"/>
+<line x1="315.8" y1="320.4" x2="592.0" y2="235.9" stroke="#1f6feb" stroke-width="2.0"/>
+<line x1="592.0" y1="235.9" x2="324.2" y2="127.7" stroke="#1f6feb" stroke-width="2.0"/>
+<line x1="324.2" y1="127.7" x2="48.0" y2="212.2" stroke="#1f6feb" stroke-width="2.0"/>
+<line x1="48.0" y1="212.2" x2="315.8" y2="320.4" stroke="#1f6feb" stroke-width="2.0"/>
 </svg>

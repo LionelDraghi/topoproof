@@ -722,6 +722,18 @@
    - OK : And the file `../docs/features/images/solids_2.svg` contains `#cf222e`  
    - [X] scenario   [the box is a solid](../features/solids.md) pass  
 
+   ### Scenario: [the Box primitive builds a solid in one call](../features/solids.md): 
+   - OK : Given the file `box_primitive.topo`  
+   - OK : When I successfully run `../bin/topocli run box_primitive.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [the Box primitive builds a solid in one call](../features/solids.md) pass  
+
+   ### Scenario: [a moved solid keeps its classification](../features/solids.md): 
+   - OK : Given the file `box_move.topo`  
+   - OK : When I successfully run `../bin/topocli run box_move.topo`  
+   - OK : Then the output is  
+   - [X] scenario   [a moved solid keeps its classification](../features/solids.md) pass  
+
    ### Scenario: [an inward tetrahedron is a solid too](../features/solids.md): 
    - OK : Given the file `inward_tetrahedron_solid.topo`  
    - OK : When I successfully run `../bin/topocli run inward_tetrahedron_solid.topo`  

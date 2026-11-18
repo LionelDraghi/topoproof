@@ -311,7 +311,8 @@ package body TopoScript_API.Drawing is
                To_Name   => To_Name,
                Label     => Null_Unbounded_String,
                Color     =>
-                 To_Unbounded_String (Hex_Of (To_Color (Data (7))))));
+                 To_Unbounded_String (Hex_Of (To_Color (Data (7)))),
+               Arrow     => True));
       end;
    end Draw_Vector_Native;
 
@@ -354,7 +355,8 @@ package body TopoScript_API.Drawing is
                To_Name   => Name,
                Label     => Null_Unbounded_String,
                Color     =>
-                 To_Unbounded_String (Hex_Of (To_Color (Data (8))))));
+                 To_Unbounded_String (Hex_Of (To_Color (Data (8)))),
+               Arrow     => True));
          Name_Point (Integer (O.X) + Integer (V.DX),
                      Integer (O.Y) + Integer (V.DY),
                      Integer (O.Z) + Integer (V.DZ),
@@ -388,7 +390,8 @@ package body TopoScript_API.Drawing is
    procedure Append_Segment
      (P, Q : TopoProof.Geometry.Points.Point_2D;
       Color : HAC_Sys.Interfacing.HAC_Element;
-      Label : String)
+      Label : String;
+      Arrow : Boolean)
    is
    begin
       Session.Current_Session.The_Scene.Vectors.Append
@@ -399,7 +402,8 @@ package body TopoScript_API.Drawing is
               Anchor_Name (Integer (Q.X), Integer (Q.Y), 0),
             Label     => To_Unbounded_String (Label),
             Color     =>
-              To_Unbounded_String (Hex_Of (To_Color (Color)))));
+              To_Unbounded_String (Hex_Of (To_Color (Color))),
+            Arrow     => Arrow));
    end Append_Segment;
 
    procedure Draw_Edge_Native
@@ -431,7 +435,8 @@ package body TopoScript_API.Drawing is
             "(" & Ada.Strings.Fixed.Trim
                  (DX'Image, Ada.Strings.Both)
              & ", " & Ada.Strings.Fixed.Trim
-                 (DY'Image, Ada.Strings.Both) & ")");
+                 (DY'Image, Ada.Strings.Both) & ")",
+            Arrow => True);
       end;
    end Draw_Edge_Native;
 
@@ -480,9 +485,87 @@ package body TopoScript_API.Drawing is
                   & ", " & Ada.Strings.Fixed.Trim
                        (DZ'Image, Ada.Strings.Both) & ")"),
                Color     =>
-                 To_Unbounded_String (Hex_Of (To_Color (Data (7))))));
+                 To_Unbounded_String (Hex_Of (To_Color (Data (7)))),
+               Arrow     => True));
       end;
    end Draw_Edge_3D_Native;
+
+   --  The wireframe of the axis-aligned box of the given dimensions
+   --  over the given corner: the twelve segments of the box skeleton,
+   --  appended as plain scene vectors - no displacement labels, the
+   --  skeleton shows a volume, not twelve displacements. The positive
+   --  dimensions and the grid-check of the far corner follow the same
+   --  input contract as the Box creation primitive.
+   procedure Draw_Box_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Corner at 1..3, Width at 4, Depth at 5,
+      --  Height at 6, Color at 7.
+      Corner : TopoProof.Geometry.Points.Point_3D;
+      W : constant Long_Long_Integer := Conversions.To_Long (Data (4));
+      D : constant Long_Long_Integer := Conversions.To_Long (Data (5));
+      H : constant Long_Long_Integer := Conversions.To_Long (Data (6));
+      Color : constant Unbounded_String :=
+        To_Unbounded_String (Hex_Of (To_Color (Data (7))));
+
+      procedure Add_Segment
+        (PX, PY, PZ, QX, QY, QZ : Integer)
+      is
+      begin
+         Session.Current_Session.The_Scene.Vectors.Append
+           (Vector_Rec'
+              (From_Name => Anchor_Name (PX, PY, PZ),
+               To_Name   => Anchor_Name (QX, QY, QZ),
+               Label     => Null_Unbounded_String,
+               Color     => Color,
+               Arrow     => False));
+      end Add_Segment;
+
+   begin
+      if not Session.Current_Session.Image_Open then
+         Session.Record_Failure (TopoDiagnostics.No_Image_Diagnostic);
+         return;
+      end if;
+      if not Conversions.Read_Point_3D (Data, 1, Corner) then
+         Session.Record_Failure (TopoDiagnostics.Outside_Grid_Diagnostic);
+         return;
+      end if;
+      if W < 1 or else D < 1 or else H < 1
+        or else not Conversions.Grid_In_Range
+                       (Long_Long_Integer (Corner.X) + W)
+        or else not Conversions.Grid_In_Range
+                       (Long_Long_Integer (Corner.Y) + D)
+        or else not Conversions.Grid_In_Range
+                       (Long_Long_Integer (Corner.Z) + H)
+      then
+         Session.Record_Failure ("error: invalid box dimensions");
+         return;
+      end if;
+
+      declare
+         X : constant Integer := Integer (Corner.X);
+         Y : constant Integer := Integer (Corner.Y);
+         Z : constant Integer := Integer (Corner.Z);
+         U : constant Integer := X + Integer (W);  --  The far X, Y, Z
+         V : constant Integer := Y + Integer (D);  --  faces of the
+         T : constant Integer := Z + Integer (H);  --  box.
+      begin
+         --  The bottom rectangle, then the top rectangle, then the
+         --  four verticals.
+         Add_Segment (X, Y, Z, U, Y, Z);
+         Add_Segment (U, Y, Z, U, V, Z);
+         Add_Segment (U, V, Z, X, V, Z);
+         Add_Segment (X, V, Z, X, Y, Z);
+         Add_Segment (X, Y, T, U, Y, T);
+         Add_Segment (U, Y, T, U, V, T);
+         Add_Segment (U, V, T, X, V, T);
+         Add_Segment (X, V, T, X, Y, T);
+         Add_Segment (X, Y, Z, X, Y, T);
+         Add_Segment (U, Y, Z, U, Y, T);
+         Add_Segment (U, V, Z, U, V, T);
+         Add_Segment (X, V, Z, X, V, T);
+      end;
+   end Draw_Box_Native;
 
    procedure Draw_Segment_2D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
@@ -506,7 +589,7 @@ package body TopoScript_API.Drawing is
          return;
       end if;
 
-      Append_Segment (P, Q, Data (5), "");
+      Append_Segment (P, Q, Data (5), "", Arrow => False);
    end Draw_Segment_2D_Native;
 
    procedure End_Image_Native

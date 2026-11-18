@@ -83,6 +83,13 @@ package TopoScript_API.Drawing is
    procedure Draw_Edge_3D_Native
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
 
+   --  Native side of Draw_Box: the wireframe of the axis-aligned box
+   --  of the given positive dimensions, over the given corner, twelve
+   --  plain segments without displacement labels; the whole wireframe
+   --  is grid-checked like every drawing input.
+   procedure Draw_Box_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array);
+
    --  Native side of Draw_Segment_2D: the plain 2D segment from P to
    --  Q, without label: the diagrams of crossing segments, where the
    --  displacement labels of Draw_Edge would overlap at the common

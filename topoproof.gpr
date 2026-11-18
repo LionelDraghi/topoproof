@@ -3,13 +3,19 @@
 --  withs this project; it is not part of the proof scope.
 project TopoProof is
 
-   --  Build profiles, selected with the Topoproof_Build_Profile external:
-   --    development (default): checks and contracts verified at run time
-   --    release: proved checks suppressed on the kernel; the client keeps
-   --      its own checks in every profile (see tools/topocli/topocli.gpr)
-   type Build_Profile_Kind is ("release", "development");
+   --  Build profiles, selected with the Topoproof_Build_Profile external
+   --  (the Alire [build-profiles] pin drives it for every alr command):
+   --    development: fast edit loop, no contract or run-time check in the
+   --      generated code, style and warnings still enforced
+   --    validation (default): the working profile, every check and
+   --      contract embedded (-gnata, -gnatVa); every push goes through a
+   --      green validation build
+   --    release: proved checks suppressed on the kernel (-gnatp, -O2),
+   --      the payoff of the proof; the client keeps its own checks in
+   --      every profile (see tools/topocli/topocli.gpr)
+   type Build_Profile_Kind is ("development", "validation", "release");
    Build_Profile : Build_Profile_Kind :=
-     External ("Topoproof_Build_Profile", "development");
+     External ("Topoproof_Build_Profile", "validation");
 
    for Languages use ("Ada");
    for Source_Dirs use ("src");
@@ -46,12 +52,21 @@ project TopoProof is
 
    package Compiler is
       case Build_Profile is
-         when "release" =>
+         when "development" =>
+            --  Contracts are compiled out in this profile and in
+            --  release, so parameters referenced from contracts only
+            --  are seen as unreferenced by the front end; the -gnatwF
+            --  suppression removes that class. Validation keeps it:
+            --  there, a formal unreferenced even from the contracts is
+            --  a real problem, and every other warning stays an error.
             for Default_Switches ("Ada") use
-              Kernel_Switches & ("-O2", "-gnatp");
-         when others =>
+              Kernel_Switches & ("-gnatwF");
+         when "validation" =>
             for Default_Switches ("Ada") use
               Kernel_Switches & ("-gnatVa", "-gnata");
+         when "release" =>
+            for Default_Switches ("Ada") use
+              Kernel_Switches & ("-O2", "-gnatp", "-gnatwF");
       end case;
    end Compiler;
 

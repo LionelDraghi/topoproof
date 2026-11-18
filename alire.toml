@@ -54,6 +54,17 @@ gnatcov_bin = "^26.2.1"
 type = "test"
 command = ["make", "test"]
 
+# The working profile is validation: every Alire command of the root
+# workspace (alr build, alr test) hence passes -X*_BUILD_PROFILE=
+# validation to the project files, whose own defaults match it. The
+# profile is the one every push must go green with (all checks and
+# contracts embedded); a deeper release chain, clean build included,
+# is make release. The client crate is pinned the same way in its own
+# workspace (tools/topocli/alire.toml): one crate per workspace here,
+# a crate unknown to the other workspace is rejected.
+[build-profiles]
+topoproof = "validation"
+
 # No [build-switches] here: the project files (topoproof.gpr,
 # tools/topocli/topocli.gpr) own the switches, so the local builds and the CI
 # builds compile with one single profile. Alire build-switches are ignored

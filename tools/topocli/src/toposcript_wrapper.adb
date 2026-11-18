@@ -598,6 +598,12 @@ package body TopoScript_Wrapper is
          "Color : in Color_Kind)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
+      Append_Line ("   procedure Draw_Box");
+      Append_Line
+        ("      (Corner : in Point_3D; Width, Depth, Height : in Integer; " &
+         "Color : in Color_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
       Append_Line
         ("   procedure Draw_Segment_2D (P, Q : in Point_2D; " &
          "Color : in Color_Kind)");
@@ -746,6 +752,36 @@ package body TopoScript_Wrapper is
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line ("   procedure Put_Solid_3D (K : in Solid_3D_Kind)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   --  The human-level solid primitives (DD-006):");
+      Append_Line ("   subtype Solid_Handle is Integer;");
+      Append_Line ("");
+      Append_Line ("   procedure Box");
+      Append_Line ("      (Width, Depth, Height : in Integer;");
+      Append_Line ("       Result               : out Solid_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Move");
+      Append_Line ("      (S : in Solid_Handle; X, Y, Z : in Integer;");
+      Append_Line ("       Result : out Solid_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Put_Solid (S : in Solid_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Difference");
+      Append_Line ("      (A, B          : in Solid_Handle;");
+      Append_Line ("       Piece_Count   : out Natural)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Piece");
+      Append_Line ("      (K : in Natural; Result : out Solid_Handle)");
+      Append_Line ("      with Import => True;");
+      Append_Line ("");
+      Append_Line ("   procedure Solid_Bounds");
+      Append_Line ("      (S   : in Solid_Handle;");
+      Append_Line ("       Min : out Point_3D; Max : out Point_3D)");
       Append_Line ("      with Import => True;");
       Append_Line ("");
       Append_Line ("   --  User declarations (TopoScript fragment):");

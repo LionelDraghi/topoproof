@@ -59,6 +59,7 @@ package body TopoScript_API is
                 "Draw_Point_2D");
       Register (BD, Drawing.Draw_Edge_Native'Access, "Draw_Edge");
       Register (BD, Drawing.Draw_Edge_3D_Native'Access, "Draw_Edge_3D");
+      Register (BD, Drawing.Draw_Box_Native'Access, "Draw_Box");
       Register (BD, Drawing.Draw_Segment_2D_Native'Access,
                 "Draw_Segment_2D");
       Register (BD, Drawing.End_Image_Native'Access, "End_Image");
@@ -100,9 +101,15 @@ package body TopoScript_API is
       Register (BD, Topology.Make_Face_3D_Native'Access, "Make_Face_3D");
       Register (BD, Topology.Make_Shell_3D_Native'Access, "Make_Shell_3D");
       Register (BD, Topology.Make_Solid_3D_Native'Access, "Make_Solid_3D");
+      Register (BD, Topology.Box_Native'Access, "Box");
+      Register (BD, Topology.Move_Native'Access, "Move");
+      Register (BD, Topology.Difference_Native'Access, "Difference");
+      Register (BD, Topology.Piece_Native'Access, "Piece");
       Register (BD, Output.Put_Face_3D_Native'Access, "Put_Face_3D");
       Register (BD, Output.Put_Shell_3D_Native'Access, "Put_Shell_3D");
       Register (BD, Output.Put_Solid_3D_Native'Access, "Put_Solid_3D");
+      Register (BD, Output.Put_Solid_Native'Access, "Put_Solid");
+      Register (BD, Topology.Solid_Bounds_Native'Access, "Solid_Bounds");
    end Register_All;
 
 end TopoScript_API;

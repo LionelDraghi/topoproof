@@ -22,6 +22,8 @@ supports left without their opposite in red in the diagrams.
 
 - [Scenario: the tetrahedron is a solid](#scenario-the-tetrahedron-is-a-solid)
 - [Scenario: the box is a solid](#scenario-the-box-is-a-solid)
+- [Scenario: the Box primitive builds a solid in one call](#scenario-the-box-primitive-builds-a-solid-in-one-call)
+- [Scenario: a moved solid keeps its classification and its position](#scenario-a-moved-solid-keeps-its-classification-and-its-position)
 - [Scenario: an inward tetrahedron is a solid too](#scenario-an-inward-tetrahedron-is-a-solid-too)
 - [Scenario: a flat shell is not a solid](#scenario-a-flat-shell-is-not-a-solid)
 - [Scenario: a non-closed shell is not a solid](#scenario-a-non-closed-shell-is-not-a-solid)
@@ -118,18 +120,7 @@ solid is built.
 
   Begin_Image (+"../docs/features/images/solids_2.svg");
   Draw_Axes;
-  Draw_Edge_3D (A, B, Blue);
-  Draw_Edge_3D (B, C, Blue);
-  Draw_Edge_3D (C, D, Blue);
-  Draw_Edge_3D (D, A, Blue);
-  Draw_Edge_3D (E, F, Blue);
-  Draw_Edge_3D (F, G, Blue);
-  Draw_Edge_3D (G, H, Blue);
-  Draw_Edge_3D (H, E, Blue);
-  Draw_Edge_3D (A, E, Blue);
-  Draw_Edge_3D (B, F, Blue);
-  Draw_Edge_3D (C, G, Blue);
-  Draw_Edge_3D (D, H, Blue);
+  Draw_Box (A, 4, 3, 3, Blue);
   Draw_Named_Point (A, +"A", Blue);
   Draw_Named_Point (G, +"G", Red);
   End_Image;
@@ -186,6 +177,108 @@ solid is built.
 - And the file `../docs/features/images/solids_2.svg` contains `#cf222e`
   (The `#cf222e` value is the red of `Color_Kind`: the check ensures
   the far top corner of the box, the vertex the skeleton rises to, is
+  drawn.)
+
+## Scenario: the Box primitive builds a solid in one call
+
+The human-level creation primitive of DD-006, increment b: the box of
+the origin corner, its six faces wound counter-clockwise seen from
+outside, built in one call over the 3D stores of the run - eight
+vertices, twelve edges, six faces, the shell closed by construction.
+The exact classification still runs on the built value: the primitive
+never bypasses the gate, and the script receives the handle of a solid
+value classifiable exactly like any other. HAC imports procedures
+only, so the value comes back through an out parameter; error cases
+(yields the absent solid) are covered by the classification scenarios
+above.
+
+- Given the file `box_primitive.topo`
+  ```ada
+  Block : Solid_Handle;
+
+  Box (100, 60, 20, Block);
+  Put_Solid (Block);
+  ```
+- When I successfully run `../bin/topocli run box_primitive.topo`
+- Then the output is
+  ```text
+  solid3d outward
+  ```
+
+## Scenario: a moved solid keeps its classification and its position
+
+The solid move of DD-006, increment c, named by the user decision of
+2026-10-26: `Move (S, X, Y, Z, R)` builds a copy with every vertex
+translated by the same grid vector, each moved vertex exactly in its
+domain, the pairing preserved structurally, and the exact
+classification recomputed on the copy. A moved box is still a solid.
+
+Review decision of 2026-11-18: the classification alone does not say
+where the value sits, so the scenario checks the arrival position of
+the moved box, not just its classification. The position read-out is
+`Solid_Bounds (S, Min, Max)`: the exact grid bounds of the solid's
+vertices. The diagram draws the box at its origin position in blue,
+its moved copy in green, and the move vector in red: the whole box
+slides along the vector. The vector runs from `B (100, 0, 0)`, the
+right end of the front-bottom edge of the blue box, to `B' (360, -80,
+180)`, the matching corner of the moved box: the move displaces the
+box far enough that the two wireframes never superimpose, under the
+axonometric projection either, and the arrow from B to B' crosses
+neither wireframe.
+
+![A moved box keeps its classification and its position](images/solids_5.svg)
+
+- Given the file `box_move.topo`
+  ```ada
+  A  : constant Point_3D := (0, 0, 0);
+  B  : constant Point_3D := (100, 0, 0);
+  Block : Solid_Handle;
+  Moved : Solid_Handle;
+  Min   : Point_3D;
+  Max   : Point_3D;
+  Step  : Vector_3D;
+  B2    : Point_3D;
+
+  Box (100, 60, 20, Block);
+  Move (Block, 260, -80, 180, Moved);
+  Put_Solid (Moved);
+
+  Solid_Bounds (Moved, Min, Max);
+  Put (Min);
+  Put (Max);
+
+  Displacement (A, Min, Step);
+  Translate (B, Step, B2);
+
+  Begin_Image (+"../docs/features/images/solids_5.svg");
+  Draw_Axes;
+  Draw_Box (A, 100, 60, 20, Blue);
+  Draw_Box (Min, 100, 60, 20, Green);
+  Draw_Named_Point (A, +"A", Blue);
+  Draw_Named_Point (B, +"B", Blue);
+  Draw_Named_Point (Min, +"A'", Green);
+  Draw_Named_Point (B2, +"B'", Green);
+  Draw_Named_Vector (B, Step, +"Move", Red);
+  End_Image;
+  ```
+- When I successfully run `../bin/topocli run box_move.topo`
+- Then the output is
+  ```text
+  solid3d outward
+  point 260 -80 180
+  point 360 -20 200
+  ```
+  (The arrival position check: the exact bounds of the moved box are
+  its original bounds translated by the move vector, from the origin
+  corner `(0, 0, 0)` to `(360, -20, 200)`.)
+- And the file `../docs/features/images/solids_5.svg` contains `#1f6feb`
+  (The `#1f6feb` value is the blue of `Color_Kind`: the box at its
+  origin position is drawn.)
+- And the file `../docs/features/images/solids_5.svg` contains `#1a7f37`
+  (The `#1a7f37` value is the green of `Color_Kind`: the moved copy is
+  drawn.)
+- And the file `../docs/features/images/solids_5.svg` contains `#cf222e`
+  (The `#cf222e` value is the red of `Color_Kind`: the move vector is
   drawn.)
 
 ## Scenario: an inward tetrahedron is a solid too

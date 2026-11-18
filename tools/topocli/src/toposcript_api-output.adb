@@ -19,6 +19,7 @@ with TopoProof.Geometry.Planes;
 with TopoProof.Topology.Faces;
 with TopoProof.Topology.Faces_3D;
 with TopoProof.Topology.Loops;
+with TopoProof.Topology.Solids;
 with TopoProof.Topology.Shells;
 
 package body TopoScript_API.Output is
@@ -600,5 +601,62 @@ package body TopoScript_API.Output is
             Session.Record_Failure ("error: the shell is not closed");
       end case;
    end Put_Solid_3D_Native;
+
+   --  Native side of Put_Solid: reads the solid handle at Position 1,
+   --  and puts the exact classification of the stored solid value
+   --  (DD-006): the same canonical line as Put_Solid_3D, the
+   --  classification recomputed exactly from the stored assembly.
+   procedure Put_Solid_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      use type TopoProof.Topology.Solids.Solid_Kind;
+
+      H : TopoScript_API.Solid_Handle_Kind;
+
+   begin
+      if not Conversions.Read_Solid_Handle (Data, 1, H)
+        or else H = TopoScript_API.No_Solid
+        or else Natural (H)
+                > Natural (Session.Current_Session.Solids.Length)
+      then
+         Session.Record_Failure ("error: unknown solid");
+         return;
+      end if;
+
+      declare
+         S : constant TopoProof.Topology.Shells.Shell :=
+           Session.Current_Session.Solids.Element (Natural (H));
+         SV : constant TopoProof.Topology.Shells.Shell_Validity :=
+           TopoProof.Topology.Shells.Classify_Shell
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+         SK : TopoProof.Topology.Solids.Solid_Kind;
+
+      begin
+         if SV /= TopoProof.Topology.Shells.Closed_Shell then
+            --  A stored solid value is closed by construction; this
+            --  would be a kernel contract violation, never a script
+            --  input problem.
+            Session.Record_Failure ("error: the shell is not closed");
+            return;
+         end if;
+
+         SK :=
+           TopoProof.Topology.Solids.Classify_Solid
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+
+         case SK is
+            when TopoProof.Topology.Solids.Outward_Solid =>
+               Put_Line ("solid3d outward");
+            when TopoProof.Topology.Solids.Inward_Solid =>
+               Put_Line ("solid3d inward");
+            when TopoProof.Topology.Solids.Flat_Assembly =>
+               --  A stored solid value is never flat: its construction
+               --  rejected the flat degeneracy (DD-005, decision 3).
+               Session.Record_Failure ("error: flat shell");
+         end case;
+      end;
+   end Put_Solid_Native;
 
 end TopoScript_API.Output;

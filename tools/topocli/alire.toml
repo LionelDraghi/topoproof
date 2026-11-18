@@ -32,3 +32,9 @@ hac = "~0.45.0"
 
 [[pins]]
 topoproof = { path = "../.." }
+
+# Same working profile as the kernel crate (see its alire.toml): the
+# client builds with all its checks embedded by default, through alr
+# and through the -X switch of every explicit profile build.
+[build-profiles]
+topocli = "validation"

@@ -21,10 +21,11 @@ project Topocli is
    end Builder;
 
    --  Build profiles, selected with the same external as the kernel, so
-   --  that one -X switch on the command line drives both projects.
-   type Build_Profile_Kind is ("release", "development");
+   --  that one -X switch on the command line drives both projects. The
+   --  default matches the pinned Alire profile (validation).
+   type Build_Profile_Kind is ("development", "validation", "release");
    Build_Profile : Build_Profile_Kind :=
-     External ("Topoproof_Build_Profile", "development");
+     External ("Topoproof_Build_Profile", "validation");
 
    Client_Switches := ("-gnat2022", "-gnatwa", "-gnatwe", "-gnatf",
                       "-gnatyabefhiklnprtx");
@@ -33,12 +34,22 @@ project Topocli is
 
    package Compiler is
       case Build_Profile is
+         when "development" =>
+            --  No -O switch: the compiler default (-O0) keeps the edit
+            --  loop fast.
+            for Default_Switches ("Ada") use
+              Client_Switches;
+         when "validation" =>
+            --  The client is not proved (it is not part of the kernel),
+            --  so unlike the kernel release profile it keeps its checks
+            --  in every profile: its input validation relies on
+            --  Constraint_Error, and a release build without checks
+            --  would silently accept out-of-domain input.
+            for Default_Switches ("Ada") use
+              Client_Switches & ("-gnatVa", "-gnata");
          when "release" =>
             for Default_Switches ("Ada") use
               Client_Switches & ("-O2", "-gnatVa");
-         when others =>
-            for Default_Switches ("Ada") use
-              Client_Switches & ("-gnatVa", "-gnata");
       end case;
    end Compiler;
 

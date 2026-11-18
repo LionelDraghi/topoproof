@@ -217,6 +217,7 @@ Operations:
 | `Draw_Named_Point_2D (P, Name, Color)` | colors a 2D point of the image, labeled with `Name` instead of the automatic anchor name |
 | `Draw_Edge (P, Q, Color)` | draws the labeled segment arrow from `P` to `Q` |
 | `Draw_Segment_2D (P, Q, Color)` | draws the plain 2D segment from `P` to `Q`, without label |
+| `Draw_Box (Corner, Width, Depth, Height, Color)` | draws the plain box wireframe of the given dimensions, over the given corner, without label |
 | `End_Image` | renders the image through the topodraw renderer |
 
 The rejected operations record the same diagnostics as the client

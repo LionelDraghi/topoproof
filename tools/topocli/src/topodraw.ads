@@ -30,6 +30,10 @@ package Topodraw is
       --  of the rendered diagrams, arrow head included.
       Color : Ada.Strings.Unbounded.Unbounded_String :=
         Ada.Strings.Unbounded.Null_Unbounded_String;
+      --  The arrow head: vectors render with one, plain segments - the
+      --  box wireframes of Draw_Box, the plain 2D segments of
+      --  Draw_Segment_2D - render without.
+      Arrow : Boolean := True;
    end record;
 
    package Scene_Vector_Vectors is new Ada.Containers.Indefinite_Vectors

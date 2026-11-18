@@ -729,8 +729,12 @@ package body Topodraw is
                       & To_String (V.To_Name)
                       & ": coincident points";
             end if;
-            Line (Doc, A, B, Line_Color, 2.0, "",
-                  "url(#" & Id_Of (V.Color) & ")");
+            if V.Arrow then
+               Line (Doc, A, B, Line_Color, 2.0, "",
+                     "url(#" & Id_Of (V.Color) & ")");
+            else
+               Line (Doc, A, B, Line_Color, 2.0, "");
+            end if;
             if To_String (V.Label) /= "" then
                Place_Label (Doc, (A.X + B.X) / 2.0,
                             (A.Y + B.Y) / 2.0 - 8.0,

@@ -935,7 +935,6 @@ package body TopoScript_API.Topology is
       Status : TopoProof.Topology.Shells.Shell_Validity) return String
    is
       use type TopoProof.Topology.Loops_3D.Loop_Validity;
-      use type TopoProof.Topology.Shells.Shell_Validity;
    begin
       case Status is
          when TopoProof.Topology.Shells.Closed_Shell =>
@@ -1024,7 +1023,6 @@ package body TopoScript_API.Topology is
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
       --  Element layout: Kind at 1.
-      use type TopoProof.Topology.Shells.Shell_Validity;
       F : constant Natural :=
         Natural (Session.Current_Session.Groups.Length);
       M : constant Natural := Session.Current_Session.Face_Start - 1;
@@ -1084,7 +1082,6 @@ package body TopoScript_API.Topology is
      (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
    is
       --  Element layout: Kind at 1.
-      use type TopoProof.Topology.Shells.Shell_Validity;
       use type TopoProof.Topology.Solids.Solid_Kind;
       Kind : Solid_3D_Kind;
 
@@ -1138,5 +1135,871 @@ package body TopoScript_API.Topology is
       end;
       Data (1) := Solid_3D_To_HAC (Kind);
    end Make_Solid_3D_Native;
+
+
+   --  ----------------------------------------------------------------
+   --  The human-level solid primitives (DD-006, increments b and c):
+   --  Box builds the whole boundary of a solid value in one call,
+   --  Move copies one solid value, every vertex moved by the same
+   --  vector, Difference subtracts one axis-aligned box from another
+   --  (DD-006, decision 4). All run the exact classification gates
+   --  over the shared 3D stores of the run: a rejected construction
+   --  records its diagnostic and yields the absent solid. A built
+   --  value stays valid for the whole run, like every handle of the
+   --  model, and the stored edge chain of a value is never touched
+   --  again: the stores are append-only.
+
+   --  The shared construction of an axis-aligned box value (DD-006,
+   --  decisions 2 and 4): the eight corners between (X1, Y1, Z1) and
+   --  (X2, Y2, Z2), the twelve edges, the six faces wound
+   --  counter-clockwise seen from outside, in the verified edge
+   --  pattern of the box-solid scenario. The caller checked the
+   --  positive extents and the capacity; the vertices and edges
+   --  created here are consumed by the assembly's own boundary, so
+   --  the caller sets Face_Start after its last call.
+   procedure Build_Box
+     (X1, Y1, Z1, X2, Y2, Z2 : Long_Long_Integer;
+      S                      :    out TopoProof.Topology.Shells.Shell)
+   with Pre => S.Face_Count = 6 and then S.Edge_Total = 24
+   is
+      procedure Corner
+        (X, Y, Z : Long_Long_Integer;
+         V       :    out TopoProof.Topology.Vertices_3D.Vertex_Handle)
+      is
+         P : TopoProof.Geometry.Points.Point_3D;
+      begin
+         P := (X => TopoProof.Numerics.Grid_Coordinate (X),
+               Y => TopoProof.Numerics.Grid_Coordinate (Y),
+               Z => TopoProof.Numerics.Grid_Coordinate (Z));
+         TopoProof.Topology.Vertices_3D.Create
+           (Session.Current_Session.Vertices_3D, P, V);
+      end Corner;
+
+      procedure Edge
+        (A, B : TopoProof.Topology.Vertices_3D.Vertex_Handle;
+         E    :    out TopoProof.Topology.Edges_3D.Edge_Handle)
+      is
+      begin
+         TopoProof.Topology.Edges_3D.Create
+           (Session.Current_Session.Links_3D,
+            Session.Current_Session.Vertices_3D, A, B, E);
+      end Edge;
+
+      HA, HB, HC, HD, HE, HF, HG, HH :
+        TopoProof.Topology.Vertices_3D.Vertex_Handle;
+      E1, E2, E3, E4 : TopoProof.Topology.Edges_3D.Edge_Handle;
+
+      --  The edge handles of this call are consecutive from the count
+      --  taken before the first corner.
+      First_Edge : constant Natural :=
+        TopoProof.Topology.Edges_3D.Edge_Count
+          (Session.Current_Session.Links_3D);
+
+   begin
+      Corner (X1, Y1, Z1, HA);
+      Corner (X2, Y1, Z1, HB);
+      Corner (X2, Y2, Z1, HC);
+      Corner (X1, Y2, Z1, HD);
+      Corner (X1, Y1, Z2, HE);
+      Corner (X2, Y1, Z2, HF);
+      Corner (X2, Y2, Z2, HG);
+      Corner (X1, Y2, Z2, HH);
+
+      Edge (HD, HC, E1);
+      Edge (HC, HB, E2);
+      Edge (HB, HA, E3);
+      Edge (HA, HD, E4);
+      Edge (HE, HF, E1);
+      Edge (HF, HG, E2);
+      Edge (HG, HH, E3);
+      Edge (HH, HE, E4);
+      Edge (HB, HF, E1);
+      Edge (HF, HE, E2);
+      Edge (HE, HA, E3);
+      Edge (HA, HB, E4);
+      Edge (HB, HC, E1);
+      Edge (HC, HG, E2);
+      Edge (HG, HF, E3);
+      Edge (HF, HB, E4);
+      Edge (HC, HD, E1);
+      Edge (HD, HH, E2);
+      Edge (HH, HG, E3);
+      Edge (HG, HC, E4);
+      Edge (HD, HA, E1);
+      Edge (HA, HE, E2);
+      Edge (HE, HH, E3);
+      Edge (HH, HD, E4);
+
+      --  The boundary list of the assembled value, in creation order:
+      --  the edge handles of this call are consecutive from the count
+      --  taken before the first corner, and each face range is the
+      --  four-use block of the call.
+      for K in 1 .. 6 loop
+         for U in 1 .. 4 loop
+            S.Boundary (4 * (K - 1) + U) :=
+              TopoProof.Topology.Edges_3D.Edge_Handle
+                (First_Edge + 4 * (K - 1) + U);
+         end loop;
+         S.Face_Ends (K) := 4 * K;
+      end loop;
+   end Build_Box;
+
+   procedure Box_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: Width at 1, Depth at 2, Height at 3, Result
+      --  out at 4. The box of the origin corner: its dimensions count
+      --  in grid units; once positive and within the grid domain,
+      --  the whole box stays on the grid and every face is a
+      --  non-degenerate rectangle, exact by construction.
+      use type TopoProof.Topology.Solids.Solid_Kind;
+
+      Grid_Last : constant Long_Long_Integer :=
+        Long_Long_Integer (TopoProof.Numerics.Grid_Coordinate'Last);
+
+      W : constant Long_Long_Integer := Conversions.To_Long (Data (1));
+      D : constant Long_Long_Integer := Conversions.To_Long (Data (2));
+      H : constant Long_Long_Integer := Conversions.To_Long (Data (3));
+
+      Old_Edges : constant Natural :=
+        TopoProof.Topology.Edges_3D.Edge_Count
+          (Session.Current_Session.Links_3D);
+      Old_Vertices : constant Natural :=
+        TopoProof.Topology.Vertices_3D.Vertex_Count
+          (Session.Current_Session.Vertices_3D);
+
+      --  The shell of the built value: 24 uses over the 12 edges of
+      --  this call, six faces of four uses each. The edge handles are
+      --  consecutive in creation order, so the six face ranges are
+      --  the four-use blocks of the call.
+      S  : TopoProof.Topology.Shells.Shell (6, 24);
+      SV : TopoProof.Topology.Shells.Shell_Validity;
+      SK : TopoProof.Topology.Solids.Solid_Kind;
+
+   begin
+      if W < 1 or else D < 1 or else H < 1
+        or else W > Grid_Last or else D > Grid_Last or else H > Grid_Last
+      then
+         Session.Record_Failure ("error: invalid box dimensions");
+         Conversions.Write_Solid_Handle (Data, 4, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      if Old_Vertices + 8 > TopoProof.Topology.Vertices_3D.Max_Vertices_3D
+        or else Old_Edges + 24 > TopoProof.Topology.Edges_3D.Max_Edges_3D
+      then
+         Session.Record_Failure ("error: too many edges for one solid");
+         Conversions.Write_Solid_Handle (Data, 4, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      Build_Box (0, 0, 0, W, D, H, S);
+
+      SV :=
+        TopoProof.Topology.Shells.Classify_Shell
+          (Session.Current_Session.Links_3D,
+           Session.Current_Session.Vertices_3D, S);
+
+      if SV /= TopoProof.Topology.Shells.Closed_Shell then
+         --  The classification gate runs on the built value; a
+         --  rejection here would be a construction defect, reported
+         --  the shell way.
+         Session.Record_Failure ("error: the box boundary is not closed");
+         Conversions.Write_Solid_Handle (Data, 4, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      SK :=
+        TopoProof.Topology.Solids.Classify_Solid
+          (Session.Current_Session.Links_3D,
+           Session.Current_Session.Vertices_3D, S);
+
+      if SK = TopoProof.Topology.Solids.Flat_Assembly then
+         --  A box of positive dimensions encloses something exact: a
+         --  flat assembly here would be a construction defect.
+         Session.Record_Failure ("error: flat shell");
+         Conversions.Write_Solid_Handle (Data, 4, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      Session.Current_Session.Solids.Append (S);
+      --  The edges of the call are consumed by its own boundary: a
+      --  later Make_Face_3D of the same script starts a new face after
+      --  them.
+      Session.Current_Session.Face_Start := Old_Edges + 25;
+
+      Conversions.Write_Solid_Handle
+        (Data, 4,
+         TopoScript_API.Solid_Handle_Kind
+           (Natural (Session.Current_Session.Solids.Length)));
+   end Box_Native;
+
+
+   procedure Move_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: solid handle S at 1, X at 2, Y at 3, Z at 4,
+      --  Result out at 5.
+      use type TopoProof.Topology.Solids.Solid_Kind;
+      use type TopoProof.Numerics.Grid_Coordinate;
+
+      H : TopoScript_API.Solid_Handle_Kind;
+      DX, DY, DZ : Long_Long_Integer;
+      Grid_First : constant Long_Long_Integer :=
+        Long_Long_Integer (TopoProof.Numerics.Grid_Coordinate'First);
+      Grid_Last  : constant Long_Long_Integer :=
+        Long_Long_Integer (TopoProof.Numerics.Grid_Coordinate'Last);
+
+      Source : TopoProof.Topology.Shells.Shell;
+
+      Old_Edges : constant Natural :=
+        TopoProof.Topology.Edges_3D.Edge_Count
+          (Session.Current_Session.Links_3D);
+      Old_Vertices : constant Natural :=
+        TopoProof.Topology.Vertices_3D.Vertex_Count
+          (Session.Current_Session.Vertices_3D);
+
+      --  One moved copy per distinct source vertex: Seen marks the
+      --  source vertices visited by the check pass, Map carries the
+      --  handle of the created moved copy, zero when not created.
+      Seen : array (1 .. TopoProof.Topology.Vertices_3D.Max_Vertices_3D)
+        of Boolean := [others => False];
+      Map : array (1 .. TopoProof.Topology.Vertices_3D.Max_Vertices_3D)
+        of Natural := [others => 0];
+
+      Rejected : Boolean := False;
+      E : TopoProof.Topology.Edges_3D.Edge_Handle;
+
+      --  The check pass, before any creation: the moved position of
+      --  the source vertex V stays in the grid domain, so a rejected
+      --  move leaves no half-moved copy behind; the mark also counts
+      --  the distinct source vertices, one moved copy each.
+      procedure Check_Vertex
+        (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+      is
+         P : TopoProof.Geometry.Points.Point_3D;
+      begin
+         if Seen (V) then
+            return;
+         end if;
+         P :=
+           TopoProof.Topology.Vertices_3D.Point_Of
+             (Session.Current_Session.Vertices_3D, V);
+         Seen (V) := True;
+         if Grid_First
+              > Long_Long_Integer (P.X) + DX
+            or else Long_Long_Integer (P.X) + DX > Grid_Last
+            or else Grid_First
+                     > Long_Long_Integer (P.Y) + DY
+                 or else Long_Long_Integer (P.Y) + DY > Grid_Last
+            or else Grid_First
+                     > Long_Long_Integer (P.Z) + DZ
+                 or else Long_Long_Integer (P.Z) + DZ > Grid_Last
+         then
+            Rejected := True;
+         end if;
+      end Check_Vertex;
+
+   begin
+      if not Conversions.Read_Solid_Handle (Data, 1, H)
+        or else H = TopoScript_API.No_Solid
+        or else Natural (H)
+                > Natural (Session.Current_Session.Solids.Length)
+      then
+         Session.Record_Failure ("error: unknown solid");
+         Conversions.Write_Solid_Handle (Data, 5, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      DX := Conversions.To_Long (Data (2));
+      DY := Conversions.To_Long (Data (3));
+      DZ := Conversions.To_Long (Data (4));
+
+      Source := Session.Current_Session.Solids.Element (Natural (H));
+
+      for U in 1 .. Source.Edge_Total loop
+         declare
+            Pair : constant TopoProof.Topology.Edges_3D.Vertex_Handle_Pair :=
+              TopoProof.Topology.Edges_3D.Endpoints
+                (Session.Current_Session.Links_3D, Source.Boundary (U));
+         begin
+            Check_Vertex (Pair.From_Vertex);
+            exit when Rejected;
+            Check_Vertex (Pair.To_Vertex);
+            exit when Rejected;
+         end;
+      end loop;
+
+      if Rejected then
+         Session.Record_Failure ("error: the moved solid leaves the grid");
+         Conversions.Write_Solid_Handle (Data, 5, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      --  The capacity of the copy: one new vertex per distinct source
+      --  vertex, one new edge per use.
+      declare
+         Distinct : Natural := 0;
+      begin
+         for V in 1 .. TopoProof.Topology.Vertices_3D.Max_Vertices_3D loop
+            if Seen (V) then
+               Distinct := Distinct + 1;
+            end if;
+         end loop;
+
+         if Distinct + Old_Vertices
+              > TopoProof.Topology.Vertices_3D.Max_Vertices_3D
+           or else Natural (Source.Edge_Total) + Old_Edges
+              > TopoProof.Topology.Edges_3D.Max_Edges_3D
+         then
+            Session.Record_Failure ("error: too many edges for one solid");
+            Conversions.Write_Solid_Handle
+              (Data, 5, TopoScript_API.No_Solid);
+            return;
+         end if;
+      end;
+
+      --  The moved copy: one new vertex per distinct source vertex,
+      --  then one new edge per use, in the source boundary order; the
+      --  pairing is preserved structurally.
+      declare
+         Target : TopoProof.Topology.Shells.Shell
+           (Source.Face_Count, Source.Edge_Total);
+         Index  : Natural := 0;
+
+         function Moved
+           (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+            return TopoProof.Geometry.Points.Point_3D
+         is
+            P : constant TopoProof.Geometry.Points.Point_3D :=
+              TopoProof.Topology.Vertices_3D.Point_Of
+                (Session.Current_Session.Vertices_3D, V);
+         begin
+            return
+              (X => P.X + TopoProof.Numerics.Grid_Coordinate (DX),
+               Y => P.Y + TopoProof.Numerics.Grid_Coordinate (DY),
+               Z => P.Z + TopoProof.Numerics.Grid_Coordinate (DZ));
+         end Moved;
+
+         function Moved_Copy
+           (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+            return TopoProof.Topology.Vertices_3D.Vertex_Handle
+         is
+            VV : TopoProof.Topology.Vertices_3D.Vertex_Handle;
+         begin
+            if Map (V) = 0 then
+               TopoProof.Topology.Vertices_3D.Create
+                 (Session.Current_Session.Vertices_3D, Moved (V), VV);
+               Map (V) := VV;
+            end if;
+            return TopoProof.Topology.Vertices_3D.Vertex_Handle (Map (V));
+         end Moved_Copy;
+
+         Status : TopoProof.Topology.Shells.Shell_Validity;
+         SK     : TopoProof.Topology.Solids.Solid_Kind;
+
+      begin
+         for K in 1 .. Source.Face_Count loop
+            for U in
+              (if K = 1 then 1
+               else Source.Face_Ends (K - 1) + 1) .. Source.Face_Ends (K)
+            loop
+               declare
+                  Pair : constant TopoProof.Topology.Edges_3D.
+                           Vertex_Handle_Pair :=
+                    TopoProof.Topology.Edges_3D.Endpoints
+                      (Session.Current_Session.Links_3D,
+                       Source.Boundary (U));
+               begin
+                  TopoProof.Topology.Edges_3D.Create
+                    (Session.Current_Session.Links_3D,
+                     Session.Current_Session.Vertices_3D,
+                     Moved_Copy (Pair.From_Vertex),
+                     Moved_Copy (Pair.To_Vertex), E);
+                  Index := Index + 1;
+                  Target.Boundary (Index) := E;
+               end;
+            end loop;
+            Target.Face_Ends (K) := Index;
+         end loop;
+
+         Status :=
+           TopoProof.Topology.Shells.Classify_Shell
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, Target);
+
+         if Status /= TopoProof.Topology.Shells.Closed_Shell then
+            --  The pairing is preserved structurally; a rejection here
+            --  would be a construction defect, reported the shell way.
+            Session.Record_Failure
+              ("error: the moved boundary is not closed");
+            Conversions.Write_Solid_Handle
+              (Data, 5, TopoScript_API.No_Solid);
+            return;
+         end if;
+
+         SK :=
+           TopoProof.Topology.Solids.Classify_Solid
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, Target);
+
+         if SK = TopoProof.Topology.Solids.Flat_Assembly then
+            Session.Record_Failure ("error: flat shell");
+            Conversions.Write_Solid_Handle
+              (Data, 5, TopoScript_API.No_Solid);
+            return;
+         end if;
+
+         Session.Current_Session.Solids.Append (Target);
+         --  The edges of the copy are consumed by its own boundary.
+         Session.Current_Session.Face_Start :=
+           Old_Edges + Natural (Source.Edge_Total) + 1;
+
+         Conversions.Write_Solid_Handle
+           (Data, 5,
+            TopoScript_API.Solid_Handle_Kind
+              (Natural (Session.Current_Session.Solids.Length)));
+      end;
+   end Move_Native;
+
+
+
+   --  ----------------------------------------------------------------
+   --  The exact difference of two axis-aligned box values (DD-006,
+   --  decision 4, increment d): the first box minus the second, as
+   --  the exact set subtraction of two grid prisms. Either no
+   --  positive-volume overlap - the difference is the first box,
+   --  unchanged - or a full covering - nothing, reported and never
+   --  built - or a decomposition into at most six axis-aligned boxes
+   --  over the clipped extents of the second box: the bottom and top
+   --  slabs over the full cross-section of the first box, then the
+   --  front and back slabs over the clipped depth, then the left and
+   --  right slabs over the clipped height. Every piece is built by
+   --  the same construction as Box and runs the exact classification
+   --  gates, so every piece stays exactly classifiable; the pieces
+   --  live in the scripting layer as a compound (a list of solid
+   --  handles, the kernel model stays the one shell of DD-005).
+
+   --  The exact extents of one box value, and the input gate of the
+   --  Difference: a stored solid value is an axis-aligned box when
+   --  six faces of four uses each carry exactly eight distinct
+   --  vertices, each on a corner of the bounding box (each coordinate
+   --  at the lower or the upper end on each axis). A closed shell
+   --  with that boundary is exactly the prism of those extents, so
+   --  the exact decomposition below is exact on it.
+   type Extents is record
+      X1, Y1, Z1, X2, Y2, Z2 : Long_Long_Integer;
+   end record;
+
+   function Is_Axis_Box
+     (S :        TopoProof.Topology.Shells.Shell;
+      E :    out Extents)
+      return Boolean
+   is
+      function Point_Of
+        (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+         return TopoProof.Geometry.Points.Point_3D
+      is
+      begin
+         return TopoProof.Topology.Vertices_3D.Point_Of
+           (Session.Current_Session.Vertices_3D, V);
+      end Point_Of;
+
+      --  The corner of the bounding box each vertex sits on: eight
+      --  distinct vertices on box corners carry exactly the eight
+      --  corner codes 0 .. 7.
+      Corner : array (1 .. TopoProof.Topology.Vertices_3D.Max_Vertices_3D)
+        of Natural := [others => 0];
+      Distinct : Natural := 0;
+      Failed   : Boolean := False;
+
+      First : Boolean := True;
+      Min_X, Max_X, Min_Y, Max_Y, Min_Z, Max_Z : Long_Long_Integer;
+
+   begin
+      E := (0, 0, 0, 0, 0, 0);
+
+      --  The structure of a box value: six faces of four uses each.
+      if S.Face_Count /= 6 or else S.Edge_Total /= 24 then
+         return False;
+      end if;
+      for K in 1 .. 6 loop
+         if S.Face_Ends (K) /= 4 * K then
+            return False;
+         end if;
+      end loop;
+
+      --  The bounding box, over the endpoints of every use.
+      for U in 1 .. S.Edge_Total loop
+         declare
+            Pair : constant TopoProof.Topology.Edges_3D.
+                     Vertex_Handle_Pair :=
+               TopoProof.Topology.Edges_3D.Endpoints
+                 (Session.Current_Session.Links_3D, S.Boundary (U));
+
+            procedure Collect
+              (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+            is
+               P : constant TopoProof.Geometry.Points.Point_3D :=
+                 Point_Of (V);
+               X : constant Long_Long_Integer := Long_Long_Integer (P.X);
+               Y : constant Long_Long_Integer := Long_Long_Integer (P.Y);
+               Z : constant Long_Long_Integer := Long_Long_Integer (P.Z);
+            begin
+               if First then
+                  Min_X := X; Max_X := X;
+                  Min_Y := Y; Max_Y := Y;
+                  Min_Z := Z; Max_Z := Z;
+                  First := False;
+               else
+                  Min_X := Long_Long_Integer'Min (Min_X, X);
+                  Max_X := Long_Long_Integer'Max (Max_X, X);
+                  Min_Y := Long_Long_Integer'Min (Min_Y, Y);
+                  Max_Y := Long_Long_Integer'Max (Max_Y, Y);
+                  Min_Z := Long_Long_Integer'Min (Min_Z, Z);
+                  Max_Z := Long_Long_Integer'Max (Max_Z, Z);
+               end if;
+            end Collect;
+
+         begin
+            Collect (Pair.From_Vertex);
+            Collect (Pair.To_Vertex);
+         end;
+      end loop;
+
+      --  Every vertex on a box corner, eight distinct vertices.
+      for U in 1 .. S.Edge_Total loop
+         declare
+            Pair : constant TopoProof.Topology.Edges_3D.
+                     Vertex_Handle_Pair :=
+               TopoProof.Topology.Edges_3D.Endpoints
+                 (Session.Current_Session.Links_3D, S.Boundary (U));
+
+            procedure Corner_Of
+              (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+            is
+               P : constant TopoProof.Geometry.Points.Point_3D :=
+                 Point_Of (V);
+               X : constant Long_Long_Integer := Long_Long_Integer (P.X);
+               Y : constant Long_Long_Integer := Long_Long_Integer (P.Y);
+               Z : constant Long_Long_Integer := Long_Long_Integer (P.Z);
+            begin
+               if (X /= Min_X and then X /= Max_X)
+                 or else (Y /= Min_Y and then Y /= Max_Y)
+                 or else (Z /= Min_Z and then Z /= Max_Z)
+               then
+                  Failed := True;
+               elsif Corner (V) = 0 then
+                  Distinct := Distinct + 1;
+                  Corner (V) :=
+                    (if X = Max_X then 1 else 0)
+                    + (if Y = Max_Y then 2 else 0)
+                    + (if Z = Max_Z then 4 else 0)
+                    + 1;
+               end if;
+            end Corner_Of;
+
+         begin
+            Corner_Of (Pair.From_Vertex);
+            Corner_Of (Pair.To_Vertex);
+         end;
+      end loop;
+
+      if Failed or else Distinct /= 8 then
+         return False;
+      end if;
+
+      E := (X1 => Min_X, Y1 => Min_Y, Z1 => Min_Z,
+            X2 => Max_X, Y2 => Max_Y, Z2 => Max_Z);
+      return True;
+   end Is_Axis_Box;
+
+   procedure Difference_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: box A at 1, box B at 2, piece count out at 3.
+      use type TopoProof.Topology.Solids.Solid_Kind;
+
+      A, B   : TopoScript_API.Solid_Handle_Kind;
+      EA, EB : Extents;
+
+      Old_Edges : constant Natural :=
+        TopoProof.Topology.Edges_3D.Edge_Count
+          (Session.Current_Session.Links_3D);
+      Old_Vertices : constant Natural :=
+        TopoProof.Topology.Vertices_3D.Vertex_Count
+          (Session.Current_Session.Vertices_3D);
+
+      Count : Natural := 0;
+
+      --  One piece of the decomposition, built only on positive
+      --  extents, classified exactly, appended to the solid store and
+      --  to the compound (DD-006, decision 4). The extents of every
+      --  piece are inside the extents of the first box, whose
+      --  vertices are on the grid, so every piece stays on the grid.
+      procedure Build_Piece
+        (X1, Y1, Z1, X2, Y2, Z2 : Long_Long_Integer)
+      is
+         S  : TopoProof.Topology.Shells.Shell (6, 24);
+         SV : TopoProof.Topology.Shells.Shell_Validity;
+         SK : TopoProof.Topology.Solids.Solid_Kind;
+
+      begin
+         if X1 >= X2 or else Y1 >= Y2 or else Z1 >= Z2 then
+            return;
+         end if;
+
+         Build_Box (X1, Y1, Z1, X2, Y2, Z2, S);
+
+         SV :=
+           TopoProof.Topology.Shells.Classify_Shell
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+         if SV /= TopoProof.Topology.Shells.Closed_Shell then
+            --  A rejection here would be a construction defect,
+            --  reported the shell way.
+            Session.Record_Failure
+              ("error: the difference piece is not closed");
+            return;
+         end if;
+
+         SK :=
+           TopoProof.Topology.Solids.Classify_Solid
+             (Session.Current_Session.Links_3D,
+              Session.Current_Session.Vertices_3D, S);
+         if SK = TopoProof.Topology.Solids.Flat_Assembly then
+            --  A piece of positive extents encloses something exact.
+            Session.Record_Failure ("error: flat shell");
+            return;
+         end if;
+
+         Session.Current_Session.Solids.Append (S);
+         Count := Count + 1;
+         Session.Current_Session.Compound.Append
+           (TopoScript_API.Solid_Handle_Kind
+              (Natural (Session.Current_Session.Solids.Length)));
+      end Build_Piece;
+
+   begin
+      if not Conversions.Read_Solid_Handle (Data, 1, A)
+        or else A = TopoScript_API.No_Solid
+        or else Natural (A)
+                > Natural (Session.Current_Session.Solids.Length)
+        or else not Conversions.Read_Solid_Handle (Data, 2, B)
+        or else B = TopoScript_API.No_Solid
+        or else Natural (B)
+                > Natural (Session.Current_Session.Solids.Length)
+      then
+         Session.Record_Failure ("error: unknown solid");
+         Conversions.Write_Count (Data, 3, 0);
+         return;
+      end if;
+
+      Session.Current_Session.Compound.Clear;
+
+      if not Is_Axis_Box
+               (Session.Current_Session.Solids.Element (Natural (A)), EA)
+        or else not Is_Axis_Box
+               (Session.Current_Session.Solids.Element (Natural (B)), EB)
+      then
+         Session.Record_Failure
+           ("error: the difference needs axis-aligned box values");
+         Conversions.Write_Count (Data, 3, 0);
+         return;
+      end if;
+
+      --  Six pieces at most, one value each: eight vertices and
+      --  twenty-four uses per piece.
+      if Old_Vertices + 48
+             > TopoProof.Topology.Vertices_3D.Max_Vertices_3D
+        or else Old_Edges + 144
+             > TopoProof.Topology.Edges_3D.Max_Edges_3D
+      then
+         Session.Record_Failure ("error: too many edges for one solid");
+         Conversions.Write_Count (Data, 3, 0);
+         return;
+      end if;
+
+      --  The positive-volume overlap of the two boxes.
+      declare
+         CX1 : constant Long_Long_Integer :=
+           Long_Long_Integer'Max (EA.X1, EB.X1);
+         CX2 : constant Long_Long_Integer :=
+           Long_Long_Integer'Min (EA.X2, EB.X2);
+         CY1 : constant Long_Long_Integer :=
+           Long_Long_Integer'Max (EA.Y1, EB.Y1);
+         CY2 : constant Long_Long_Integer :=
+           Long_Long_Integer'Min (EA.Y2, EB.Y2);
+         CZ1 : constant Long_Long_Integer :=
+           Long_Long_Integer'Max (EA.Z1, EB.Z1);
+         CZ2 : constant Long_Long_Integer :=
+           Long_Long_Integer'Min (EA.Z2, EB.Z2);
+
+         Overlap : constant Boolean :=
+           CX1 < CX2 and then CY1 < CY2 and then CZ1 < CZ2;
+
+         Covered : constant Boolean :=
+           EA.X1 >= EB.X1 and then EA.X2 <= EB.X2
+           and then EA.Y1 >= EB.Y1 and then EA.Y2 <= EB.Y2
+           and then EA.Z1 >= EB.Z1 and then EA.Z2 <= EB.Z2;
+
+      begin
+         if not Overlap then
+            --  The difference is the first box itself, its stored
+            --  value unchanged: the compound carries its handle.
+            Session.Current_Session.Compound.Append (A);
+            Conversions.Write_Count (Data, 3, 1);
+            return;
+         end if;
+
+         if Covered then
+            Session.Record_Failure
+              ("error: the difference encloses nothing");
+            Conversions.Write_Count (Data, 3, 0);
+            return;
+         end if;
+
+         --  The decomposition: bottom and top slabs of the clipped
+         --  box over the full cross-section of the first box, then
+         --  front and back slabs over the clipped depth, then left
+         --  and right slabs over the clipped height, in this order.
+         Build_Piece (EA.X1, EA.Y1, EA.Z1, EA.X2, EA.Y2, CZ1);
+         Build_Piece (EA.X1, EA.Y1, CZ2, EA.X2, EA.Y2, EA.Z2);
+         Build_Piece (EA.X1, EA.Y1, CZ1, EA.X2, CY1, CZ2);
+         Build_Piece (EA.X1, CY2, CZ1, EA.X2, EA.Y2, CZ2);
+         Build_Piece (EA.X1, CY1, CZ1, CX1, CY2, CZ2);
+         Build_Piece (CX2, CY1, CZ1, EA.X2, CY2, CZ2);
+
+         --  Every edge created for the pieces is consumed by their
+         --  own boundary.
+         Session.Current_Session.Face_Start :=
+           TopoProof.Topology.Edges_3D.Edge_Count
+             (Session.Current_Session.Links_3D) + 1;
+
+         Conversions.Write_Count (Data, 3, Count);
+      end;
+   end Difference_Native;
+
+   procedure Piece_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: piece index K at 1, handle out at 2.
+      K : Natural;
+
+   begin
+      if not Conversions.Read_Count (Data, 1, K)
+        or else K = 0
+        or else K > Natural (Session.Current_Session.Compound.Length)
+      then
+         Session.Record_Failure ("error: unknown piece");
+         Conversions.Write_Solid_Handle (Data, 2, TopoScript_API.No_Solid);
+         return;
+      end if;
+
+      Conversions.Write_Solid_Handle
+        (Data, 2, Session.Current_Session.Compound.Element (K));
+   end Piece_Native;
+
+   --  Native side of Solid_Bounds: the exact grid bounds of one solid
+   --  value of the designated session: the min and max of every vertex
+   --  coordinate over all the edge uses of the stored assembly, written
+   --  into the two out points (DD-006, the position read-out named by
+   --  the moved-solid review: the classification alone does not say
+   --  where the value sits, and a moved-box check must see it).
+   procedure Solid_Bounds_Native
+     (Data : in out HAC_Sys.Interfacing.HAC_Element_Array)
+   is
+      --  Element layout: solid handle S at 1, Min out at 2, Max out at
+      --  5 (three grid components each).
+      H : TopoScript_API.Solid_Handle_Kind;
+
+      Source : TopoProof.Topology.Shells.Shell;
+
+      Grid_First : constant Long_Long_Integer :=
+        Long_Long_Integer (TopoProof.Numerics.Grid_Coordinate'First);
+      Grid_Last  : constant Long_Long_Integer :=
+        Long_Long_Integer (TopoProof.Numerics.Grid_Coordinate'Last);
+
+      --  Seed bounds: any real vertex tightens them (the solid values
+      --  are built inside the grid domain, so the seed never survives
+      --  on a nonempty solid).
+      Min_X, Min_Y, Min_Z : Long_Long_Integer := Grid_Last;
+      Max_X, Max_Y, Max_Z : Long_Long_Integer := Grid_First;
+
+      Seen : array (1 .. TopoProof.Topology.Vertices_3D.Max_Vertices_3D)
+        of Boolean := [others => False];
+
+      --  The bounds pass, min and max per axis on each distinct vertex.
+      procedure Track_Vertex
+        (V : TopoProof.Topology.Vertices_3D.Vertex_Handle)
+      is
+         P : TopoProof.Geometry.Points.Point_3D;
+      begin
+         if Seen (V) then
+            return;
+         end if;
+         P :=
+           TopoProof.Topology.Vertices_3D.Point_Of
+             (Session.Current_Session.Vertices_3D, V);
+         Seen (V) := True;
+
+         if Min_X > Long_Long_Integer (P.X) then
+            Min_X := Long_Long_Integer (P.X);
+         end if;
+         if Max_X < Long_Long_Integer (P.X) then
+            Max_X := Long_Long_Integer (P.X);
+         end if;
+         if Min_Y > Long_Long_Integer (P.Y) then
+            Min_Y := Long_Long_Integer (P.Y);
+         end if;
+         if Max_Y < Long_Long_Integer (P.Y) then
+            Max_Y := Long_Long_Integer (P.Y);
+         end if;
+         if Min_Z > Long_Long_Integer (P.Z) then
+            Min_Z := Long_Long_Integer (P.Z);
+         end if;
+         if Max_Z < Long_Long_Integer (P.Z) then
+            Max_Z := Long_Long_Integer (P.Z);
+         end if;
+      end Track_Vertex;
+
+   begin
+      if not Conversions.Read_Solid_Handle (Data, 1, H)
+        or else H = TopoScript_API.No_Solid
+        or else Natural (H)
+                > Natural (Session.Current_Session.Solids.Length)
+      then
+         Session.Record_Failure ("error: unknown solid");
+         Conversions.Write_Point_3D
+           (Data, 2, (X => 0, Y => 0, Z => 0));
+         Conversions.Write_Point_3D
+           (Data, 5, (X => 0, Y => 0, Z => 0));
+         return;
+      end if;
+
+      Source := Session.Current_Session.Solids.Element (Natural (H));
+
+      for U in 1 .. Source.Edge_Total loop
+         declare
+            Pair : constant TopoProof.Topology.Edges_3D.Vertex_Handle_Pair :=
+              TopoProof.Topology.Edges_3D.Endpoints
+                (Session.Current_Session.Links_3D, Source.Boundary (U));
+         begin
+            Track_Vertex (Pair.From_Vertex);
+            Track_Vertex (Pair.To_Vertex);
+         end;
+      end loop;
+
+      Conversions.Write_Point_3D
+        (Data, 2,
+         (X => TopoProof.Numerics.Grid_Coordinate (Min_X),
+          Y => TopoProof.Numerics.Grid_Coordinate (Min_Y),
+          Z => TopoProof.Numerics.Grid_Coordinate (Min_Z)));
+      Conversions.Write_Point_3D
+        (Data, 5,
+         (X => TopoProof.Numerics.Grid_Coordinate (Max_X),
+          Y => TopoProof.Numerics.Grid_Coordinate (Max_Y),
+          Z => TopoProof.Numerics.Grid_Coordinate (Max_Z)));
+   end Solid_Bounds_Native;
 
 end TopoScript_API.Topology;

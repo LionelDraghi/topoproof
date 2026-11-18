@@ -51,6 +51,10 @@ COVERAGE_RUN ?=
 GNATCOV := $(ALR) exec -- gnatcov
 CHECK_EVIDENCE_DIR := tools/check-evidence
 CHECK_EVIDENCE := $(CHECK_EVIDENCE_DIR)/bin/check-evidence
+# The profile stamp: obj/.profile records the profile of the last
+# build, and a build on another profile starts with a clean (gprbuild
+# tracks the sources, not the switches). See the build recipe.
+PROFILE_STAMP := obj/.profile
 
 # GNATprove invocation, shared by every proof recipe below. Every run
 # analyses the whole kernel: -U covers units not reachable from a main.
@@ -108,8 +112,11 @@ help:
 	echo "Targets:"
 	echo "  all        : build, test and prove (default when no target given)"
 	echo "  build      : compile the kernel (topoproof.gpr) and the client"
-	echo "               (tools/topocli/topocli.gpr), dev profile"
-	echo "  release    : build with the release profile (fast proved kernel)"
+	echo "               (tools/topocli/topocli.gpr), validation profile"
+	echo "  release    : the full release chain: a complete clean, then a"
+	echo "               release build of both crates, then the whole test"
+	echo "               replay green on the release executable. Only a"
+	echo "               green replay unlocks the release."
 	echo "  test       : build, then run the Markdown documentation in"
 	echo "               docs/features through bbt, and validate the"
 	echo "               generated diagrams as XML"
@@ -136,19 +143,41 @@ build:
 	echo
 	echo === building the topoproof kernel
 
+	# The object directories hold one profile at a time: gprbuild
+	# tracks the sources, not the compiler switches, so a profile
+	# switch without a clean would link the stale objects of the
+	# previous profile into the new build. The last built profile is
+	# stamped in obj/.profile (make clean removes it with obj/), and
+	# a build on another profile starts with a clean.
+	if [ -f $(PROFILE_STAMP) ] && [ "$$(cat $(PROFILE_STAMP))" != "validation" ]; then \
+	  echo "profile switch: "$$(cat $(PROFILE_STAMP))" objects must go, clean first"; \
+	  $(MAKE) --no-print-directory clean; \
+	fi
+	mkdir -p obj && echo validation > $(PROFILE_STAMP)
 	$(ALR) build
 	cd tools/topocli && $(ALR) build
 
-# Release build: run-time checks suppressed on the proved kernel (the
-# silver payoff), kept on the client. Each crate builds in its own
-# Alire environment: the client imports HAC, which the root crate
-# environment does not know.
-release:
+# The release chain: a profile never reuses another profile's results,
+# so the release starts from a complete clean, rebuilds both crates in
+# release mode through one -X switch on each project (run-time checks
+# suppressed on the proved kernel - the silver payoff -, kept on the
+# client, whose input validation relies on them), and replays the whole
+# executable documentation on the release executable. Only a green test
+# replay unlocks the release. The replay runs through the regular
+# test-run pipeline, and refreshes the local test evidence with
+# release-profile results on the way.
+release: clean
 	echo
 	echo === building topoproof and topocli, release profile
 
-	$(ALR) exec -- gprbuild -P topoproof.gpr -XTopoproof_Build_Profile=release
-	cd tools/topocli && $(ALR) exec -- gprbuild -P topocli.gpr -XTopoproof_Build_Profile=release
+	mkdir -p obj && echo release > $(PROFILE_STAMP)
+	$(ALR) exec -- gprbuild -p -P topoproof.gpr -XTopoproof_Build_Profile=release
+	cd tools/topocli && $(ALR) exec -- gprbuild -p -P topocli.gpr -XTopoproof_Build_Profile=release
+	echo
+	echo === replaying the whole executable documentation, release build
+
+	$(MAKE) --no-print-directory test-run
+	echo OK
 
 # bbt runs from tests/, where the documentation scenarios create their
 # files; --cleanup removes the files created by Given steps, and the
