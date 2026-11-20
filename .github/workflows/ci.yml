@@ -70,18 +70,13 @@ jobs:
       - name: Relocate the Alire cache (Windows)
         if: runner.os == 'Windows'
         run: alr settings --global --set cache.dir C:\alr-cache
-      # bbt 0.6 is not released to the Alire index yet, and the released
-      # version does not compile with GNAT 16: the CI builds the latest
-      # bbt from its repository, until 0.6 lands in the index and alr
-      # install becomes enough again. The binary joins the PATH for
-      # the make test recipes. RUNNER_TEMP is used instead of /tmp so
-      # that the PATH entry is also a valid path on the Windows runner.
-      - name: Install bbt (latest)
+
+      - name: Install bbt
         shell: bash
+        working-directory: ${{ runner.temp }}
         run: |
-          git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
-          cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
-          echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
+          alr --non-interactive install bbt
+          echo "$HOME/.alire/bin" >> "$GITHUB_PATH"
       # The ubuntu-26.04 runner image no longer ships xmllint
       # (libxml2-utils); the diagram validation of make test needs it.
       - name: Install xmllint (Linux)
@@ -234,11 +229,14 @@ jobs:
           restore-keys: |
             ${{ github.job }}-alire-
 
-      - name: Build the latest bbt from its repository
+      # Same bbt install as the build-and-bbt job: the indexed release,
+      # in the default prefix, outside the workspace.
+      - name: Install bbt
+        shell: bash
+        working-directory: ${{ runner.temp }}
         run: |
-          git clone --depth 1 https://github.com/LionelDraghi/bbt "$RUNNER_TEMP/bbt"
-          cd "$RUNNER_TEMP/bbt" && alr --non-interactive build --release
-          echo "$RUNNER_TEMP/bbt" >> "$GITHUB_PATH"
+          alr --non-interactive install bbt
+          echo "$HOME/.alire/bin" >> "$GITHUB_PATH"
 
       # Same xmllint need as the build-and-bbt job: the test-run recipes
       # validate every generated diagram.
