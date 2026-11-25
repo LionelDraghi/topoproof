@@ -330,4 +330,66 @@ package body Adi_Gui.Session is
       end if;
    end Build_Face;
 
+   procedure Move_Vertex
+     (M           : in out Model;
+      VH          :        Natural;
+      Target_X    :        Integer;
+      Target_Y    :        Integer;
+      Accepted    : out    Boolean;
+      Result_Line : out    Unbounded_String;
+      Rejection   : out    Unbounded_String)
+   is
+      Candidate : Model := M;
+      R         : Adi_Gui.Kernel.Result;
+
+      --  The exact displacement of the gesture: from the
+      --  kernel-recorded position to the clicked target, both exact
+      --  grid points.
+      DX : constant Integer := Target_X - M.Vertices (VH).X;
+      DY : constant Integer := Target_Y - M.Vertices (VH).Y;
+
+      VH_Name : constant String := "V" & Trim (Natural'Image (VH));
+      --  One fresh Point_2D per move: the declarations accumulate,
+      --  a repeated name would not compile.
+      P_Name  : constant String :=
+        "MP" & Trim (Natural'Image (Candidate.Moves + 1));
+
+      --  The canonical trace of the accepted move: the last Put of
+      --  the candidate script is this Put_Vertex, so the exact match
+      --  on the last line cannot confuse an older vertex trace with
+      --  the moved one.
+      Expected : constant String :=
+        "vertex" & Natural'Image (VH) & " point "
+        & Trim (Integer'Image (Target_X)) & " "
+        & Trim (Integer'Image (Target_Y));
+
+   begin
+      Accepted := False;
+      Result_Line := Null_Unbounded_String;
+      Rejection := Null_Unbounded_String;
+
+      Append (Candidate.Declarations,
+              P_Name & " : Point_2D;" & ASCII.LF);
+      Append (Candidate.Statements,
+              "Move_Vertex (" & VH_Name & ", "
+              & Trim (Integer'Image (DX)) & ", "
+              & Trim (Integer'Image (DY)) & ", " & P_Name & ");"
+              & ASCII.LF
+              & "Put_Vertex (" & VH_Name & ");" & ASCII.LF);
+      Candidate.Moves := Candidate.Moves + 1;
+
+      R := Kernel.Run_Code (Replay_Script (Candidate));
+
+      if R.Exit_Code = 0
+        and then Last_Line (To_String (R.Traces)) = Expected
+      then
+         M := Candidate;
+         M.Vertices (VH) := (X => Target_X, Y => Target_Y);
+         Accepted := True;
+         Result_Line := To_Unbounded_String (Expected);
+      else
+         Rejection := Rejection_Of (R);
+      end if;
+   end Move_Vertex;
+
 end Adi_Gui.Session;

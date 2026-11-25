@@ -20,7 +20,11 @@ package Adi_Gui.Canvas is
 
    --  Pick_Vertex is the Select mode of drawing-model.md: Select is a
    --  reserved word, and the mode names one existing vertex.
-   type Mode_Kind is (Draw_Point, Draw_Edge, Draw_Loop, Pick_Vertex);
+   --  Move_Vertex is the move mode of DD-006: the selected vertex
+   --  follows the next click, through the kernel Move_Vertex
+   --  operation.
+   type Mode_Kind is (Draw_Point, Draw_Edge, Draw_Loop, Pick_Vertex,
+                      Move_Vertex);
 
    --  What the status line displays: the kernel traces of accepted
    --  gestures, the kernel diagnostics verbatim of the rejected ones.

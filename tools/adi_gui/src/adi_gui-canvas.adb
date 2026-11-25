@@ -439,6 +439,50 @@ package body Adi_Gui.Canvas is
                end if;
             end;
 
+         when Move_Vertex =>
+            --  The move gesture of DD-006: the selected vertex follows
+            --  the next click. Without a selection, the click selects
+            --  first, through the same exact-equality snap as Select. The destination is any
+            --  grid point; the kernel arbitrates the whole move and
+            --  a rejection keeps the selection, so the next click
+            --  retries toward another point.
+            if Selected_Vertex = 0 then
+               declare
+                  H : constant Natural :=
+                    Adi_Gui.Session.Snap (The_Session, GX, GY);
+               begin
+                  Selected_Vertex := H;
+                  if H = 0 then
+                     Report ("move: nothing at " & Img (GX) & " " & Img (GY));
+                  else
+                     declare
+                        Vertex : constant Adi_Gui.Session.Vertex_Record :=
+                          Adi_Gui.Session.Vertex_At (The_Session, H);
+                     begin
+                        Report ("move: vertex" & Natural'Image (H)
+                                & " selected at "
+                                & Img (Vertex.X) & " " & Img (Vertex.Y));
+                     end;
+                  end if;
+                  Refresh;
+               end;
+            else
+               declare
+                  OK     : Boolean;
+                  Line   : Unbounded_String;
+                  Reject : Unbounded_String;
+               begin
+                  Adi_Gui.Session.Move_Vertex
+                    (The_Session, Selected_Vertex, GX, GY, OK, Line, Reject);
+                  if OK then
+                     Report (To_String (Line));
+                  else
+                     Report (To_String (Reject));
+                  end if;
+                  Refresh;
+               end;
+            end if;
+
       end case;
    end Gesture;
 
@@ -580,6 +624,9 @@ package body Adi_Gui.Canvas is
             Report ("Loop mode: click the figure points, close on the first.");
          when Pick_Vertex =>
             Report ("Select mode: click a vertex; click nothing to clear.");
+         when Move_Vertex =>
+            Report
+              ("Move mode: the selected vertex follows the next click.");
       end case;
       Refresh;
    end Set_Mode;

@@ -1,3 +1,9 @@
 adi_gui
 config
 inspiration style *.png
+*.dll
+*.exe
+*.o
+*.ali
+*.tmp
+build_full.log

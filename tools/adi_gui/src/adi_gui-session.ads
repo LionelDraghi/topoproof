@@ -123,6 +123,25 @@ package Adi_Gui.Session is
    function Face_Handle (M : Model; Index : Positive) return Natural
      with Pre => Index <= Face_Count (M);
 
+   --  Move one known vertex to the exact grid point (Target_X,
+   --  Target_Y) through the kernel Move_Vertex operation, the kernel
+   --  side of DD-006. The displacement is the exact
+   --  difference between the kernel-recorded position and the
+   --  target; the acceptance reads the kernel trace, not the
+   --  displacement. Accepted only when the run exits 0 and the
+   --  canonical trace is the moved vertex at the target point; any
+   --  other result reports verbatim and leaves the session
+   --  unchanged, selection included.
+   procedure Move_Vertex
+     (M           : in out Model;
+      VH          :        Natural;
+      Target_X    :        Integer;
+      Target_Y    :        Integer;
+      Accepted    : out    Boolean;
+      Result_Line : out    Ada.Strings.Unbounded.Unbounded_String;
+      Rejection   : out    Ada.Strings.Unbounded.Unbounded_String)
+     with Pre => VH in 1 .. Vertex_Count (M);
+
 private
 
    type Vertex_List is array (1 .. 512) of Vertex_Record;
@@ -138,6 +157,7 @@ private
       NC           : Natural := 0;
       Face         : Handle_List;
       NF           : Natural := 0;
+      Moves        : Natural := 0;
       Declarations : Ada.Strings.Unbounded.Unbounded_String;
       Statements   : Ada.Strings.Unbounded.Unbounded_String;
    end record;

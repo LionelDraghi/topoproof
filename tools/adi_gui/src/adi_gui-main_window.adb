@@ -94,6 +94,8 @@ package body Adi_Gui.Main_Window is
          Adi_Gui.Canvas.Set_Mode (Adi_Gui.Canvas.Draw_Loop);
       elsif Text = "Select" then
          Adi_Gui.Canvas.Set_Mode (Adi_Gui.Canvas.Pick_Vertex);
+      elsif Text = "Move" then
+         Adi_Gui.Canvas.Set_Mode (Adi_Gui.Canvas.Move_Vertex);
       elsif Text = "Face" then
          Adi_Gui.Canvas.Submit_Face;
       end if;
@@ -193,7 +195,8 @@ package body Adi_Gui.Main_Window is
 
       --  The drawing modes of v0 increments 2 to 4 (drawing-model.md):
       --  Point and Edge draw, Loop closes a figure, Face classifies
-      --  the accumulated chain, Select names one vertex.
+      --  the accumulated chain, Select names one vertex, Move moves
+      --  it through the kernel Move_Vertex operation.
       Sketch_Menu := Adi.Widget.Context_Menu.Create_Handle;
       Adi.Widget.Context_Menu.Attach_Window (Sketch_Menu, W);
       Style_Menu (Sketch_Menu);
@@ -201,6 +204,7 @@ package body Adi_Gui.Main_Window is
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Edge");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Loop");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Select");
+      Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Move");
       Adi.Widget.Context_Menu.Add_Item (Sketch_Menu, "Face");
       Adi.Widget.Context_Menu.Connect_Item_Selected
         (Sketch_Menu, On_Sketch_Item'Unrestricted_Access);
