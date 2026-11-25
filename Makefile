@@ -5,6 +5,11 @@
 # See README.md, AGENTS.md and docs/dev/development_workflow.md for the workflow.
 
 ALR ?= alr
+# bbt runs the executable documentation. Alire builds it under its build
+# store and exports the crate prefix through `alr printenv`, but does not put
+# the executable on the `alr exec` PATH: resolve it from that prefix, then
+# from the PATH, so that `make test` works without a manual PATH setup.
+BBT ?= $(or $(wildcard $(shell bash -c 'eval "$$($(ALR) printenv 2>/dev/null)"; printf "%s" "$$BBT_ALIRE_PREFIX"' 2>/dev/null)/bbt),$(lastword $(sort $(wildcard $(HOME)/.local/share/alire/builds/bbt_*/*/bbt))),$(shell command -v bbt 2>/dev/null),bbt)
 # The recipes use pipefail, which requires a POSIX-shell feature set that
 # /bin/sh does not guarantee (dash lacks it). The shell is resolved from
 # the PATH, not from an absolute path, so that a native make on Windows
@@ -31,6 +36,10 @@ SCENARII := ../docs/features/command-line.md \
 
 ARTIFACTS_DIR ?= artifacts
 BBT_ARTIFACTS := $(ARTIFACTS_DIR)/bbt
+# The bbt command line of the test run, shared by its two output modes
+# (see test-run). bbt runs from tests/, so the evidence files are given
+# relatively to that directory.
+BBT_RUN := $(BBT) --cleanup=full --yes --index ../docs/tests_results/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url
 PROOF_ARTIFACTS := $(ARTIFACTS_DIR)/gnatprove
 COVERAGE_ARTIFACTS := $(ARTIFACTS_DIR)/coverage
 # Coverage metric of the coverage target: stmt by default, decision or
@@ -182,8 +191,14 @@ release: clean
 # bbt runs from tests/, where the documentation scenarios create their
 # files; --cleanup removes the files created by Given steps, and the
 # files created by the application in When steps are removed before the
-# run so that each run starts from a clean state. The complete output
-# is teed to $(BBT_ARTIFACTS)/results.log as reviewable evidence.
+# run so that each run starts from a clean state.
+# The complete output is kept as reviewable evidence, as a plain log:
+# bbt draws its status bar - the progress counter, the spinner and the
+# document under run - only when its standard output is a terminal, and
+# that bar is a terminal display, not evidence. The run therefore goes
+# straight to the terminal when make writes to one, and through the tee
+# otherwise, so neither mode can spoil the other: no bar to strip from
+# the log, no log to miss on the terminal.
 # The test run itself, without any build: the coverage target invokes it
 # with the instrumented build in place (make test keeps the build
 # prerequisite for the normal path).
@@ -193,7 +208,9 @@ test-run: evidence-dirs
 	echo
 	echo === running the executable documentation
 
-	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out && bbt --cleanup=full --yes --index ../docs/tests_results/results.md --generate_badge ../$(BBT_ARTIFACTS)/badge.url $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log'
+	$(ALR) exec -- bash -c 'set -o pipefail; cd tests && rm -f *.out ../$(BBT_ARTIFACTS)/results.log; \
+	  if [ -t 1 ]; then $(BBT_RUN) $(SCENARII); \
+	  else $(BBT_RUN) $(SCENARII) 2>&1 | tee ../$(BBT_ARTIFACTS)/results.log; fi'
 
 	# The bbt run stores the scenario paths as given on the command
 	# line, relative to tests/: reanchored to the index location, the

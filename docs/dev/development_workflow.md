@@ -74,6 +74,12 @@ reviewable artefacts under `artifacts/` (`artifacts/bbt/` and
 `artifacts/gnatprove/`). Local evidence is ignored by Git, but CI uploads it
 as workflow artefacts.
 
+The bbt run shows its status bar - the progress counter, the spinner and the
+document under run - when the output of `make` is a terminal, and then keeps
+no log: the bar is a terminal display, not evidence. When the output is
+redirected (CI, `make test | tee`), the run goes through a tee instead, and
+`artifacts/bbt/results.log` holds the complete output as a plain transcript.
+
 ## Build profiles
 
 The profiles are selected in `topoproof.gpr` by the `Topoproof_Build_Profile`

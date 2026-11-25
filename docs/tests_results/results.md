@@ -728,11 +728,14 @@
    - OK : Then the output is  
    - [X] scenario   [the Box primitive builds a solid in one call](../features/solids.md) pass  
 
-   ### Scenario: [a moved solid keeps its classification](../features/solids.md): 
+   ### Scenario: [a moved solid keeps its classification and its position](../features/solids.md): 
    - OK : Given the file `box_move.topo`  
    - OK : When I successfully run `../bin/topocli run box_move.topo`  
    - OK : Then the output is  
-   - [X] scenario   [a moved solid keeps its classification](../features/solids.md) pass  
+   - OK : And the file `../docs/features/images/solids_5.svg` contains `#1f6feb`  
+   - OK : And the file `../docs/features/images/solids_5.svg` contains `#1a7f37`  
+   - OK : And the file `../docs/features/images/solids_5.svg` contains `#cf222e`  
+   - [X] scenario   [a moved solid keeps its classification and its position](../features/solids.md) pass  
 
    ### Scenario: [an inward tetrahedron is a solid too](../features/solids.md): 
    - OK : Given the file `inward_tetrahedron_solid.topo`  
@@ -881,12 +884,12 @@
    - [X] scenario   [an inline run writes to the output file](../features/toposcript.md) pass  
 
 
-## Summary : **Success**, 125 scenarios OK
+## Summary : **Success**, 127 scenarios OK
 
 | Status     | Count |
 |------------|-------|
 | Failed     | 0     |
-| Successful | 125   |
+| Successful | 127   |
 | Empty      | 0     |
 | Not Run    | 0     |
 
