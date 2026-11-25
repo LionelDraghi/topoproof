@@ -31,13 +31,20 @@ During development, run the target of the step under work: `make build`,
 running the four commands in sequence is redundant, since `check` is
 `build` + `test` + `prove`.
 
-Before considering a change complete, run the complete chain from a
-clean state:
+The complete chain runs at the delivery gates, never per commit
+(the active contracts of the validation build make kernel operations
+one to two orders of magnitude slower):
 
-```sh
-make clean
-make all
-```
+- **Edit loop**: `make build`, then bbt on the touched feature file
+  only — seconds.
+- **Commit**: nothing mandatory; the CI backs every push and PR.
+- **Push** (local gate while it stays practical): `make check`.
+  On Linux/macOS the proof cache keeps `prove` incremental; on Windows
+  the proof cache is disabled (see the Makefile), and the full prove
+  is the long pole there.
+- **Release**: `make clean` then `make all` from a clean state,
+  followed by the release replay. The only full-chain-from-clean point
+  (see `docs/dev/release_procedure.md`).
 
 Do not add a public operation without a contract. Keep each change within the current milestone. Justify all numeric bounds. Prefer Ada/GNAT semantic tools over textual search when inspecting declarations and references.
 
