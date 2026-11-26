@@ -14,6 +14,59 @@ is
    --  every boundary is valid; Result records the worst pairing
    --  defect seen so far. A later, worse defect overrides an earlier
    --  one, and an earlier one is never masked by a later, lesser one.
+   --  One pass over the visited positions, from From on: the count
+   --  walks the chain once, and every iteration pays the endpoint
+   --  checks once. The recursive expression form re-evaluated the
+   --  preconditions at every recursion step, which made one count
+   --  quadratic in the chain length.
+   function Same_Support_Count
+      (E       : Edges_3D.Edge_Store;
+       V       : Vertices_3D.Vertex_Store;
+       Chain   : Loops_3D.Edge_Handle_Array;
+       U, From : Positive) return Natural
+   is
+      Result : Natural := 0;
+
+   begin
+      for F in From .. Chain'Last loop
+         if F /= U
+            and then Use_From (E, V, Chain, F) = Use_From (E, V, Chain, U)
+            and then Use_To (E, V, Chain, F) = Use_To (E, V, Chain, U)
+         then
+            Result := Result + 1;
+         end if;
+
+         pragma Loop_Invariant (Result <= F - From + 1);
+      end loop;
+
+      return Result;
+   end Same_Support_Count;
+
+   --  One pass, from From on: the count walks the chain once; the use
+   --  whose directed support is the opposite of the use U is counted.
+   function Opposite_Support_Count
+      (E       : Edges_3D.Edge_Store;
+       V       : Vertices_3D.Vertex_Store;
+       Chain   : Loops_3D.Edge_Handle_Array;
+       U, From : Positive) return Natural
+   is
+      Result : Natural := 0;
+
+   begin
+      for F in From .. Chain'Last loop
+         if F /= U
+            and then Use_To (E, V, Chain, F) = Use_From (E, V, Chain, U)
+            and then Use_From (E, V, Chain, F) = Use_To (E, V, Chain, U)
+         then
+            Result := Result + 1;
+         end if;
+
+         pragma Loop_Invariant (Result <= F - From + 1);
+      end loop;
+
+      return Result;
+   end Opposite_Support_Count;
+
    function Classify_Shell
       (E : Edges_3D.Edge_Store; V : Vertices_3D.Vertex_Store; S : Shell) return Shell_Validity
    is

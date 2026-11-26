@@ -97,12 +97,18 @@ is
    --  The segments properly cross: each segment straddles the supporting
    --  line of the other, with no endpoint on either line.
    function Properly_Crossing (S1, S2 : Segments.Segment_2D) return Boolean is
-     (Kind_S1_S2F (S1, S2) /= Orientations.Collinear
-      and then Kind_S1_S2T (S1, S2) /= Orientations.Collinear
-      and then Kind_S2_S1F (S1, S2) /= Orientations.Collinear
-      and then Kind_S2_S1T (S1, S2) /= Orientations.Collinear
-      and then Kind_S1_S2F (S1, S2) /= Kind_S1_S2T (S1, S2)
-      and then Kind_S2_S1F (S1, S2) /= Kind_S2_S1T (S1, S2));
+     (declare
+         K1 : constant Orientations.Orientation_Kind := Kind_S1_S2F (S1, S2);
+         K2 : constant Orientations.Orientation_Kind := Kind_S1_S2T (S1, S2);
+         K3 : constant Orientations.Orientation_Kind := Kind_S2_S1F (S1, S2);
+         K4 : constant Orientations.Orientation_Kind := Kind_S2_S1T (S1, S2);
+      begin
+         K1 /= Orientations.Collinear
+         and then K2 /= Orientations.Collinear
+         and then K3 /= Orientations.Collinear
+         and then K4 /= Orientations.Collinear
+         and then K1 /= K2
+         and then K3 /= K4);
 
    --  A point common to both segments.
    function Is_Common (P : Points.Point_2D; S1, S2 : Segments.Segment_2D)

@@ -25,6 +25,11 @@ is
          pragma Loop_Invariant
            (Shells.Classify_Shell (E, V, S) = Shells.Closed_Shell);
 
+         --  Discharged face by face: the shell classification's Post
+         --  states the validity in terms of Is_Valid_Boundary; the
+         --  assertion below unfolds it once into the Classify_Loop
+         --  form required by Make_Loop's precondition.
+         pragma Assert (Shells.Is_Valid_Boundary (E, V, S, K));
          pragma Assert
            (Loops_3D.Classify_Loop
               (E, V,

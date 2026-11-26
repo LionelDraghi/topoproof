@@ -103,61 +103,50 @@ is
    --  The number of uses from the position From on whose directed
    --  support is the same as the one of the use U: same starting point
    --  and same arrival point. The use U itself is not counted. The
-   --  count is bounded by the number of visited positions.
+   --  count is bounded by the number of visited positions. The count
+   --  is iterative, in one pass over the visited positions: the
+   --  recursive form re-evaluated the preconditions at every
+   --  recursion step, which made one count quadratic in the chain
+   --  length.
    function Same_Support_Count
       (E       : Edges_3D.Edge_Store;
        V       : Vertices_3D.Vertex_Store;
        Chain   : Loops_3D.Edge_Handle_Array;
        U, From : Positive) return Natural
-   is (if From > Chain'Last
-       then 0
-       elsif From = U
-       then Same_Support_Count (E, V, Chain, U, From + 1)
-       elsif Use_From (E, V, Chain, From) = Use_From (E, V, Chain, U)
-          and then Use_To (E, V, Chain, From) = Use_To (E, V, Chain, U)
-       then 1 + Same_Support_Count (E, V, Chain, U, From + 1)
-       else Same_Support_Count (E, V, Chain, U, From + 1))
    with
-      Pre                =>
+      Pre  =>
          U in Chain'Range
          and then From >= Chain'First
          and then Chain'Last <= Loops_3D.Max_Loop_Length
          and then Loops_3D.Is_Orphan_Free (E, Chain)
          and then Loops_3D.Has_Existing_Endpoints (E, V, Chain),
-      Post               =>
+      Post =>
          (if From <= Chain'Last
           then Same_Support_Count'Result <= Chain'Last - From + 1
-          else Same_Support_Count'Result = 0),
-      Subprogram_Variant => (Decreases => Chain'Last - From + 1);
+          else Same_Support_Count'Result = 0);
 
    --  The number of uses from the position From on whose directed
    --  support is the opposite of the one of the use U: the arrival
    --  point of one is the starting point of the other, and the other
    --  way around. The count is bounded by the number of visited
-   --  positions.
+   --  positions. Like Same_Support_Count, the count is iterative, in
+   --  one pass over the visited positions.
    function Opposite_Support_Count
       (E       : Edges_3D.Edge_Store;
        V       : Vertices_3D.Vertex_Store;
        Chain   : Loops_3D.Edge_Handle_Array;
        U, From : Positive) return Natural
-   is (if From > Chain'Last
-       then 0
-       elsif Use_To (E, V, Chain, From) = Use_From (E, V, Chain, U)
-          and then Use_From (E, V, Chain, From) = Use_To (E, V, Chain, U)
-       then 1 + Opposite_Support_Count (E, V, Chain, U, From + 1)
-       else Opposite_Support_Count (E, V, Chain, U, From + 1))
    with
-      Pre                =>
+      Pre  =>
          U in Chain'Range
          and then From >= Chain'First
          and then Chain'Last <= Loops_3D.Max_Loop_Length
          and then Loops_3D.Is_Orphan_Free (E, Chain)
          and then Loops_3D.Has_Existing_Endpoints (E, V, Chain),
-      Post               =>
+      Post =>
          (if From <= Chain'Last
           then Opposite_Support_Count'Result <= Chain'Last - From + 1
-          else Opposite_Support_Count'Result = 0),
-      Subprogram_Variant => (Decreases => Chain'Last - From + 1);
+          else Opposite_Support_Count'Result = 0);
 
    --  The boundary K of the assembly is a valid loop: its slice of the
    --  edge chain closes, is connected, and carries no orphan edge, no

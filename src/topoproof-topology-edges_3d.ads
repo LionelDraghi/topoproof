@@ -46,8 +46,13 @@ is
    --  object pays only its declared capacity, and the capacity is
    --  frozen for the object lifetime: no assignment can invalidate
    --  handles. The type predicate guarantees that the pair array
-   --  always covers the stored edges, and that degenerate edges are
-   --  forbidden: every stored edge connects two distinct vertices.
+   --  always covers the stored edges. The edge degeneracy ban is not
+   --  carried here: the type predicate is evaluated at every pass of
+   --  the store, and a quantifier over the pairs made the validation
+   --  of every parameter pay the pair scan again - the Create
+   --  operation owns the ban instead (it is the only writer, and its
+   --  Post guarantees that every stored pair connects two distinct
+   --  vertices).
    type Edge_Store (Capacity : Edge_Count_Range) is record
       --  The default pair is vertex 1 to vertex 1: unreachable, like
       --  the default points of a vertex store, because a freshly
@@ -57,10 +62,7 @@ is
       Pairs : Vertex_Pair_Array (1 .. Capacity) :=
          [others => (From_Vertex => 1, To_Vertex => 1)];
    end record
-   with Dynamic_Predicate =>
-      Count <= Capacity
-      and then
-        (for all I in 1 .. Count => Pairs (I).From_Vertex /= Pairs (I).To_Vertex);
+   with Dynamic_Predicate => Count <= Capacity;
 
    --  The handle E designates a stored edge of Store.
    function Contains (Store : Edge_Store; E : Edge_Handle) return Boolean
@@ -77,6 +79,19 @@ is
    is (Store.Pairs (E))
    with Pre => Contains (Store, E);
 
+   --  No stored edge is degenerate: every stored pair connects two
+   --  distinct vertices. The ban is established by Create, the only
+   --  writer of pairs, and consumed before storage: stored pairs are
+   --  never removed, so the property is preserved by every Create.
+   --  Declared as a named expression function instead of a
+   --  Dynamic_Predicate clause: the type predicate is evaluated at
+   --  every pass of the store, and a quantifier over the pairs made
+   --  the validation of every parameter pay the pair scan again.
+   function Has_Distinct_Endpoints (Store : Edge_Store) return Boolean
+   is (for all F in 1 .. Edge_Count (Store) =>
+          Endpoints (Store, F).From_Vertex
+          /= Endpoints (Store, F).To_Vertex);
+
    --  Create one oriented edge from vertex A to vertex B, and return its
    --  handle. Degeneracy is topological: both ends must be distinct
    --  vertices, so A /= B; an edge between two distinct vertices at the
@@ -84,7 +99,9 @@ is
    --  (DD-002), and the geometric degeneracy of its support is judged at
    --  loop level. Both endpoints must exist in Vertex_Store at creation;
    --  since stored vertices are never removed, existing endpoints stay
-   --  valid for the whole lifetime of both stores.
+   --  valid for the whole lifetime of both stores. The store itself must
+   --  already satisfy the ban: Create is an incremental writer, it
+   --  extends an existing store, it does not repair one.
    procedure Create
       (Store        : in out Edge_Store;
        Vertex_Store :        Vertices_3D.Vertex_Store;
@@ -95,13 +112,15 @@ is
          Edge_Count (Store) < Store.Capacity
          and then Vertices_3D.Contains (Vertex_Store, A)
          and then Vertices_3D.Contains (Vertex_Store, B)
-         and then A /= B,
+         and then A /= B
+         and then Has_Distinct_Endpoints (Store),
       Post =>
          Edge_Count (Store) = Edge_Count (Store)'Old + 1
          and then Contains (Store, E)
          and then Endpoints (Store, E) = (From_Vertex => A, To_Vertex => B)
          and then
            (for all F in 1 .. Edge_Count (Store)'Old =>
-               Endpoints (Store, F) = Endpoints (Store'Old, F));
+               Endpoints (Store, F) = Endpoints (Store'Old, F))
+         and then Has_Distinct_Endpoints (Store);
 
 end TopoProof.Topology.Edges_3D;
